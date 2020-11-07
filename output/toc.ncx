@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1" xml:lang="pl">
+  <head>
+    <meta content="b5f3d8e3-c92c-4107-a900-f69e1ee72cbc" name="dtb:uid"/>
+    <meta content="2" name="dtb:depth"/>
+    <meta content="calibre (4.23.0)" name="dtb:generator"/>
+    <meta content="0" name="dtb:totalPageCount"/>
+    <meta content="0" name="dtb:maxPageNumber"/>
+  </head>
+  <docTitle>
+    <text>Śpiewnik</text>
+  </docTitle>
+  <navMap>
+    <navPoint id="num_1" playOrder="1">
+      <navLabel>
+        <text>Początek</text>
+      </navLabel>
+      <content src="start.xhtml"/>
+    </navPoint>
+    <navPoint id="num_2" playOrder="2">
+      <navLabel>
+        <text>Czerwony Nos</text>
+      </navLabel>
+      <content src="text/czerwony_nos.xhtml"/>
+    </navPoint>
+    <navPoint id="num_3" playOrder="3">
+      <navLabel>
+        <text>Ballada o Wszechżonie</text>
+      </navLabel>
+      <content src="text/ballada_o_wszechzonie.xhtml"/>
+    </navPoint>
+  </navMap>
+</ncx>

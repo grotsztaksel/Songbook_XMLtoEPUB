@@ -1,0 +1,66 @@
+@charset "utf-8";
+/* Styles for Śpiewnik */
+body, section, div, table, thead, tbody, tfoot, th, td, p, pre, ul, ol, dl, dt, dd, li, span, nav, header, footer{
+    margin: 0; 
+  padding: 0; 
+} 
+
+body{ 
+  margin: 20px;
+  padding: 0;
+} 
+
+h1{
+  margin-bottom:6px;
+}
+
+div, section{
+  -moz-box-sizing: border-box;
+  -o-box-sizing: border-box; 
+  -webkit-box-sizing: border-box; 
+   box-sizing: border-box; 
+} 
+
+p{
+  padding-bottom: 20px;
+}
+
+table, tr, td{
+  border-collapse: collapse;
+  font-style: inherit;
+  padding-top: inherit;
+}
+
+.chords_above{
+ font-size: 0.75em;
+
+}
+
+.chords_beside{
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+
+
+.verse{
+  margin-left: 0px;
+}
+
+.chorus{
+  font-style: italic;
+  margin-left: 20px;
+}
+
+.authors{
+  font-size: 12px;
+  padding-bottom:2px;
+  margin-bottom: 18px;
+  margin-right: 20%;
+  margin-top: 6px;
+  border-bottom: 2px solid black;
+}
+
+tr.chords_above{
+ padding-top: 20px; 
+}
