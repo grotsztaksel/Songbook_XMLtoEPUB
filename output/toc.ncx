@@ -2,7 +2,7 @@
 <ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1" xml:lang="pl">
   <head>
     <meta content="b5f3d8e3-c92c-4107-a900-f69e1ee72cbc" name="dtb:uid"/>
-    <meta content="2" name="dtb:depth"/>
+    <meta content="3" name="dtb:depth"/>
     <meta content="calibre (4.23.0)" name="dtb:generator"/>
     <meta content="0" name="dtb:totalPageCount"/>
     <meta content="0" name="dtb:maxPageNumber"/>
@@ -19,15 +19,21 @@
     </navPoint>
     <navPoint id="num_2" playOrder="2">
       <navLabel>
-        <text>Czerwony Nos</text>
+        <text>W Bieszczadach nie będą znali</text>
       </navLabel>
-      <content src="text/czerwony_nos.xhtml"/>
-    </navPoint>
-    <navPoint id="num_3" playOrder="3">
-      <navLabel>
-        <text>Ballada o Wszechżonie</text>
-      </navLabel>
-      <content src="text/ballada_o_wszechzonie.xhtml"/>
+      <content src="start.xhtml"/>
+      <navPoint id="num_3" playOrder="3">
+        <navLabel>
+          <text>Czerwony Nos</text>
+        </navLabel>
+        <content src="text/czerwony_nos.xhtml"/>
+      </navPoint>
+      <navPoint id="num_4" playOrder="4">
+        <navLabel>
+          <text>Ballada o Wszechżonie</text>
+        </navLabel>
+        <content src="text/ballada_o_wszechzonie.xhtml"/>
+      </navPoint>
     </navPoint>
   </navMap>
 </ncx>
