@@ -151,7 +151,46 @@ class HtmlWriter():
         
 
     def write_chords_above(self, srcPath, targetPath):
-        return False
+        """
+        In this format, the <p/> element contains N <table/> elements, where
+        N is the number of lines. Every table has two rows: one for the chords above,
+        one for the line of text
+        """
+        text = self.src_tixi.getTextElement(srcPath).strip()
+        if not ">" in text:
+            return False
+        lines = [line.strip().split(">") for line in text.split('\n')]
+        
+        self.tixi.createElement(targetPath, "p")
+        pPath = "{}/p[{}]" .format(targetPath, self.tixi.getNamedChildrenCount(targetPath, "p"))
+
+
+        for line in lines:
+            # 1. Create table for each line
+            self.tixi.createElement(pPath, "table")
+            row = self.tixi.getNamedChildrenCount(pPath, "table")
+            tbPath = "{}/table[{}]".format(pPath, row)
+            
+            textChunks = line[0].split("|")
+            try:
+                chords = [''] + line[1].split(" ")  # with the empty element in fromt, the chords should have the same length as the textChunks
+                haveChords = True
+            except IndexError:
+                # Chords not found. Do not split the line, write it as one
+                haveChords = False
+                # textChunks will have only one item then
+                
+            if haveChords:
+                # Create row - this will be for the chords
+                self.tixi.createElement(tbPath, "tr")
+                row = self.tixi.getNamedChildrenCount(tbPath, "tr")
+                trPath = "{}/tr[{}]".format(tbPath, row)
+            
+            # Create row - this will be for the lyrics
+            self.tixi.createElement(tbPath, "tr")
+            row = self.tixi.getNamedChildrenCount(tbPath, "tr")
+            trPath = "{}/tr[{}]".format(tbPath, row)
+
     
     def write_chords_beside(self, srcPath, targetPath):
         """
