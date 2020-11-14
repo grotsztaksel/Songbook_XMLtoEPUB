@@ -113,9 +113,11 @@ class HtmlWriter():
         voc = srcPath.split("/")[-1]  # Extract the last element in path
         voc = voc.split("[")[0]       # Get rid of the index, if there is one
         
-        n = self.tixi.getNamedChildrenCount(self.root+"/body", "p")
-        path = self.root+"/body/p[{}]".format(n+1)
+        
+        path = self.root+"/body"
         self.format_song_part(srcPath, path)
+        n = self.tixi.getNamedChildrenCount(self.root+"/body", "p")
+        path = "{}/p[{}]".format(path, n)
         self.tixi.addTextAttribute(path, "class", voc)
         
     def format_song_part(self, srcPath, targetPath, mode=None):
@@ -152,7 +154,32 @@ class HtmlWriter():
         return False
     
     def write_chords_beside(self, srcPath, targetPath):
-        return False
+        """
+        In this format, the <p/> element contains one <table/> element, where
+        every row has two columns: one for the line of text, the other for chords
+        """
+        text = self.src_tixi.getTextElement(srcPath).strip()
+        if not ">" in text:
+            return False
+        lines = [line.strip().split(">") for line in text.split('\n')]
+        
+        self.tixi.createElement(targetPath, "p")
+        pPath = "{}/p[{}]" .format(targetPath, self.tixi.getNamedChildrenCount(targetPath, "p"))
+        self.tixi.createElement(pPath, "table")
+        tbPath = pPath+"/table"
+        self.tixi.addTextAttribute(tbPath, "class", "chords_beside")
+        for line in lines:
+            self.tixi.createElement(tbPath, "tr")
+            row = self.tixi.getNamedChildrenCount(tbPath, "tr")
+            trPath = "{}/tr[{}]".format(tbPath, row)
+            self.tixi.addTextElement(trPath, "td", line[0].replace("|",""))
+            try:
+                self.tixi.addTextElement(trPath, "td", line[1])
+                self.tixi.addTextAttribute(trPath + "/td[2]", "class", "chords")
+            except IndexError:
+                pass
+
+        return True
     
     def write_without_chords(self, srcPath, targetPath):
         """
@@ -166,5 +193,6 @@ class HtmlWriter():
         text = "<br/>\n".join(lines) # Leave the \n for better appearance
         
         self.tixi.addTextElement(self.root+"/body", "p", "\n{}\n".format(text))
+        return True
         
     
