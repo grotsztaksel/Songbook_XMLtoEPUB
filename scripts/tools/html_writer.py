@@ -7,6 +7,7 @@ Created on Sat Nov 14 17:56:39 2020
 __all__ = ['LineWithChords', 'HtmlWriter']
 
 import os
+import re
 from collections import namedtuple
 
 from config import CFG, ChordMode
@@ -76,6 +77,8 @@ class HtmlWriter():
         }
         for rr in replaceRules.keys():
             text = text.replace(rr, replaceRules[rr])
+        # Now regular expressions
+        text = re.sub(r"(<\/?t[dr].*?>)\s*(<\/?t[dr])", r"\1\2",text)
 
         file = open(os.path.join(CFG.SONG_HTML_DIR, fileName), "w", encoding='utf8')
         file.write(text)
