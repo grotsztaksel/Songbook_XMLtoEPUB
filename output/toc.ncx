@@ -34,6 +34,12 @@
         </navLabel>
         <content src="text/ballada_o_wszechzonie.xhtml"/>
       </navPoint>
+      <navPoint id="num_5" playOrder="5">
+        <navLabel>
+          <text>Do Anioła Stróża</text>
+        </navLabel>
+        <content src="text/do_aniola_stroza.xhtml"/>
+      </navPoint>
     </navPoint>
   </navMap>
 </ncx>
