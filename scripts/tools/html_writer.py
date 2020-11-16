@@ -159,36 +159,45 @@ class HtmlWriter():
         text = self.src_tixi.getTextElement(srcPath).strip()
         if not CFG.CS in text:
             return False
-        lines = [line.strip().split(CFG.CS) for line in text.split('\n')]
 
         self.tixi.createElement(targetPath, "p")
         pPath = "{}/p[{}]".format(targetPath, self.tixi.getNamedChildrenCount(targetPath, "p"))
 
-        for line in lines:
-            # 1. Create table for each line
-            self.tixi.createElement(pPath, "table")
-            row = self.tixi.getNamedChildrenCount(pPath, "table")
-            tbPath = "{}/table[{}]".format(pPath, row)
+        for line in HtmlWriter._identifyLinesWithChords(text):
+            if isinstance(line, str):
+                self.tixi.addTextElement(pPath, "div", line)
+            elif isinstance(line, LineWithChords):
+                self.tixi.createElement(pPath, "table")
+                row = self.tixi.getNamedChildrenCount(pPath, "table")
+                tbPath = "{}/table[{}]".format(pPath, row)
 
-            textChunks = line[0].split(CFG.CI)
-            try:
-                chords = [''] + line[1].split(" ")
                 # with the empty element [''] in front, the chords should have the same length as the textChunks
-                haveChords = True
-            except IndexError:
-                # Chords not found. Do not split the line, write it as one
-                haveChords = False
-                # textChunks will have only one item then
+                chords = [''] + line.chords[0].split(" ")
+                textChunks = line.text.split(CFG.CI)
 
-            if haveChords:
-                # Create row - this will be for the chords
+                self.tixi.createElement(tbPath, "tr")
                 self.tixi.createElement(tbPath, "tr")
                 crdPath = "{}/tr[1]".format(tbPath)
+                txtPath = "{}/tr[2]".format(tbPath)
+                self.tixi.addTextAttribute(crdPath, "class", "chords_above")
 
-            # Create row - this will be for the lyrics
-            self.tixi.createElement(tbPath, "tr")
-            # txtPath may end with "/tr[1]" or "/tr[2]", depending on the presence of the chords
-            txtPath = "{}/tr[{}]".format(tbPath, self.tixi.getNamedChildrenCount(tbPath, "tr"))
+                while chords or textChunks:
+                    if not chords:
+                        # Run out of chords. Ignore the rest of the CFG.CI characters.
+                        chunk = "".join(textChunks)
+                        chord = ""
+                    elif not textChunks:
+                        # Run out of CFG.CI characters. Just add the remaining chords at the end of the line
+                        chunk = ""
+                        chord = " ".join(chords)
+                    else:
+                        chord = chords.pop(0)
+                        chunk = textChunks.pop(0)
+                        if chunk.endswith(" "):
+                            chunk = chunk[:-1] + "&nbsp;"
+                    self.tixi.addTextElement(crdPath, "td", chord)
+                    self.tixi.addTextElement(txtPath, "td", chunk)
+        return True
 
     def write_chords_beside(self, srcPath, targetPath):
         """
