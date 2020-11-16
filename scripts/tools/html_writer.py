@@ -69,7 +69,14 @@ class HtmlWriter():
 
     def saveFile(self, fileName):
         """Apply specific formatting andf save the content of the self.tixi to a file filename"""
-        text = self.tixi.exportDocumentAsString().replace("&lt;br/&gt;", "<br/>")
+        text = self.tixi.exportDocumentAsString()
+        replaceRules = {
+            "&lt;br/&gt;": "<br/>",
+            "&amp;nbsp;": "&nbsp;"
+        }
+        for rr in replaceRules.keys():
+            text = text.replace(rr, replaceRules[rr])
+
         file = open(os.path.join(CFG.SONG_HTML_DIR, fileName), "w", encoding='utf8')
         file.write(text)
         file.close()
