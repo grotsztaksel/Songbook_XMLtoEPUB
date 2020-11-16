@@ -4,7 +4,7 @@ Created on Sat Nov 14 17:56:39 2020
 
 @author: piotr
 """
-__all__ = ['HtmlWriter']
+__all__ = ['LineWithChords', 'HtmlWriter']
 
 import os
 from collections import namedtuple
@@ -157,9 +157,9 @@ class HtmlWriter():
         one for the line of text
         """
         text = self.src_tixi.getTextElement(srcPath).strip()
-        if not ">" in text:
+        if not CFG.CS in text:
             return False
-        lines = [line.strip().split(">") for line in text.split('\n')]
+        lines = [line.strip().split(CFG.CS) for line in text.split('\n')]
 
         self.tixi.createElement(targetPath, "p")
         pPath = "{}/p[{}]".format(targetPath, self.tixi.getNamedChildrenCount(targetPath, "p"))
@@ -170,7 +170,7 @@ class HtmlWriter():
             row = self.tixi.getNamedChildrenCount(pPath, "table")
             tbPath = "{}/table[{}]".format(pPath, row)
 
-            textChunks = line[0].split("|")
+            textChunks = line[0].split(CFG.CI)
             try:
                 chords = [''] + line[1].split(" ")
                 # with the empty element [''] in front, the chords should have the same length as the textChunks
@@ -196,9 +196,9 @@ class HtmlWriter():
         every row has two columns: one for the line of text, the other for chords
         """
         text = self.src_tixi.getTextElement(srcPath).strip()
-        if not ">" in text:
+        if not CFG.CS in text:
             return False
-        lines = [line.strip().split(">") for line in text.split('\n')]
+        lines = [line.strip().split(CFG.CS) for line in text.split('\n')]
 
         self.tixi.createElement(targetPath, "p")
         pPath = "{}/p[{}]".format(targetPath, self.tixi.getNamedChildrenCount(targetPath, "p"))
@@ -209,7 +209,7 @@ class HtmlWriter():
             self.tixi.createElement(tbPath, "tr")
             row = self.tixi.getNamedChildrenCount(tbPath, "tr")
             trPath = "{}/tr[{}]".format(tbPath, row)
-            self.tixi.addTextElement(trPath, "td", line[0].replace("|", ""))
+            self.tixi.addTextElement(trPath, "td", line[0].replace(CFG.CI, ""))
             try:
                 self.tixi.addTextElement(trPath, "td", line[1])
                 self.tixi.addTextAttribute(trPath + "/td[2]", "class", "chords")
@@ -226,7 +226,7 @@ class HtmlWriter():
         """
 
         text = self.src_tixi.getTextElement(srcPath).strip()
-        lines = [line.strip().split(">")[0].replace("|", "") for line in text.split('\n')]
+        lines = [line.strip().split(CFG.CS)[0].replace(CFG.CI, "") for line in text.split('\n')]
         text = "<br/>\n".join(lines)  # Leave the \n for better appearance
 
         self.tixi.addTextElement(self.root + "/body", "p", "\n{}\n".format(text))
@@ -246,7 +246,7 @@ class HtmlWriter():
         noChordLines = None
 
         for line in lines:
-            chords = [s.strip() for s in line.split(">")]
+            chords = [s.strip() for s in line.split(CFG.CS)]
             text = chords.pop(0)
             if chords == []:
                 if noChordLines is None:
