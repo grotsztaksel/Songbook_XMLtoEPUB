@@ -7,10 +7,13 @@ Created on Sat Nov 14 17:56:39 2020
 __all__ = ['HtmlWriter']
 
 import os
+from collections import namedtuple
 
 from config import CFG, ChordMode
 from tixi import Tixi
 from .utf_simplifier import UtfSimplifier
+
+LineWithChords = namedtuple("LineWithChords", ["text", "chords"])
 
 
 class HtmlWriter():
@@ -228,3 +231,37 @@ class HtmlWriter():
 
         self.tixi.addTextElement(self.root + "/body", "p", "\n{}\n".format(text))
         return True
+
+    @staticmethod
+    def _identifyLinesWithChords(text: str) -> list:
+        """
+        Split the text on newlines and return a list of items.
+        If a line contains chords, return it as namedtuple LineWithChords
+        Otherwise, merge all neighboring lines that do not have chords.
+        :param text: input text
+        :return: list of LineWithChords and/or plain string elements
+        """
+        output = list()
+        lines = [line.strip() for line in text.split("\n")]
+        noChordLines = None
+
+        for line in lines:
+            chords = [s.strip() for s in line.split(">")]
+            text = chords.pop(0)
+            if chords == []:
+                if noChordLines is None:
+                    noChordLines = text
+                else:
+                    noChordLines += "<br/>\n" + text
+            else:
+                if noChordLines is not None:
+                    # Append the chunk of text to the output and reset the noChordLines collector
+                    output.append(noChordLines)
+                    noChordLines = None
+                output.append(LineWithChords(text, chords))
+
+        if noChordLines is not None:
+            # Append the chunk of text to the output and reset the noChordLines collector
+            output.append(noChordLines)
+
+        return output
