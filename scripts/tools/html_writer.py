@@ -180,13 +180,12 @@ class HtmlWriter():
             if haveChords:
                 # Create row - this will be for the chords
                 self.tixi.createElement(tbPath, "tr")
-                row = self.tixi.getNamedChildrenCount(tbPath, "tr")
-                trPath = "{}/tr[{}]".format(tbPath, row)
+                crdPath = "{}/tr[1]".format(tbPath)
 
             # Create row - this will be for the lyrics
             self.tixi.createElement(tbPath, "tr")
-            row = self.tixi.getNamedChildrenCount(tbPath, "tr")
-            trPath = "{}/tr[{}]".format(tbPath, row)
+            # txtPath may end with "/tr[1]" or "/tr[2]", depending on the presence of the chords
+            txtPath = "{}/tr[{}]".format(tbPath, self.tixi.getNamedChildrenCount(tbPath, "tr"))
 
     def write_chords_beside(self, srcPath, targetPath):
         """
