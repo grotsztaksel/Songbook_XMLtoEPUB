@@ -26,7 +26,7 @@ class config():
     SONG_SRC_DIR = os.path.join(ROOT_DIR, "song_src")
     SONG_SRC_XML = os.path.join(SONG_SRC_DIR, "songs_src.xml")
     SONG_HTML_DIR = os.path.join(OUTPUT_DIR, "text")    
-    MODE = ChordMode.CHORDS_ABOVE
+    MODE = ChordMode.CHORDS_BESIDE
     
 
         
