@@ -124,7 +124,7 @@ class HtmlWriter():
         voc = voc.split("[")[0]  # Get rid of the index, if there is one
 
         path = self.root + "/body"
-        self.format_song_part(srcPath, path)
+        self.format_song_part(srcPath, path, CFG.MODE)
         n = self.tixi.getNamedChildrenCount(self.root + "/body", "p")
         path = "{}/p[{}]".format(path, n)
         self.tixi.addTextAttribute(path, "class", voc)
