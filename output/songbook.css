@@ -65,3 +65,7 @@ table, tr, td{
 tr.chords_above{
  padding-top: 10px; 
 }
+
+td.chords{
+  width: 20%;
+}
