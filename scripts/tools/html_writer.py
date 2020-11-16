@@ -118,7 +118,7 @@ class HtmlWriter():
 
         # <p class="authors">sł. [lyrics], muz. [music]</p>
         self.tixi.addTextElement(bpath, "p",
-                                 "s&#x142;. {}, muz. {}".format(lyrics, music))
+                                 "sł. {}, muz. {}".format(lyrics, music))
         self.tixi.addTextAttribute(bpath + "/p", "class", "authors")
 
     def write_song_part(self, srcPath):
