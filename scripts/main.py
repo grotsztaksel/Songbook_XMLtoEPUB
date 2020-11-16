@@ -53,5 +53,5 @@ def print_exceptions(etype, value, tb):
     text = "\n".join(traceback.format_exception(etype, value, tb))
     QMessageBox.critical(None, "Python Error!", text)
 
-
-main(sys.argv)
+if __name__ == '__main__':
+    main(sys.argv)
