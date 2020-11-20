@@ -71,6 +71,27 @@ class SongBookGenerator(object):
             writer = HtmlWriter(self.tixi, song.xml)
             writer.write_song_file(song.file)
 
+    def updateLinks(self):
+        """Scan all the songs to find potential links and create similar links
+            This method creates link elements in the tixi object, which are not schema compliant,
+            but are later used to create the link sections in each song html
+        """
+
+        raise NotImplemented
+
+        xPathFrom = "//song/link[@title]"
+        n = tryXPathEvaluateNodeNumber(self.tixi, xPathFrom)
+
+        xPathTo = "//song[@title='{}']"
+        for i in range(1, n + 1):
+            path = self.tixi.xPathExpressionGetXPath(xPathFrom, i)
+            title = self.tixi.getTextAttribute(path, "title")
+            xPath = xPathTo.format(title)
+            m = tryXPathEvaluateNodeNumber(self.tixi, xPath)
+
+            for j in range(1, m + 1):
+                target_path = self.tixi.xPathExpressionGetXPath(xPath, j)
+
     def write_metadata(self):
         """Cleanup and rewrite the metadata.opf"""
         tixi = Tixi()
