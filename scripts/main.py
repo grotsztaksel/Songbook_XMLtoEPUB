@@ -19,6 +19,7 @@ def main(argv):
     os.mkdir(CFG.SONG_HTML_DIR)
     sg = SongBookGenerator(10)
     sg.write_songs()
+    sg.write_metadata()
 
 
 def print_exceptions(etype, value, tb):
@@ -26,7 +27,9 @@ def print_exceptions(etype, value, tb):
     from PyQt5.QtWidgets import QMessageBox
 
     text = "\n".join(traceback.format_exception(etype, value, tb))
+    print(text)
     QMessageBox.critical(None, "Python Error!", text)
+    traceback.format_exception(etype, value, tb)
 
 
 if __name__ == '__main__':

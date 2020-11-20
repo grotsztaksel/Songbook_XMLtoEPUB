@@ -7,7 +7,7 @@ Created on 20.11.2020 18:35
 import os
 
 from config import CFG
-from tixi import Tixi, TixiException
+from tixi import Tixi, tryXPathEvaluateNodeNumber
 from .utf_simplifier import UtfSimplifier
 from .html_writer import HtmlWriter
 from .song_tuple import Song
@@ -31,13 +31,11 @@ class SongBookGenerator(object):
     def getBasicSongInfo(self):
 
         xPath = "//song[@title]"
-        try:
-            n = self.tixi.xPathEvaluateNodeNumber(xPath)
-            print("Found {} songs".format(n))
-            if self.N > 0 and n < self.N:
-                self.N = n
-        except TixiException:
-            self.N = 0
+
+        n = tryXPathEvaluateNodeNumber(self.tixi, xPath)
+        print("Found {} songs".format(n))
+        if self.N > 0 and n < self.N:
+            self.N = n
 
         print("Will process {} songs".format(self.N))
 
@@ -72,3 +70,67 @@ class SongBookGenerator(object):
         for song in self.songs:
             writer = HtmlWriter(self.tixi, song.xml)
             writer.write_song_file(song.file)
+
+    def write_metadata(self):
+        """Cleanup and rewrite the metadata.opf"""
+        tixi = Tixi()
+        opf = os.path.join(CFG.OUTPUT_DIR, "metadata.opf")
+        opfuri = "http://www.idpf.org/2007/opf"
+        tixi.open(opf)
+        tixi.registerNamespacesFromDocument()
+        tixi.registerNamespace(opfuri, "opf")
+        tixi.registerNamespace("http://purl.org/dc/elements/1.1/", "dc")
+
+        ns = dict()
+
+        for p in [
+            "/package",
+            "/opf:package",
+        ]:
+            ns[p] = tixi.checkElement(p)
+
+        # Clean the contents of specified elements to recreate them from scratch
+        nodes = ["manifest", "spine", "guide"]
+        for node in nodes:
+            path = "/opf:package/opf:{}[1]".format(node)
+            while tixi.checkElement(path):
+                tixi.removeElement(path)
+
+        for node in nodes:
+            tixi.createElementNS("/opf:package", node, opfuri)
+
+        manifest = "/opf:package/opf:manifest"
+        spine = "/opf:package/opf:spine"
+
+        tixi.addTextAttribute(spine, "toc", "ncx")
+
+        itemAttributes = [{"href": "start.xhtml", "id": "start", "media-type": "application/xhtml+xml"},
+                          {"href": "toc.ncx", "id": "ncx", "media-type": "application/x-dtbncx+xml"},
+                          {"href": "songbook.css", "id": "css", "media-type": "text/css"}]
+
+        for i, d in enumerate(itemAttributes):
+            tixi.createElementNS(manifest, "item", opfuri)
+            path = manifest + "/opf:item[{}]".format(i + 1)
+            for key, value in d.items():
+                tixi.addTextAttribute(path, key, value)
+
+        tixi.createElementNS(spine, "itemref", opfuri)
+        tixi.addTextAttribute(spine + "/opf:itemref", "idref", "start")
+
+        for i, song in enumerate(self.songs):
+            id = "id{}".format(i)
+
+            tixi.createElement(manifest, "item")
+            n = tixi.getNamedChildrenCount(manifest, "item")
+            path = manifest + "/item[{}]".format(n)
+
+            file = os.path.basename(CFG.SONG_HTML_DIR) + "/" + song.file
+            tixi.addTextAttribute(path, "href", file)
+            tixi.addTextAttribute(path, "id", id)
+            tixi.addTextAttribute(path, "media-type", "application/xhtml+xml")
+
+            tixi.createElementNS(spine, "itemref", opfuri)
+            n = tixi.getNamedChildrenCount(spine, "opf:itemref")
+            path = spine + "/opf:itemref[{}]".format(n)
+            tixi.addTextAttribute(path, "idref", id)
+        tixi.saveDocument(opf)
