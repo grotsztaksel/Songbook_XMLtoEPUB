@@ -34,27 +34,11 @@ class HtmlWriter():
 
         self.root = "/" + self.root
 
-    def write_song_file(self) -> bool:
+    def write_song_file(self, fileName) -> bool:
         """
         Read the xml node in song_path and write a valid HTML file out of it in the desired location
         """
-        if not self.src_tixi.checkElement(self.src_path):
-            return False
         title = self.src_tixi.getTextAttribute(self.src_path, "title")
-
-        file_name_base = UtfSimplifier.toAscii(title).replace(" ", "_").lower()
-        suffix = ""
-        ext = ".xhtml"
-        fileNameTaken = True
-
-        while fileNameTaken:
-            fileName = file_name_base + suffix + ext
-            fileNameTaken = os.path.isfile(os.path.join(CFG.SONG_HTML_DIR, fileName))
-            if not suffix:
-                number = 0
-            number += 1
-            suffix = "_" + str(number)
-
         print("Saving song: {}\n  -- to file {}".format(title, fileName))
 
         self.write_html_header()
