@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Created by Piotr Gradkowski <grotsztaksel@o2.pl>
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:annotation>
+        <xs:documentation>
+            Schema for the source file for the e-Songbook generator. The source is available on
+            https://github.com/grotsztaksel/songbook
+        </xs:documentation>
+    </xs:annotation>
+
+    <xs:simpleType name="chord_mode">
+        <xs:annotation>
+            <xs:documentation>
+                Specifies how the chords schould be written with the song
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="CHORDS_ABOVE">
+                <xs:annotation>
+                    <xs:documentation>
+                        The chords will be written above the line, above a location specified by "Chord insertion point"
+                        placed in the song text
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="CHORDS_BESIDE">
+                <xs:annotation>
+                    <xs:documentation>
+                        The chords will be written next the line
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="NO_CHORDS">
+                <xs:annotation>
+                    <xs:documentation>
+                        The song will be written without any chords. The chord information will be ignored
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:element name="songbook">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="settings" type="settings" minOccurs="0" maxOccurs="1"/>
+                <xs:element name="section" type="section" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="settings">
+        <xs:annotation>
+            <xs:documentation>
+                Settings node. Collects settings to be read while generating the songbook
+            </xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="max_songs" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Max number of songs that should be processed by the generator. If not present, all available
+                        songs will be processed
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:nonNegativeInteger">
+                        <xs:minInclusive value="1"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="prefered_chords_mode" type="chord_mode" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Chord mode to be preferred in all processed songs. Can be overriden by the song's "chords_mode"
+                        attribute.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:all>
+    </xs:complexType>
+
+    <xs:complexType name="section">
+        <xs:annotation>
+            <xs:documentation>
+                This element can be nested within itself. Use a cascade of "sections" to create a hierarchical Table Of
+                Contents
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice>
+            <xs:sequence>
+                <xs:element name="section" type="section" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:sequence>
+                <xs:element name="song" type="song" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:choice>
+        <xs:attribute name="title" type="xs:string" use="required"/>
+        <xs:attribute name="chord_mode" type="chord_mode" use="optional">
+            <xs:annotation>
+                <xs:documentation>If present, overrides the upper level chord mode</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="song">
+        <xs:annotation>
+            <xs:documentation>
+                An element defining the entire song.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="link" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        If present, this element informs that the given song can somehow be linked to other ones. The
+                        generator will find all other songs that have the same title, and create html link to them. That
+                        songs will also be linked to this one, if they are not yet linked
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:attribute name="title" type="xs:string" use="optional"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="verse" type="lyrics_part"/>
+                <xs:element name="chorus" type="lyrics_part"/>
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="title" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    Title of the song. Multiple songs can have the same title. In such case, they are placed in files
+                    with numeric suffixes in their names
+                    When this title is present in some song's link element, that song is also linked to this, and both
+                    have html links to each other created
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="lyrics" type="xs:string" default="trad.">
+            <xs:annotation>
+                <xs:documentation>Name of the author(s) of the lyrics</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="music" type="xs:string" default="trad.">
+            <xs:annotation>
+                <xs:documentation>Name of the author(s) of the lyrics</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="band" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Name of the band, of there is one</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="chord_mode" type="chord_mode" use="optional">
+            <xs:annotation>
+                <xs:documentation>If present, overrides the upper level chord mode</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+
+    </xs:complexType>
+    <xs:complexType name="lyrics_part">
+        <xs:annotation>
+            <xs:documentation>
+                Elements containing verse and chorus text, respectively. Each line should end with a newline. If
+                there are chords to be defined, they should be defined as follows:
+                - separated from the text with the Chords Separator
+                - separated from each other with whitespace
+                - if they should be placed in a specific place in the line, this place could be indicated by
+                Chord Insertion Point
+            </xs:documentation>
+        </xs:annotation>
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="chord_mode" type="chord_mode" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>If present, overrides the upper level chord mode</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
+
+    </xs:complexType>
+</xs:schema>
