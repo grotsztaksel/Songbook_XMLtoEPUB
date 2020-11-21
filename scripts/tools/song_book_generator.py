@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 Created on 20.11.2020 18:35
- 
+
 @author: piotr
 """
 import os
 
 from config import CFG
-from tixi import Tixi, tryXPathEvaluateNodeNumber
+from tixi import Tixi, TixiException, tryXPathEvaluateNodeNumber
 from .utf_simplifier import UtfSimplifier
 from .html_writer import HtmlWriter
 from .song_tuple import Song
@@ -71,26 +71,56 @@ class SongBookGenerator(object):
             writer = HtmlWriter(self.tixi, song.xml)
             writer.write_song_file(song.file)
 
-    def updateLinks(self):
-        """Scan all the songs to find potential links and create similar links
-            This method creates link elements in the tixi object, which are not schema compliant,
-            but are later used to create the link sections in each song html
+    def createTwoWayLinks(self):
+        """
+            Find all songs that have links to other songs. Then, find that other songs and create links to the songs
+            that linked to these songs
+
+            For example, a song A is found that links to B:
+
+            <song title="A">
+                <link title="B">
+            </song>
+
+            Find the song B and create link to A:
+
+            <song title="B">
+                <link title="A">
+            </song>
         """
 
-        raise NotImplemented
-
         xPathFrom = "//song/link[@title]"
-        n = tryXPathEvaluateNodeNumber(self.tixi, xPathFrom)
 
-        xPathTo = "//song[@title='{}']"
-        for i in range(1, n + 1):
-            path = self.tixi.xPathExpressionGetXPath(xPathFrom, i)
-            title = self.tixi.getTextAttribute(path, "title")
-            xPath = xPathTo.format(title)
-            m = tryXPathEvaluateNodeNumber(self.tixi, xPath)
+        linksToCreate = True
+        while linksToCreate:
+            n = tryXPathEvaluateNodeNumber(self.tixi, xPathFrom)
+            linksToCreate = list()
+            linksToRemove = list()
+            for i in range(1, n + 1):
+                path_link = self.tixi.xPathExpressionGetXPath(xPathFrom, i)
+                xpath_parent_song = path_link + "/ancestor::song"
+                path_song = self.tixi.xPathExpressionGetXPath(xpath_parent_song, 1)
+                title_parent = self.tixi.getTextAttribute(path_song, "title")
+                title_link = self.tixi.getTextAttribute(path_link, "title")
 
-            for j in range(1, m + 1):
-                target_path = self.tixi.xPathExpressionGetXPath(xPath, j)
+                # Find all songs that have title mentioned in the link
+                xPath = "//song[@title=\"{}\"]".format(title_link)
+                m = tryXPathEvaluateNodeNumber(self.tixi, xPath)
+                if m == 0:
+                    linksToRemove.append(path_link)
+                for j in range(1, m + 1):
+                    target_path = self.tixi.xPathExpressionGetXPath(xPath, j)
+                    # Do not create link, if there already is one
+                    if tryXPathEvaluateNodeNumber(self.tixi, target_path + "/link[@title='{}']".format(title_parent)):
+                        continue
+                    nlinks = self.tixi.getNamedChildrenCount(target_path, "link")
+                    linksToCreate.append((target_path, nlinks + 1, title_parent))
+            for link in linksToCreate:
+                self.tixi.createElementAtIndex(link[0], "link", link[1])
+                newPath = "{}/link[{}]".format(link[0], link[1])
+                self.tixi.addTextAttribute(newPath, "title", link[2])
+            for link in reversed(linksToRemove):
+                self.tixi.removeElement(link)
 
     def write_metadata(self):
         """Cleanup and rewrite the metadata.opf"""
