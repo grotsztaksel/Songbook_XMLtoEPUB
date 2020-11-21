@@ -6,12 +6,19 @@ body, section, div, table, thead, tbody, tfoot, th, td, p, pre, ul, ol, dl, dt, 
 } 
 
 body{ 
+  // Paperwhite has 1024x768 pixels
+  height: 1024px;
+  width: 768px;
   margin: 20px;
   padding: 0;
 } 
 
 h1{
   margin-bottom:6px;
+}
+
+h3.links{
+    border-top: 1px solid gray;
 }
 
 div, section{
@@ -25,6 +32,7 @@ p{
   padding-bottom: 20px;
 }
 
+
 table.chords_beside{
   width: 100%;
 }
@@ -33,6 +41,8 @@ table, tr, td{
   font-style: inherit;
   padding-top: inherit;
 }
+
+
 
 .chords_above{
  font-size: 0.75em;
@@ -68,4 +78,11 @@ tr.chords_above{
 
 td.chords{
   width: 20%;
+}
+
+#bottom {
+  border-top: 2px solid black;
+  position: absolute;
+  bottom: 12;
+  left: 32;
 }
