@@ -24,11 +24,17 @@ class SongBookGenerator(object):
         self.tixi.open(CFG.SONG_SRC_XML, recursive=True)
         self.tixi.registerNamespacesFromDocument()
         self.N = max_n
-        self.songs = []
+        self.songs = None
 
         self.getBasicSongInfo()
 
     def getBasicSongInfo(self):
+        self.songs = []
+        # First remove the songs that have attribute include="false"
+        xPathToRemove = "//song[@include='false']"
+        for i in reversed(range(tryXPathEvaluateNodeNumber(self.tixi, xPathToRemove))):
+            path = self.tixi.xPathExpressionGetXPath(xPathToRemove, i + 1)
+            self.tixi.removeElement(path)
 
         xPath = "//song[@title]"
         usedFileNames = []
@@ -60,6 +66,17 @@ class SongBookGenerator(object):
                 suffix = "_" + str(number)
             usedFileNames.append(fileName)
             self.songs.append(Song(fileName, title, xmlPath))
+
+        # Remove the abundant songs
+        while tryXPathEvaluateNodeNumber(self.tixi, xPath) > self.N:
+            path = self.tixi.xPathExpressionGetXPath(xPath, self.N + 1)
+            self.tixi.removeElement(path)
+
+        # Now remove sections that do not have songs inside
+        xPath = "//section[not(descendant::song)]"
+        for i in reversed(range(tryXPathEvaluateNodeNumber(self.tixi, xPath))):
+            path = self.tixi.xPathExpressionGetXPath(xPath, i + 1)
+            self.tixi.removeElement(path)
 
     def write_songs(self):
         """
