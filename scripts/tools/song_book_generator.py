@@ -31,10 +31,10 @@ class SongBookGenerator(object):
     def getBasicSongInfo(self):
 
         xPath = "//song[@title]"
-
+        usedFileNames = []
         n = tryXPathEvaluateNodeNumber(self.tixi, xPath)
         print("Found {} songs".format(n))
-        if self.N > 0 and n < self.N:
+        if self.N > 0 and n < self.N or self.N == 0:
             self.N = n
 
         print("Will process {} songs".format(self.N))
@@ -53,12 +53,12 @@ class SongBookGenerator(object):
 
             while fileNameTaken:
                 fileName = file_name_base + suffix + ext
-                fileNameTaken = os.path.isfile(os.path.join(CFG.SONG_HTML_DIR, fileName))
+                fileNameTaken = fileName in usedFileNames
                 if not suffix:
                     number = 0
                 number += 1
                 suffix = "_" + str(number)
-
+            usedFileNames.append(fileName)
             self.songs.append(Song(fileName, title, xmlPath))
 
     def write_songs(self):
@@ -101,14 +101,6 @@ class SongBookGenerator(object):
         tixi.registerNamespacesFromDocument()
         tixi.registerNamespace(opfuri, "opf")
         tixi.registerNamespace("http://purl.org/dc/elements/1.1/", "dc")
-
-        ns = dict()
-
-        for p in [
-            "/package",
-            "/opf:package",
-        ]:
-            ns[p] = tixi.checkElement(p)
 
         # Clean the contents of specified elements to recreate them from scratch
         nodes = ["manifest", "spine", "guide"]
