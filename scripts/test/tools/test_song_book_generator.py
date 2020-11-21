@@ -47,6 +47,33 @@ class TestSongBookGenerator(unittest.TestCase):
 
         self.assertEqual(expected, self.sg.songs)
 
+        # Now make some empty sections (by adding new and removing songs from exisiting). Rerun the function
+        # and see if these sections are removed
+
+        self.sg = SongBookGenerator(3)
+        expected = [Song("song_a.xhtml", "Song A", "/songbook/section[1]/section[1]/song"),
+                    Song("song_b.xhtml", "Song B", "/songbook/section[1]/section[2]/song[1]"),
+                    Song("song_c.xhtml", "Song C", "/songbook/section[1]/section[2]/song[2]")]
+        self.assertEqual(expected, self.sg.songs)
+
+        self.assertFalse(self.sg.tixi.checkElement("/songbook/section[2]"))
+
+        # Add some cascade of sections that should eventually be removed - check if tixi removes them
+        # in the right order without bombing out
+
+        self.sg.tixi.createElement("/songbook", "section")
+        self.sg.tixi.createElement("/songbook", "section")
+        self.sg.tixi.createElement("/songbook/section[3]", "section")
+        self.sg.tixi.createElement("/songbook/section[2]", "section")
+        self.sg.tixi.createElement("/songbook/section[2]/section", "section")
+        self.sg.tixi.createElement("/songbook/section[2]/section", "section")
+        self.sg.tixi.createElement("/songbook/section[2]/section[1]/section[2]", "section")
+
+        self.sg.getBasicSongInfo()
+
+        self.assertEqual(expected, self.sg.songs)
+        self.assertFalse(self.sg.tixi.checkElement("/songbook/section[2]"))
+
     def test_createTwoWayLinks(self):
         links_start = {"/songbook/section[1]/section[1]/song[1]/link": "Song B",
                        "/songbook/section[1]/section[2]/song[1]/link": None,
