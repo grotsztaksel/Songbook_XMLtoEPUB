@@ -159,6 +159,11 @@
                 <xs:documentation>If present, overrides the upper level chord mode</xs:documentation>
             </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="include" type="xs:boolean" default="true">
+            <xs:annotation>
+                <xs:documentation>If set to false, the song will be skipped in the songbook</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
 
     </xs:complexType>
     <xs:complexType name="lyrics_part">
