@@ -23,7 +23,7 @@ class ChordMode(Enum):
 
 
 class config():
-    ROOT_DIR = os.path.abspath("../")
+    ROOT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../")
     OUTPUT_DIR = os.path.join(ROOT_DIR, "output")
     SONG_SRC_DIR = os.path.join(ROOT_DIR, "song_src")
     SONG_SRC_XML = os.path.join(SONG_SRC_DIR, "songs_src.xml")
