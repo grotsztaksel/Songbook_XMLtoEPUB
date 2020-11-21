@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+<songbook xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <settings>
+        <setting name="max_songs" value="4"/>
+        <setting name="preferred_chord_mode" value="CHORDS_ABOVE"/>
+    </settings>
+    <section title="Section 1" chord_mode="CHORDS_BESIDE">
+        <section title="Section 1.1" chord_mode="CHORDS_BESIDE">
+            <song title="Song to exclude 1" include="false">
+                <link title="Song B"/>
+                <verse>
+                La La La
+                La La La
+                </verse>
+                <chorus>
+                La La La
+                La La La
+                </chorus>
+                <verse>
+                La La La
+                La La La
+                </verse>
+            </song>
+            <song title="Song A" lyrics="John Doe" music="John Doe">
+                <link title="Song B"/>
+                <verse>
+                La La La
+                La La La
+                </verse>
+                <chorus>
+                La La La
+                La La La
+                </chorus>
+                <verse>
+                La La La
+                La La La
+                </verse>
+            </song>
+        </section>
+        <section title="Section 1.2">
+            <song title="Song B" lyrics="John Doe" music="John Doe">
+                <verse>
+                La La La
+                La La La
+                </verse>
+                <chorus>
+                La La La
+                La La La
+                </chorus>
+                <verse>
+                La La La
+                La La La
+                </verse>
+            </song>
+            <song title="Song C" lyrics="Mike Moo" music="John Doe">
+                <link title="No Such Title"/>
+                <verse>
+                La La La
+                La La La
+                </verse>
+                <chorus>
+                La La La
+                La La La
+                </chorus>
+                <verse>
+                La La La
+                La La La
+                </verse>
+            </song>
+        </section>
+    </section>
+    <section title="Section 2">
+        <song title="Song A" lyrics="Mike Moo">
+            <verse>
+                La La La
+                La La La
+            </verse>
+            <chorus>
+                La La La
+                La La La
+            </chorus>
+            <verse>
+                La La La
+                La La La
+            </verse>
+        </song>
+        <song title="Song to exclude 2" include="false">
+            <link title="Song B"/>
+            <verse>
+                La La La
+                La La La
+            </verse>
+            <chorus>
+                La La La
+                La La La
+            </chorus>
+            <verse>
+                La La La
+                La La La
+            </verse>
+        </song>
+        <song title="Song to exclude 3" include="false">
+            <link title="Song B"/>
+            <verse>
+                La La La
+                La La La
+            </verse>
+            <chorus>
+                La La La
+                La La La
+            </chorus>
+            <verse>
+                La La La
+                La La La
+            </verse>
+        </song>
+        <song title="Song ABBA" lyrics="John Doe" music="John Doe" chord_mode="NO_CHORDS">
+            <link title="Song A"/>
+            <verse>
+                La La La
+                La La La
+            </verse>
+            <chorus>
+                La La La
+                La La La
+            </chorus>
+            <verse>
+                La La La
+                La La La
+            </verse>
+        </song>
+    </section>
+</songbook>
+
