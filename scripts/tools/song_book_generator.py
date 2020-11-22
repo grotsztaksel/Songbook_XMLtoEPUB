@@ -24,6 +24,7 @@ class SongBookGenerator(object):
         self.tixi.registerNamespacesFromDocument()
         self.N = max_n
 
+        self.id = None
         self.getBasicSongInfo()
 
     def getBasicSongInfo(self):
@@ -219,7 +220,40 @@ class SongBookGenerator(object):
 
         assert tixi.checkElement(navMap)
 
-        id = 1
+        self.id = 1
+        self._createNavPoint("/songbook", navMap, tixi)
 
-        attr_id = "num_{}".format(id)  # used for attribute "id"
-        attr_po = "{}".format(id)  # used for attribute "playOrder"
+        tixi.saveDocument(toc)
+
+    def _createNavPoint(self, secsongPath: str, npPath: str, tixi_ncx: Tixi) -> None:
+        """
+            Recursive helper function creating navPoint elements for each song/section in the source tixi
+        """
+        attr_id = "num_{}".format(self.id)  # used for attribute "id"
+        attr_po = "{}".format(self.id)  # used for attribute "playOrder"
+
+        isRoot = secsongPath == "/" + self.tixi.getChildNodeName("/", 1)
+        if not isRoot:
+            secsongTitle = self.tixi.getTextAttribute(secsongPath, "title")
+            secsongFile = self.tixi.getTextAttribute(secsongPath, "xhtml")
+            tixi_ncx.createElement(npPath, "navPoint")
+            n = tixi_ncx.getNamedChildrenCount(npPath, "navPoint")
+            my_npPath = "{}/navPoint[{}]".format(npPath, n)
+
+            tixi_ncx.addTextAttribute(my_npPath, "id", attr_id)
+            tixi_ncx.addTextAttribute(my_npPath, "playOrder", attr_po)
+
+            tixi_ncx.createElement(my_npPath, "navLabel")
+            tixi_ncx.addTextElement(my_npPath + "/navLabel", "text", secsongTitle)
+            tixi_ncx.createElement(my_npPath, "content")
+            tixi_ncx.addTextAttribute(my_npPath + "/content", "src", "text/" + secsongFile)
+
+            self.id += 1
+        else:
+            my_npPath = npPath
+
+        xPath = "{}/*[self::song or self::section]".format(secsongPath)
+        n = tryXPathEvaluateNodeNumber(self.tixi, xPath)
+        for i in range(n):
+            path = self.tixi.xPathExpressionGetXPath(xPath, i + 1)
+            self._createNavPoint(path, my_npPath, tixi_ncx)
