@@ -5,15 +5,16 @@ Created on 21.11.2020 17:10
 @author: piotr
 """
 
-from config import CFG
 import os
-import unittest
 import shutil
-from tixi import Tixi, TixiException, ReturnCode, tryXPathEvaluateNodeNumber
+import unittest
+from collections import namedtuple
 
-from tools.song_book_generator import SongBookGenerator
 from config import CFG
-from tools.song_tuple import Song
+from tixi import tryXPathEvaluateNodeNumber
+from tools.song_book_generator import SongBookGenerator
+
+Song = namedtuple("Song", ["file", "title", "xml"])
 
 
 class TestSongBookGenerator(unittest.TestCase):
@@ -45,7 +46,9 @@ class TestSongBookGenerator(unittest.TestCase):
                     Song("song_a_1.xhtml", "Song A", "/songbook/section[2]/song[1]"),
                     Song("song_abba.xhtml", "Song ABBA", "/songbook/section[2]/song[2]")]
 
-        self.assertEqual(expected, self.sg.songs)
+        for item in expected:
+            self.assertEqual(item.title, self.sg.tixi.getTextAttribute(item.xml, "title"))
+            self.assertEqual(item.file, self.sg.tixi.getTextAttribute(item.xml, "xhtml"))
 
         # Now make some empty sections (by adding new and removing songs from exisiting). Rerun the function
         # and see if these sections are removed
@@ -54,7 +57,10 @@ class TestSongBookGenerator(unittest.TestCase):
         expected = [Song("song_a.xhtml", "Song A", "/songbook/section/section[1]/song"),
                     Song("song_b.xhtml", "Song B", "/songbook/section/section[2]/song[1]"),
                     Song("song_c.xhtml", "Song C", "/songbook/section/section[2]/song[2]")]
-        self.assertEqual(expected, self.sg.songs)
+
+        for item in expected:
+            self.assertEqual(item.title, self.sg.tixi.getTextAttribute(item.xml, "title"))
+            self.assertEqual(item.file, self.sg.tixi.getTextAttribute(item.xml, "xhtml"))
 
         self.assertFalse(self.sg.tixi.checkElement("/songbook/section[2]"))
 
@@ -70,9 +76,10 @@ class TestSongBookGenerator(unittest.TestCase):
         self.sg.tixi.createElement("/songbook/section[2]/section[1]/section[2]", "section")
 
         self.sg.getBasicSongInfo()
-
-        self.assertEqual(expected, self.sg.songs)
         self.assertFalse(self.sg.tixi.checkElement("/songbook/section[2]"))
+        for item in expected:
+            self.assertEqual(item.title, self.sg.tixi.getTextAttribute(item.xml, "title"))
+            self.assertEqual(item.file, self.sg.tixi.getTextAttribute(item.xml, "xhtml"))
 
     def test_createTwoWayLinks(self):
         links_start = {"/songbook/section[1]/section[1]/song[1]/link": "Song B",

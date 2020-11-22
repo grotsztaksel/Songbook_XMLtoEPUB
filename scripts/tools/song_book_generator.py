@@ -7,10 +7,9 @@ Created on 20.11.2020 18:35
 import os
 
 from config import CFG
-from tixi import Tixi, TixiException, tryXPathEvaluateNodeNumber
-from .utf_simplifier import UtfSimplifier
+from tixi import Tixi, tryXPathEvaluateNodeNumber
 from .html_writer import HtmlWriter
-from .song_tuple import Song
+from .utf_simplifier import UtfSimplifier
 
 
 class SongBookGenerator(object):
@@ -24,12 +23,10 @@ class SongBookGenerator(object):
         self.tixi.open(CFG.SONG_SRC_XML, recursive=True)
         self.tixi.registerNamespacesFromDocument()
         self.N = max_n
-        self.songs = None
 
         self.getBasicSongInfo()
 
     def getBasicSongInfo(self):
-        self.songs = []
         # First remove the songs that have attribute include="false"
         xPathToRemove = "//song[@include='false']"
         for i in reversed(range(tryXPathEvaluateNodeNumber(self.tixi, xPathToRemove))):
@@ -37,7 +34,6 @@ class SongBookGenerator(object):
             self.tixi.removeElement(path)
 
         xPath = "//song[@title]"
-        usedFileNames = []
         n = tryXPathEvaluateNodeNumber(self.tixi, xPath)
         print("Found {} songs".format(n))
         if self.N > 0 and n < self.N or self.N == 0:
@@ -56,7 +52,10 @@ class SongBookGenerator(object):
 
         print("Will process {} songs".format(self.N))
 
-        for i in range(1, self.N + 1):
+        usedFileNames = []
+        xPath = "//*[self::song or self::section][@title]"
+        n = tryXPathEvaluateNodeNumber(self.tixi, xPath)
+        for i in range(1, n + 1):
             xmlPath = self.tixi.xPathExpressionGetXPath(xPath, i)
 
             if not self.tixi.checkElement(xmlPath):
@@ -67,7 +66,7 @@ class SongBookGenerator(object):
             suffix = ""
             ext = ".xhtml"
             fileNameTaken = True
-
+            number = ""
             while fileNameTaken:
                 fileName = file_name_base + suffix + ext
                 fileNameTaken = fileName in usedFileNames
@@ -76,7 +75,8 @@ class SongBookGenerator(object):
                 number += 1
                 suffix = "_" + str(number)
             usedFileNames.append(fileName)
-            self.songs.append(Song(fileName, title, xmlPath))
+
+            self.tixi.addTextAttribute(xmlPath, "xhtml", fileName)
 
     def write_songs(self):
         """
@@ -84,9 +84,13 @@ class SongBookGenerator(object):
         song xml file in the required location
         """
 
-        for song in self.songs:
-            writer = HtmlWriter(self.tixi, song.xml)
-            writer.write_song_file(song.file)
+        xPath = "//song"
+        for i in range(tryXPathEvaluateNodeNumber(self.tixi, xPath)):
+            xml = self.tixi.xPathExpressionGetXPath(xPath, i + 1)
+            file = self.tixi.getTextAttribute(xml, "xhtml")
+
+            writer = HtmlWriter(self.tixi, xml)
+            writer.write_song_file(file)
 
     def createTwoWayLinks(self):
         """
@@ -177,14 +181,17 @@ class SongBookGenerator(object):
         tixi.createElementNS(spine, "itemref", opfuri)
         tixi.addTextAttribute(spine + "/opf:itemref", "idref", "start")
 
-        for i, song in enumerate(self.songs):
+        xPath = "//song"
+        for i in range(1, tryXPathEvaluateNodeNumber(self.tixi, xPath) + 1):
+            xml = self.tixi.xPathExpressionGetXPath(xPath, i)
+            fileName = self.tixi.getTextAttribute(xml, "xhtml")
             id = "id{}".format(i)
 
             tixi.createElement(manifest, "item")
             n = tixi.getNamedChildrenCount(manifest, "item")
             path = manifest + "/item[{}]".format(n)
 
-            file = os.path.basename(CFG.SONG_HTML_DIR) + "/" + song.file
+            file = os.path.basename(CFG.SONG_HTML_DIR) + "/" + fileName
             tixi.addTextAttribute(path, "href", file)
             tixi.addTextAttribute(path, "id", id)
             tixi.addTextAttribute(path, "media-type", "application/xhtml+xml")
