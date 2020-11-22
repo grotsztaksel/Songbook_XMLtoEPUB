@@ -80,6 +80,13 @@ td.chords{
   width: 20%;
 }
 
+ul {
+  list-style-type: none;
+  margin-left:20px
+  padding-top: 10px; 
+}
+
+
 #bottom {
   border-top: 2px solid black;
   position: absolute;
