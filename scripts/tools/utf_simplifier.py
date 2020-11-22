@@ -48,7 +48,7 @@ class UtfSimplifier():
     @staticmethod
     def toAscii(input: str) -> str:
         output = ""
-        othersigns = re.compile("[^A-Za-z0-9 ]")
+        otherchars = re.compile("[^A-Za-z0-9 \.]")
 
         for char in input:
             if char in UtfSimplifier.map_pl.keys():
@@ -57,5 +57,6 @@ class UtfSimplifier():
                 output += UtfSimplifier.map_de[char]
             else:
                 output += char
-        output = othersigns.sub("", output)
+        # Simply remove characters that do not match the regexp otherchars
+        output = otherchars.sub("", output)
         return output
