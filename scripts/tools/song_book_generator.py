@@ -7,7 +7,7 @@ Created on 20.11.2020 18:35
 import os
 
 from config import CFG
-from tixi import Tixi, tryXPathEvaluateNodeNumber
+from tixi import Tixi, tryXPathEvaluateNodeNumber, elementName
 from .html_writer import HtmlWriter
 from .utf_simplifier import UtfSimplifier
 
@@ -62,8 +62,8 @@ class SongBookGenerator(object):
             if not self.tixi.checkElement(xmlPath):
                 return False
             title = self.tixi.getTextAttribute(xmlPath, "title")
-            elementName = xmlPath.rsplit("/", 1)[-1].split("[")[0]
-            if elementName == "song":
+
+            if elementName(xmlPath) == "song":
                 prefix = "sng_"
             else:
                 prefix = "sec_"
