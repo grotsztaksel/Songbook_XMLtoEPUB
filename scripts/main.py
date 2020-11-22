@@ -20,6 +20,7 @@ def main(argv):
     sg = SongBookGenerator(10)
     sg.write_songs()
     sg.write_metadata()
+    sg.write_toc()
 
 
 def print_exceptions(etype, value, tb):
