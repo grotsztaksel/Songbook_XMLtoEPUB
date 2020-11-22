@@ -194,3 +194,26 @@ class SongBookGenerator(object):
             path = spine + "/opf:itemref[{}]".format(n)
             tixi.addTextAttribute(path, "idref", id)
         tixi.saveDocument(opf)
+
+    def write_toc(self):
+        """Cleanup and rewrite the toc.ncx"""
+        tixi = Tixi()
+        toc = os.path.join(CFG.OUTPUT_DIR, "toc.ncx")
+        tixi.open(toc)
+        tixi.registerNamespacesFromDocument()
+        tixi.registerNamespace("http://www.daisy.org/z3986/2005/ncx/", "ncx")
+        tixi.registerNamespace("http://www.w3.org/XML/", "xml")
+
+        if tixi.checkElement("/ncx:ncx/ncx:navMap"):
+            tixi.removeElement("/ncx:ncx/ncx:navMap")
+
+        tixi.createElement("/ncx:ncx", "navMap")
+        navMap = "/ncx:ncx/navMap"
+
+        assert tixi.checkElement(navMap)
+
+        id = 1
+
+        attr_id = "num_{}".format(id)  # used for attribute "id"
+        attr_po = "{}".format(id)  # used for attribute "playOrder"
+
