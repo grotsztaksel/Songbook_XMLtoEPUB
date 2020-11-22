@@ -12,10 +12,10 @@
     </docTitle>
     <navMap>
         <navPoint id="num_1" playOrder="1"><navLabel><text>Section 1</text></navLabel><content src="text/section_1.xhtml"/>
-            <navPoint id="num_2" playOrder="2"><navLabel><text>Section 1.1</text></navLabel><content src="text/section_1_1.xhtml"/>
+            <navPoint id="num_2" playOrder="2"><navLabel><text>Section 1.1</text></navLabel><content src="text/section_1.1.xhtml"/>
                 <navPoint id="num_3" playOrder="3"><navLabel><text>Song A</text></navLabel><content src="text/song_a.xhtml"/></navPoint>
             </navPoint>
-            <navPoint id="num_4" playOrder="4"><navLabel><text>Section 1.2</text></navLabel><content src="text/section_1_1.xhtml"/>
+            <navPoint id="num_4" playOrder="4"><navLabel><text>Section 1.2</text></navLabel><content src="text/section_1.2.xhtml"/>
                 <navPoint id="num_5" playOrder="5"><navLabel><text>Song B</text></navLabel><content src="text/song_b.xhtml"/></navPoint>
                 <navPoint id="num_6" playOrder="6"><navLabel><text>Song C</text></navLabel><content src="text/song_c.xhtml"/></navPoint>
             </navPoint>
