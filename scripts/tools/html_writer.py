@@ -12,7 +12,6 @@ from collections import namedtuple
 
 from config import CFG, ChordMode
 from tixi import Tixi
-from .utf_simplifier import UtfSimplifier
 
 LineWithChords = namedtuple("LineWithChords", ["text", "chords"])
 
