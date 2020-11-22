@@ -43,6 +43,17 @@ class SongBookGenerator(object):
         if self.N > 0 and n < self.N or self.N == 0:
             self.N = n
 
+        # Remove the abundant songs
+        while tryXPathEvaluateNodeNumber(self.tixi, xPath) > self.N:
+            path = self.tixi.xPathExpressionGetXPath(xPath, self.N + 1)
+            self.tixi.removeElement(path)
+
+        # Now remove sections that do not have songs inside
+        xPath_emptySection = "//section[not(descendant::song)]"
+        for i in reversed(range(tryXPathEvaluateNodeNumber(self.tixi, xPath_emptySection))):
+            path = self.tixi.xPathExpressionGetXPath(xPath_emptySection, i + 1)
+            self.tixi.removeElement(path)
+
         print("Will process {} songs".format(self.N))
 
         for i in range(1, self.N + 1):
@@ -66,17 +77,6 @@ class SongBookGenerator(object):
                 suffix = "_" + str(number)
             usedFileNames.append(fileName)
             self.songs.append(Song(fileName, title, xmlPath))
-
-        # Remove the abundant songs
-        while tryXPathEvaluateNodeNumber(self.tixi, xPath) > self.N:
-            path = self.tixi.xPathExpressionGetXPath(xPath, self.N + 1)
-            self.tixi.removeElement(path)
-
-        # Now remove sections that do not have songs inside
-        xPath = "//section[not(descendant::song)]"
-        for i in reversed(range(tryXPathEvaluateNodeNumber(self.tixi, xPath))):
-            path = self.tixi.xPathExpressionGetXPath(xPath, i + 1)
-            self.tixi.removeElement(path)
 
     def write_songs(self):
         """
@@ -216,4 +216,3 @@ class SongBookGenerator(object):
 
         attr_id = "num_{}".format(id)  # used for attribute "id"
         attr_po = "{}".format(id)  # used for attribute "playOrder"
-

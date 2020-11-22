@@ -51,9 +51,9 @@ class TestSongBookGenerator(unittest.TestCase):
         # and see if these sections are removed
 
         self.sg = SongBookGenerator(3)
-        expected = [Song("song_a.xhtml", "Song A", "/songbook/section[1]/section[1]/song"),
-                    Song("song_b.xhtml", "Song B", "/songbook/section[1]/section[2]/song[1]"),
-                    Song("song_c.xhtml", "Song C", "/songbook/section[1]/section[2]/song[2]")]
+        expected = [Song("song_a.xhtml", "Song A", "/songbook/section/section[1]/song"),
+                    Song("song_b.xhtml", "Song B", "/songbook/section/section[2]/song[1]"),
+                    Song("song_c.xhtml", "Song C", "/songbook/section/section[2]/song[2]")]
         self.assertEqual(expected, self.sg.songs)
 
         self.assertFalse(self.sg.tixi.checkElement("/songbook/section[2]"))
@@ -116,7 +116,6 @@ class TestSongBookGenerator(unittest.TestCase):
         toc_target = os.path.join(test_dir, "toc.ncx")
         shutil.copyfile(toc_original, toc_target)
         self.sg.write_toc()
-        
 
 
 if __name__ == '__main__':
