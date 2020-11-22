@@ -62,14 +62,18 @@ class SongBookGenerator(object):
             if not self.tixi.checkElement(xmlPath):
                 return False
             title = self.tixi.getTextAttribute(xmlPath, "title")
-
+            elementName = xmlPath.rsplit("/", 1)[-1].split("[")[0]
+            if elementName == "song":
+                prefix = "sng_"
+            else:
+                prefix = "sec_"
             file_name_base = UtfSimplifier.toAscii(title).replace(" ", "_").lower()
             suffix = ""
             ext = ".xhtml"
             fileNameTaken = True
             number = ""
             while fileNameTaken:
-                fileName = file_name_base + suffix + ext
+                fileName = prefix + file_name_base + suffix + ext
                 fileNameTaken = fileName in usedFileNames
                 if not suffix:
                     number = 0

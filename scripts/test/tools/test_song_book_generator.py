@@ -40,11 +40,11 @@ class TestSongBookGenerator(unittest.TestCase):
 
     def test_getBasicSongInfo(self):
         # The getBasicSongInfo has already been called in __init__
-        expected = [Song("song_a.xhtml", "Song A", "/songbook/section[1]/section[1]/song"),
-                    Song("song_b.xhtml", "Song B", "/songbook/section[1]/section[2]/song[1]"),
-                    Song("song_c.xhtml", "Song C", "/songbook/section[1]/section[2]/song[2]"),
-                    Song("song_a_1.xhtml", "Song A", "/songbook/section[2]/song[1]"),
-                    Song("song_abba.xhtml", "Song ABBA", "/songbook/section[2]/song[2]")]
+        expected = [Song("sng_song_a.xhtml", "Song A", "/songbook/section[1]/section[1]/song"),
+                    Song("sng_song_b.xhtml", "Song B", "/songbook/section[1]/section[2]/song[1]"),
+                    Song("sng_song_c.xhtml", "Song C", "/songbook/section[1]/section[2]/song[2]"),
+                    Song("sng_song_a_1.xhtml", "Song A", "/songbook/section[2]/song[1]"),
+                    Song("sng_song_abba.xhtml", "Song ABBA", "/songbook/section[2]/song[2]")]
 
         for item in expected:
             self.assertEqual(item.title, self.sg.tixi.getTextAttribute(item.xml, "title"))
@@ -54,9 +54,9 @@ class TestSongBookGenerator(unittest.TestCase):
         # and see if these sections are removed
 
         self.sg = SongBookGenerator(3)
-        expected = [Song("song_a.xhtml", "Song A", "/songbook/section/section[1]/song"),
-                    Song("song_b.xhtml", "Song B", "/songbook/section/section[2]/song[1]"),
-                    Song("song_c.xhtml", "Song C", "/songbook/section/section[2]/song[2]")]
+        expected = [Song("sng_song_a.xhtml", "Song A", "/songbook/section/section[1]/song"),
+                    Song("sng_song_b.xhtml", "Song B", "/songbook/section/section[2]/song[1]"),
+                    Song("sng_song_c.xhtml", "Song C", "/songbook/section/section[2]/song[2]")]
 
         for item in expected:
             self.assertEqual(item.title, self.sg.tixi.getTextAttribute(item.xml, "title"))
