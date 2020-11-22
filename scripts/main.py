@@ -19,6 +19,7 @@ def main(argv):
     os.mkdir(CFG.SONG_HTML_DIR)
     sg = SongBookGenerator(10)
     sg.write_songs()
+    sg.write_sections()
     sg.write_metadata()
     sg.write_toc()
 

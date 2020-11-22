@@ -9,6 +9,7 @@ import os
 from config import CFG
 from tixi import Tixi, tryXPathEvaluateNodeNumber, elementName
 from .html_writer import HtmlWriter
+from .section_writer import SectionWriter
 from .utf_simplifier import UtfSimplifier
 
 
@@ -96,6 +97,20 @@ class SongBookGenerator(object):
 
             writer = HtmlWriter(self.tixi, xml)
             writer.write_song_file(file)
+
+    def write_sections(self):
+        """
+        Read the source file and for each song defined, write a properly formatted
+        section xhtml file in the required location
+        """
+
+        xPath = "//section"
+        for i in range(tryXPathEvaluateNodeNumber(self.tixi, xPath)):
+            xml = self.tixi.xPathExpressionGetXPath(xPath, i + 1)
+            file = self.tixi.getTextAttribute(xml, "xhtml")
+
+            writer = SectionWriter(self.tixi, xml)
+            writer.write_section_file(file)
 
     def createTwoWayLinks(self):
         """
