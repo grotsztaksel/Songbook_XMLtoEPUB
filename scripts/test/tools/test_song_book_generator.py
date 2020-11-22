@@ -11,7 +11,7 @@ import unittest
 from collections import namedtuple
 
 from config import CFG
-from tixi import tryXPathEvaluateNodeNumber
+from tixi import Tixi, tryXPathEvaluateNodeNumber
 from tools.song_book_generator import SongBookGenerator
 
 Song = namedtuple("Song", ["file", "title", "xml"])
@@ -116,13 +116,25 @@ class TestSongBookGenerator(unittest.TestCase):
     def test_write_toc(self):
         # First copy the toc.ncx to the test dir and use it.
         toc_original = os.path.join(CFG.OUTPUT_DIR, "toc.ncx")
+        toc_expected = os.path.join(os.path.dirname(__file__), "expected_toc.ncx")
         test_dir = os.path.dirname(CFG.SONG_SRC_XML)
         CFG.OUTPUT_DIR = test_dir
         self.assertTrue(os.path.isfile(toc_original))
+        self.assertTrue(os.path.isfile(toc_expected))
         self.assertTrue(os.path.isdir(test_dir))
         toc_target = os.path.join(test_dir, "toc.ncx")
         shutil.copyfile(toc_original, toc_target)
         self.sg.write_toc()
+
+        tixi_expected = Tixi()
+        tixi_expected.open(toc_expected)
+        tixi_result = Tixi()
+        tixi_result.open(toc_target)
+
+        self.assertEqual(tixi_expected.exportDocumentAsString(),
+                         tixi_result.exportDocumentAsString())
+
+        os.remove(toc_target)
 
 
 if __name__ == '__main__':
