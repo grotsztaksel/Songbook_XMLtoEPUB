@@ -8,6 +8,7 @@ Created on 21.11.2020 17:10
 from config import CFG
 import os
 import unittest
+import shutil
 from tixi import Tixi, TixiException, ReturnCode, tryXPathEvaluateNodeNumber
 
 from tools.song_book_generator import SongBookGenerator
@@ -17,7 +18,6 @@ from tools.song_tuple import Song
 
 class TestSongBookGenerator(unittest.TestCase):
     def setUp(self):
-        tixi = Tixi()
         test_song_src = os.path.join(os.path.abspath(os.path.dirname(__file__)), "test_song_src.xml")
         CFG.SONG_SRC_XML = test_song_src
 
@@ -105,6 +105,18 @@ class TestSongBookGenerator(unittest.TestCase):
                         raise e
             self.sg.createTwoWayLinks()
             run = "end"
+
+    def test_write_toc(self):
+        # First copy the toc.ncx to the test dir and use it.
+        toc_original = os.path.join(CFG.OUTPUT_DIR, "toc.ncx")
+        test_dir = os.path.dirname(CFG.SONG_SRC_XML)
+        CFG.OUTPUT_DIR = test_dir
+        self.assertTrue(os.path.isfile(toc_original))
+        self.assertTrue(os.path.isdir(test_dir))
+        toc_target = os.path.join(test_dir, "toc.ncx")
+        shutil.copyfile(toc_original, toc_target)
+        self.sg.write_toc()
+        
 
 
 if __name__ == '__main__':
