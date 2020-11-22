@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<songbook xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<songbook>
     <settings>
-        <setting name="max_songs" value="4"/>
-        <setting name="preferred_chord_mode" value="CHORDS_ABOVE"/>
+        <max_songs>4</max_songs>
+        <prefered_chords_mode>CHORDS_ABOVE</prefered_chords_mode>
     </settings>
     <section title="Section 1" chord_mode="CHORDS_BESIDE">
         <section title="Section 1.1" chord_mode="CHORDS_BESIDE">

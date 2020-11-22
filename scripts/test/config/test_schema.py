@@ -59,6 +59,14 @@ class TestSchema(unittest.TestCase):
 
         self.assertNonSchemaCompliant(tixi)
 
+    def test_testXMLschemaCompliant(self):
+        test_xml_file = os.path.join(os.path.dirname(__file__),
+                                     "..", "tools", "test_song_src.xml")
+        self.assertTrue(os.path.isfile(test_xml_file))
+        tixi = Tixi()
+        tixi.open(test_xml_file)
+        tixi.schemaValidateFromFile(self.xsdpath)
+
     def assertNonSchemaCompliant(self, tixi):
         try:
             tixi.schemaValidateFromFile(self.xsdpath)
