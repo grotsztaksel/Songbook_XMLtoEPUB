@@ -113,6 +113,30 @@ class TestSongBookGenerator(unittest.TestCase):
             self.sg.createTwoWayLinks()
             run = "end"
 
+    def test_write_metadata(self):
+        # First copy the toc.ncx to the test dir and use it.
+        opf_original = os.path.join(CFG.OUTPUT_DIR, "metadata.opf")
+        opf_expected = os.path.join(os.path.dirname(__file__), "expected_opf.opf")
+        test_dir = os.path.dirname(CFG.SONG_SRC_XML)
+        CFG.OUTPUT_DIR = test_dir
+        self.assertTrue(os.path.isfile(opf_original))
+        self.assertTrue(os.path.isfile(opf_expected))
+        self.assertTrue(os.path.isdir(test_dir))
+        opf_target = os.path.join(test_dir, "metadata.opf")
+        shutil.copyfile(opf_original, opf_target)
+
+
+        self.sg.write_metadata()
+
+        tixi_expected = Tixi()
+        tixi_expected.open(opf_expected)
+        tixi_result = Tixi()
+        tixi_result.open(opf_target)
+
+        self.assertEqual(tixi_expected.exportDocumentAsString(),
+                         tixi_result.exportDocumentAsString())
+        os.remove(opf_target)
+
     def test_write_toc(self):
         # First copy the toc.ncx to the test dir and use it.
         toc_original = os.path.join(CFG.OUTPUT_DIR, "toc.ncx")
