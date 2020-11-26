@@ -7,6 +7,9 @@ Created on 22.11.2020 17:05
 
 __all__ = ['SectionWriter']
 
+import os
+import re
+
 from config import CFG
 from tixi import Tixi, tryXPathEvaluateNodeNumber, elementName
 
@@ -27,6 +30,36 @@ class SectionWriter(object):
         self.tixi.registerNamespace("http://www.w3.org/2001/XMLSchema-instance", 'xsd')
 
         self.root = "/" + self.root
+
+    def write_section_file(self, fileName):
+        """
+        Read the xml node for the section in and write a valid HTML file out of it in the desired location
+        """
+        title = self.src_tixi.getTextAttribute(self.src_path, "title")
+        print("Saving section: {}\n  -- to file {}".format(title, fileName))
+
+        self.write_html_header()
+        self.write_toc()
+
+        self.saveFile(fileName)
+
+    def saveFile(self, fileName):
+        """Apply specific formatting andf save the content of the self.tixi to a file filename"""
+        text = self.tixi.exportDocumentAsString()
+        replaceRules = {
+            "&lt;br/&gt;": "<br/>",
+            "&amp;nbsp;": "&nbsp;"
+        }
+        for rr in replaceRules.keys():
+            text = text.replace(rr, replaceRules[rr])
+
+        # Now regular expressions
+        #  .. Nothing to do here for now
+        # text = re.sub(r"(<\/?t[dr].*?>)\s*(<\/?t[dr])", r"\1\2", text)
+
+        file = open(os.path.join(CFG.SONG_HTML_DIR, fileName), "w", encoding='utf8')
+        file.write(text)
+        file.close()
 
     def write_html_header(self):
         self.tixi.createElement(self.root, "head")
