@@ -4,7 +4,7 @@ Created on Sat Nov 14 17:56:39 2020
 
 @author: piotr
 """
-__all__ = ['LineWithChords', 'HtmlWriter']
+__all__ = ['LineWithChords', 'SongWriter']
 
 import os
 import re
@@ -16,9 +16,9 @@ from tixi import Tixi
 LineWithChords = namedtuple("LineWithChords", ["text", "chords"])
 
 
-class HtmlWriter():
+class SongWriter():
     def __init__(self, tixi: Tixi, path: str, settings=None):
-        super(HtmlWriter, self).__init__()
+        super(SongWriter, self).__init__()
         self.settings = settings
         self.src_tixi = tixi
         self.src_path = path
@@ -158,7 +158,7 @@ class HtmlWriter():
         self.tixi.createElement(targetPath, "p")
         pPath = "{}/p[{}]".format(targetPath, self.tixi.getNamedChildrenCount(targetPath, "p"))
 
-        for line in HtmlWriter._identifyLinesWithChords(text):
+        for line in SongWriter._identifyLinesWithChords(text):
             if isinstance(line, str):
                 self.tixi.addTextElement(pPath, "div", line)
             elif isinstance(line, LineWithChords):

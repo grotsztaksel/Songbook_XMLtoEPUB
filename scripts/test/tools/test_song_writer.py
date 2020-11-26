@@ -8,10 +8,10 @@ Created on 16.11.2020 22:14
 import unittest
 
 from config import CFG
-from tools.html_writer import HtmlWriter, LineWithChords
+from tools.song_writer import SongWriter, LineWithChords
 
 
-class TestHtmlWriter(unittest.TestCase):
+class TestSongWriter(unittest.TestCase):
     def test_identifyLinesWithChords(self):
         text = "\n".join(["Line 1",
                           "Line 2",
@@ -19,7 +19,7 @@ class TestHtmlWriter(unittest.TestCase):
                           "Line 4"])
 
         # Should basically get the text with <br/> tags in newlines
-        self.assertEqual([text.replace("\n", "<br/>\n")], HtmlWriter._identifyLinesWithChords(text))
+        self.assertEqual([text.replace("\n", "<br/>\n")], SongWriter._identifyLinesWithChords(text))
 
         text = "\n".join(["Line 1" + CFG.CS + "F E E D",
                           "Line 2" + CFG.CS + "F E E D",
@@ -30,7 +30,7 @@ class TestHtmlWriter(unittest.TestCase):
             LineWithChords("Line 2", ["F E E D"]),
             "Line 3<br/>\nLine 4"
         ]
-        self.assertEqual(expected, HtmlWriter._identifyLinesWithChords(text))
+        self.assertEqual(expected, SongWriter._identifyLinesWithChords(text))
 
 
 if __name__ == '__main__':

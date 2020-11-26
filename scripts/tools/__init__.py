@@ -4,8 +4,8 @@ Created on Sat Nov 14 18:19:45 2020
 
 @author: piotr
 """
-__all__ = ['HtmlWriter', 'SectionWriter', 'UtfSimplifier']
+__all__ = ['SongWriter', 'SectionWriter', 'UtfSimplifier']
 
-from .html_writer import HtmlWriter
+from .song_writer import SongWriter
 from .section_writer import SectionWriter
 from .utf_simplifier import UtfSimplifier

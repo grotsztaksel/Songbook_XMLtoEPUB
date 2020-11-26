@@ -7,8 +7,8 @@ Created on 20.11.2020 18:35
 import os
 
 from config import CFG
-from tixi import Tixi, tryXPathEvaluateNodeNumber, elementName
-from .html_writer import HtmlWriter
+from tixi import Tixi
+from .song_writer import SongWriter
 from .section_writer import SectionWriter
 from .utf_simplifier import UtfSimplifier
 
@@ -31,8 +31,7 @@ class SongBookGenerator(object):
     def getBasicSongInfo(self):
         # First remove the songs that have attribute include="false"
         xPathToRemove = "//song[@include='false']"
-        for i in reversed(range(tryXPathEvaluateNodeNumber(self.tixi, xPathToRemove))):
-            path = self.tixi.xPathExpressionGetXPath(xPathToRemove, i + 1)
+        for path in reversed(self.tixi.getPathsFromXPathExpression(xPathToRemove)):
             self.tixi.removeElement(path)
 
         xPath = "//song[@title]"
@@ -48,23 +47,20 @@ class SongBookGenerator(object):
 
         # Now remove sections that do not have songs inside
         xPath_emptySection = "//section[not(descendant::song)]"
-        for i in reversed(range(tryXPathEvaluateNodeNumber(self.tixi, xPath_emptySection))):
-            path = self.tixi.xPathExpressionGetXPath(xPath_emptySection, i + 1)
+        for path in reversed(self.tixi.getPathsFromXPathExpression(xPath_emptySection)):
             self.tixi.removeElement(path)
 
         print("Will process {} songs".format(self.N))
 
         usedFileNames = []
         xPath = "//*[self::song or self::section][@title]"
-        n = tryXPathEvaluateNodeNumber(self.tixi, xPath)
-        for i in range(1, n + 1):
-            xmlPath = self.tixi.xPathExpressionGetXPath(xPath, i)
 
+        for xmlPath in self.tixi.getPathsFromXPathExpression(xPath):
             if not self.tixi.checkElement(xmlPath):
                 return False
             title = self.tixi.getTextAttribute(xmlPath, "title")
 
-            if elementName(xmlPath) == "song":
+            if Tixi.elementName(xmlPath) == "song":
                 prefix = "sng_"
             else:
                 prefix = "sec_"
@@ -91,11 +87,10 @@ class SongBookGenerator(object):
         """
 
         xPath = "//song"
-        for i in range(tryXPathEvaluateNodeNumber(self.tixi, xPath)):
-            xml = self.tixi.xPathExpressionGetXPath(xPath, i + 1)
+        for xml in self.tixi.getPathsFromXPathExpression(xPath):
             file = self.tixi.getTextAttribute(xml, "xhtml")
 
-            writer = HtmlWriter(self.tixi, xml)
+            writer = SongWriter(self.tixi, xml)
             writer.write_song_file(file)
 
     def write_sections(self):
@@ -105,8 +100,7 @@ class SongBookGenerator(object):
         """
 
         xPath = "//section"
-        for i in range(tryXPathEvaluateNodeNumber(self.tixi, xPath)):
-            xml = self.tixi.xPathExpressionGetXPath(xPath, i + 1)
+        for xml in self.tixi.getPathsFromXPathExpression(xPath):
             file = self.tixi.getTextAttribute(xml, "xhtml")
 
             writer = SectionWriter(self.tixi, xml)
@@ -134,7 +128,7 @@ class SongBookGenerator(object):
 
         linksToCreate = True
         while linksToCreate:
-            n = tryXPathEvaluateNodeNumber(self.tixi, xPathFrom)
+            n = self.tixi.tryXPathEvaluateNodeNumber(xPathFrom)
             linksToCreate = list()
             linksToRemove = list()
             for i in range(1, n + 1):
@@ -146,13 +140,13 @@ class SongBookGenerator(object):
 
                 # Find all songs that have title mentioned in the link
                 xPath = "//song[@title=\"{}\"]".format(title_link)
-                m = tryXPathEvaluateNodeNumber(self.tixi, xPath)
+                m = self.tixi.tryXPathEvaluateNodeNumber(xPath)
                 if m == 0:
                     linksToRemove.append(path_link)
                 for j in range(1, m + 1):
                     target_path = self.tixi.xPathExpressionGetXPath(xPath, j)
                     # Do not create link, if there already is one
-                    if tryXPathEvaluateNodeNumber(self.tixi, target_path + "/link[@title='{}']".format(title_parent)):
+                    if self.tixi.tryXPathEvaluateNodeNumber(target_path + "/link[@title='{}']".format(title_parent)):
                         continue
                     nlinks = self.tixi.getNamedChildrenCount(target_path, "link")
                     linksToCreate.append((target_path, nlinks + 1, title_parent))
@@ -271,7 +265,6 @@ class SongBookGenerator(object):
             my_npPath = npPath
 
         xPath = "{}/*[self::song or self::section]".format(secsongPath)
-        n = tryXPathEvaluateNodeNumber(self.tixi, xPath)
-        for i in range(n):
-            path = self.tixi.xPathExpressionGetXPath(xPath, i + 1)
+
+        for path in self.tixi.getPathsFromXPathExpression(xPath):
             self._createNavPoint(path, my_npPath, tixi_ncx)
