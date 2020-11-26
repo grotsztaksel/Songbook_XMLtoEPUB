@@ -1,92 +1,70 @@
 @charset "utf-8";
 /* Styles for Śpiewnik */
-body, section, div, table, thead, tbody, tfoot, th, td, p, pre, ul, ol, dl, dt, dd, li, span, nav, header, footer{
-    margin: 0; 
-  padding: 0; 
-} 
-
-body{ 
-  // Paperwhite has 1024x768 pixels
-  height: 1024px;
+body, section, div, table, thead, tbody, tfoot, th, td, p, pre, ul, ol, dl, dt, dd, li, span, nav, header, footer {
+  margin: 0;
+  padding: 0;
+}
+body {
   width: 768px;
   margin: 20px;
   padding: 0;
-} 
-
-h1{
-  margin-bottom:6px;
 }
-
-h3.links{
-    border-top: 1px solid gray;
+h1 {
+  margin-bottom: 6px;
 }
-
-div, section{
+h3.links {
+  border-top: 1px solid gray;
+}
+div, section {
   -moz-box-sizing: border-box;
-  -o-box-sizing: border-box; 
-  -webkit-box-sizing: border-box; 
-   box-sizing: border-box; 
-} 
-
-p{
+  -o-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+p {
   padding-bottom: 20px;
 }
-
-
-table.chords_beside{
+table.chords_beside {
   width: 100%;
 }
-table, tr, td{
+table, tr, td {
   border-collapse: collapse;
   font-style: inherit;
   padding-top: inherit;
 }
-
-
-
-.chords_above{
- font-size: 0.75em;
-
+.chords_above {
+  font-size: 0.75em;
 }
-
-.chords_beside{
-  padding-top: 0px;
-  padding-bottom: 0px;
+.chords_beside {
+  padding-top: 0;
+  padding-bottom: 0;
 }
-
-.verse{
-  margin-left: 0px;
+.verse {
+  margin-left: 0;
 }
-
-.chorus{
+.chorus {
   font-style: italic;
   margin-left: 20px;
 }
-
-.authors{
+.authors {
   font-size: 12px;
-  padding-bottom:2px;
+  padding-bottom: 2px;
   margin-bottom: 18px;
   margin-right: 20%;
   margin-top: 6px;
   border-bottom: 2px solid black;
 }
-
-tr.chords_above{
- padding-top: 10px; 
+tr.chords_above {
+  padding-top: 10px;
 }
-
-td.chords{
+td.chords {
   width: 20%;
 }
-
-ul {
+ul > li {
   list-style-type: none;
-  margin-left:20px
+  margin-left:20px;
   padding-top: 10px; 
 }
-
-
 #bottom {
   border-top: 2px solid black;
   position: absolute;
