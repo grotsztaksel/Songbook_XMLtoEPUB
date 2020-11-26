@@ -36,13 +36,13 @@ class SongBookGenerator(object):
             self.tixi.removeElement(path)
 
         xPath = "//song[@title]"
-        n = tryXPathEvaluateNodeNumber(self.tixi, xPath)
+        n = self.tixi.tryXPathEvaluateNodeNumber(xPath)
         print("Found {} songs".format(n))
         if self.N > 0 and n < self.N or self.N == 0:
             self.N = n
 
         # Remove the abundant songs
-        while tryXPathEvaluateNodeNumber(self.tixi, xPath) > self.N:
+        while self.tixi.tryXPathEvaluateNodeNumber(xPath) > self.N:
             path = self.tixi.xPathExpressionGetXPath(xPath, self.N + 1)
             self.tixi.removeElement(path)
 
@@ -100,7 +100,7 @@ class SongBookGenerator(object):
 
     def write_sections(self):
         """
-        Read the source file and for each song defined, write a properly formatted
+        Read the source file and for each section defined, write a properly formatted
         section xhtml file in the required location
         """
 
