@@ -49,6 +49,8 @@ class SongWriter():
             path = self.src_tixi.xPathExpressionGetXPath(xpath, i)
             self.write_song_part(path)
 
+        self.write_links()
+
         self.saveFile(fileName)
 
     def saveFile(self, fileName):
@@ -63,7 +65,7 @@ class SongWriter():
         # Now regular expressions
 
         # fold the table rows <tr><td></td></tr>into a single line
-        text = re.sub(r"(<\/?t[dr].*?>)\s*(<\/?t[dr])", r"\1\2",text)
+        text = re.sub(r"(<\/?t[dr].*?>)\s*(<\/?t[dr])", r"\1\2", text)
 
         file = open(os.path.join(CFG.SONG_HTML_DIR, fileName), "w", encoding='utf8')
         file.write(text)
@@ -235,6 +237,80 @@ class SongWriter():
 
         self.tixi.addTextElement(self.root + "/body", "p", "\n{}\n".format(text))
         return True
+
+    def write_links(self):
+        """If the song contains <link> elements, find all other songs that have the same title as mentioned in the link
+            and create approptiate <a href=...> elements
+        """
+        xPath = self.src_path + "/link[@title]"
+        titles_found = []
+        targetPath = "/html/body"
+        linkPcreated = bool(self.tixi.tryXPathEvaluateNodeNumber(targetPath + "/p[@class='links']"))
+        for path in self.src_tixi.getPathsFromXPathExpression(xPath):
+            if not linkPcreated:
+                # Create the new paragraph to store the links
+
+                #  <h3>Zobacz też</h3>
+                self.tixi.addTextElement(targetPath, "h3", "Zobacz też")
+
+                #  <p class="links/>
+                targetPath = self.tixi.getNewElementPath(targetPath, "p")
+                self.tixi.addTextAttribute(targetPath, "class", "links")
+
+                #  <p class="links>
+                #    <ul/>
+                #  </p>
+                targetPath = self.tixi.getNewElementPath(targetPath, "ul")
+                linkPcreated = True
+
+            title = self.tixi.getTextAttribute(path, "title")
+            if title in titles_found:
+                # Don't want to repeat if the links have already been created for this title
+                continue
+            titles_found.append(title)
+
+            # Find all songs that have this linked title - each will create a separate
+            # <li><a href="...xhtml">Title</a><div> (authors)</div></li> item
+            #
+            xPath = "//song[@title='{}' and @xhtml]".format(title)
+            for songPath in self.src_tixi.getPathsFromXPathExpression(xPath):
+                if songPath == self.src_path:
+                    # Don't want to create link for ourselves
+                    continue
+
+                file = self.src_tixi.getTextAttribute(songPath, "xhtml")
+                title = self.src_tixi.getTextAttribute(songPath, "title")
+
+                authors = []
+                for attr in ["lyrics", "music"]:
+                    if self.src_tixi.checkAttribute(songPath, attr):
+                        author = self.src_tixi.getTextAttribute(songPath, attr)
+                        if author not in authors:
+                            authors.append(author)
+                authors = "({})".format(", ".join(authors))
+
+                #  <p class="links>
+                #    <ul>
+                #        <li/>
+                #    </ul>
+                #  </p>
+                liPath = self.tixi.getNewElementPath(targetPath, "li")
+
+                #  <p class="links>
+                #    <ul>
+                #        <li><a href="...xhtml">Linked song title</a>                                  </li>
+                #    </ul>
+                #  </p>
+                aPath = self.tixi.getNewTextElementPath(liPath, "a", title)
+                self.tixi.addTextAttribute(aPath, "href", file)
+
+                #  <p class="links>
+                #    <ul>
+                #        <li><a href="...xhtml">Linked song title</a><div style="..."> (authors)</div> </li>
+                #    </ul>
+                #  </p>
+                divPath = self.tixi.getNewTextElementPath(liPath, "span", authors)
+                self.tixi.addTextAttribute(divPath, "style", "font-size:12px")
 
     @staticmethod
     def _identifyLinesWithChords(text: str) -> list:
