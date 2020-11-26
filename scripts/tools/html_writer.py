@@ -61,6 +61,8 @@ class HtmlWriter():
         for rr in replaceRules.keys():
             text = text.replace(rr, replaceRules[rr])
         # Now regular expressions
+
+        # fold the table rows <tr><td></td></tr>into a single line
         text = re.sub(r"(<\/?t[dr].*?>)\s*(<\/?t[dr])", r"\1\2",text)
 
         file = open(os.path.join(CFG.SONG_HTML_DIR, fileName), "w", encoding='utf8')
