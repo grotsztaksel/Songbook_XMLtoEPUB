@@ -60,7 +60,8 @@ class SectionWriter(object):
         self._createUl(ppath, self.src_path)
 
     def _createUl(self, targetPath, sourcePath):
-
+        """Recursively create the <li> and nested <ul> elements for each
+           item in section"""
         self.tixi.createElement(targetPath, "ul")
         nul = self.tixi.getNamedChildrenCount(targetPath, "ul")
         ulPath = "{}/ul[{}]".format(targetPath, nul)
