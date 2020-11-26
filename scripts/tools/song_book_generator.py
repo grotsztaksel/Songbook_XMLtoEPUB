@@ -201,11 +201,10 @@ class SongBookGenerator(object):
         tixi.createElementNS(spine, "itemref", opfuri)
         tixi.addTextAttribute(spine + "/opf:itemref", "idref", "start")
 
-        xPath = "//song"
-        for i in range(1, tryXPathEvaluateNodeNumber(self.tixi, xPath) + 1):
-            xml = self.tixi.xPathExpressionGetXPath(xPath, i)
+        xPath = "//*[self::song or self::section]"
+        for i, xml in enumerate(self.tixi.getPathsFromXPathExpression(xPath)):
             fileName = self.tixi.getTextAttribute(xml, "xhtml")
-            id = "id{}".format(i)
+            id = "id{}".format(i + 1)
 
             tixi.createElement(manifest, "item")
             n = tixi.getNamedChildrenCount(manifest, "item")
