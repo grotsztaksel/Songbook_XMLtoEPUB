@@ -17,7 +17,7 @@ def main(argv):
     sys.excepthook = print_exceptions
     shutil.rmtree(CFG.SONG_HTML_DIR, ignore_errors=True)
     os.mkdir(CFG.SONG_HTML_DIR)
-    sg = SongBookGenerator(10)
+    sg = SongBookGenerator(30)
     sg.write_songs()
     sg.write_sections()
     sg.write_metadata()
@@ -26,11 +26,8 @@ def main(argv):
 
 def print_exceptions(etype, value, tb):
     import traceback
-    from PyQt5.QtWidgets import QMessageBox
-
     text = "\n".join(traceback.format_exception(etype, value, tb))
     print(text)
-    QMessageBox.critical(None, "Python Error!", text)
     traceback.format_exception(etype, value, tb)
 
 
