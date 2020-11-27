@@ -1,0 +1,97 @@
+# -*- coding: utf-8 -*-|"łmkj,ncbgfdxsa!
+"""
+Created on 27.11.2020 19:51
+ 
+@author: piotr
+"""
+import re
+
+from tixi import Tixi
+from .html_writer import HtmlWriter
+
+
+class AuthorsWriter(object):
+    """Class responsible for writing the index of authors"""
+
+    def __init__(self, tixi: Tixi):
+        self.src_tixi = tixi
+        self.tixi, self.root = HtmlWriter.prepare_html_tixi()
+
+        # This the author strings to standardized author names to appear in the index
+
+        self.standardized_author_names = dict()
+        self.songs_by_author = dict()
+        self.findSongsByAuthors()
+
+    @staticmethod
+    def standardize_author_name(name, bandName=False):
+        """Standardize author name:
+        - "J. Doe" translates to "Doe, J."
+        - "John Doe" translates to "Doe, John"
+        - "Doe, John" remains "Doe, John"
+        - "Cher" remains "Cher"
+        - "J.F. Kennedy" translates to "Kennedy, J. F."  (note the missing space in 'J.F. K...')
+
+        If input argument bandName is True, then the order of words is not kept
+        """
+
+        # Initial modifications and standarizations
+        name = name.replace(".", ". ")  # Add space after dot
+        name = name.replace(",", ", ")  # Add space after comma
+        name = re.sub(r' +', ' ', name)  # Replace multiplem spaces with one
+
+        names = name.split(" ")
+
+        if bandName:
+            return name
+        if names[0][-1] == ",":
+            return name
+
+        if len(names) <= 1:
+            return name
+
+        newName = []
+        newName.append(names.pop(-1) + ",")
+        newName.extend(names)
+        return " ".join(names)
+
+    def findSongsByAuthors(self):
+        """For each author name in the dictionary, find the songs associated with that name. Then, find
+           the standardized name and create a list (so that it can be sorted) of tuples (title, file)
+        """
+        for path in self.src_tixi.getPathsFromXPathExpression("//song[@lyrics or @music or @band]"):
+            for attr in ["lyrics", "music", "band"]:
+                # For each of these attributes, if exist and not yet in the dictionary,
+                # Standardize te name. If it is a band, make sure not to alter the word order
+                if self.src_tixi.checkAttribute(path, attr):
+                    author = self.src_tixi.getTextAttribute(path, attr)
+                    if author not in self.standardized_author_names.keys():
+                        stdName = AuthorsWriter.standardize_author_name(author, attr == "band")
+                        self.standardized_author_names[author] = stdName
+
+                        title = self.src_tixi.getTextAttribute(path, "title")
+                        file = self.src_tixi.getTextAttribute(path, "xhtml")
+                        if not self.songs_by_author[stdName]:
+                            self.songs_by_author[stdName] = dict()
+                        self.songs_by_author[stdName][title] = file
+
+    def write_index(self):
+
+        bPath = self.tixi.getNewElementPath("/html", "body")
+        self.tixi.addTextElement(bPath, "h2", "Spis autorów")
+
+        I = ""  # Initial
+        for author in sorted(self.standardized_author_names.keys()):
+            if author[0] > I:
+                I = author[0]
+                self.tixi.addTextElement(bPath, "h3", I)
+                ulPath = self.tixi.getNewElementPath(bPath, "ul")
+
+            self.tixi.addTextElement(bPath, "h4", author)
+            hisOrHerSongs = self.songs_by_author[author]
+            for song in sorted(hisOrHerSongs.keys()):
+                liPath = self.tixi.getNewElementPath(ulPath, "li")
+                file = hisOrHerSongs[song]
+
+                aPath = self.tixi.getNewTextElementPath(liPath, "a", song)
+                self.tixi.addTextAttribute(aPath, "href", file)
