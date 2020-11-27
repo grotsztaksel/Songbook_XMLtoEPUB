@@ -1,26 +1,8 @@
-<?xml version='1.0' encoding='utf-8'?>
-<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="uuid_id" version="2.0">
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://www.idpf.org/2007/opf">
   <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
-    <dc:identifier opf:scheme="calibre" id="calibre_id">0a06e10c-1fa7-40f8-8116-a2cfe3892461</dc:identifier>
-    <dc:identifier opf:scheme="uuid" id="uuid_id">b5f3d8e3-c92c-4107-a900-f69e1ee72cbc</dc:identifier>
     <dc:title>Śpiewnik</dc:title>
     <dc:creator opf:file-as="Nieznany" opf:role="aut">P. Grądkowski</dc:creator>
-    <dc:contributor opf:file-as="calibre" opf:role="bkp">calibre (4.23.0) [https://calibre-ebook.com]</dc:contributor>
     <dc:language>pol</dc:language>
   </metadata>
-  <manifest>
-    <item href="start.xhtml" id="start" media-type="application/xhtml+xml"/>
-    <item href="toc.ncx" id="ncx" media-type="application/x-dtbncx+xml"/>
-    <item href="text/czerwony_nos.xhtml" id="id" media-type="application/xhtml+xml"/>
-    <item href="songbook.css" id="id1" media-type="text/css"/>
-    <item href="text/ballada_o_wszechzonie.xhtml" id="id2" media-type="application/xhtml+xml"/>
-    <item href="text/do_aniola_stroza.xhtml" id="id3" media-type="application/xhtml+xml"/>
-  </manifest>
-  <spine toc="ncx">
-    <itemref idref="start"/>
-    <itemref idref="id"/>
-    <itemref idref="id2"/>
-    <itemref idref="id3"/>
-  </spine>
-  <guide/>
 </package>
