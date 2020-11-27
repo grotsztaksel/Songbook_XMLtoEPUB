@@ -9,11 +9,18 @@ body {
   margin: 20px;
   padding: 0;
 }
+h1, h2, h3, h4 {
+  page-break-after: avoid;
+}
 h1 {
   margin-bottom: 6px;
 }
 h3.links {
   border-top: 1px solid gray;
+}
+h3, h4 {
+  padding-bottom: 0;
+  margin-bottom: 0;
 }
 div, section {
   -moz-box-sizing: border-box;
@@ -23,6 +30,7 @@ div, section {
 }
 p {
   padding-bottom: 20px;
+  page-break-inside: avoid;
 }
 table.chords_beside {
   width: 100%;
@@ -62,8 +70,8 @@ td.chords {
 }
 ul > li {
   list-style-type: none;
-  margin-left:20px;
-  padding-top: 10px; 
+  margin-left: 20px;
+  padding-top: 10px;
 }
 #bottom {
   border-top: 2px solid black;
