@@ -297,7 +297,7 @@ class SongWriter(HtmlWriter):
                     # Append the chunk of text to the output and reset the noChordLines collector
                     output.append(noChordLines)
                     noChordLines = None
-                output.append(LineWithChords(text, chords))
+                output.append(LineWithChords(text, chords[0]))
 
         if noChordLines is not None:
             # Append the chunk of text to the output and reset the noChordLines collector
