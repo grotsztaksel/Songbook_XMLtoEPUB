@@ -51,7 +51,7 @@ class AuthorsWriter(HtmlWriter):
         newName = []
         newName.append(names.pop(-1) + ",")
         newName.extend(names)
-        return " ".join(names)
+        return " ".join(newName)
 
     def findSongsByAuthors(self):
         """For each author name in the dictionary, find the songs associated with that name. Then, find
@@ -63,13 +63,13 @@ class AuthorsWriter(HtmlWriter):
                 # Standardize te name. If it is a band, make sure not to alter the word order
                 if self.src_tixi.checkAttribute(path, attr):
                     author = self.src_tixi.getTextAttribute(path, attr)
-                    if author not in self.standardized_author_names.keys():
+                    if author not in self.standardized_author_names:
                         stdName = AuthorsWriter.standardize_author_name(author, attr == "band")
                         self.standardized_author_names[author] = stdName
 
                         title = self.src_tixi.getTextAttribute(path, "title")
                         file = self.src_tixi.getTextAttribute(path, "xhtml")
-                        if not self.songs_by_author[stdName]:
+                        if stdName not in self.songs_by_author:
                             self.songs_by_author[stdName] = dict()
                         self.songs_by_author[stdName][title] = file
 
@@ -79,7 +79,8 @@ class AuthorsWriter(HtmlWriter):
         self.tixi.addTextElement(bPath, "h2", "Spis autorów")
 
         I = ""  # Initial
-        for author in sorted(self.standardized_author_names.keys()):
+        for author in sorted(self.standardized_author_names.values()):
+            
             if author[0] > I:
                 I = author[0]
                 self.tixi.addTextElement(bPath, "h3", I)
