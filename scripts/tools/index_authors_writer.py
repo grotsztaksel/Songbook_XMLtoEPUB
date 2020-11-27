@@ -10,13 +10,11 @@ from tixi import Tixi
 from .html_writer import HtmlWriter
 
 
-class AuthorsWriter(object):
+class AuthorsWriter(HtmlWriter):
     """Class responsible for writing the index of authors"""
 
     def __init__(self, tixi: Tixi):
-        self.src_tixi = tixi
-        self.tixi, self.root = HtmlWriter.prepare_html_tixi()
-
+        super(AuthorsWriter, self).__init__(tixi)
         # This the author strings to standardized author names to appear in the index
 
         self.standardized_author_names = dict()
@@ -76,7 +74,7 @@ class AuthorsWriter(object):
                         self.songs_by_author[stdName][title] = file
 
     def write_index(self):
-
+        """Write the whole block of the index"""
         bPath = self.tixi.getNewElementPath("/html", "body")
         self.tixi.addTextElement(bPath, "h2", "Spis autorów")
 
