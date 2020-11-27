@@ -27,9 +27,9 @@ class SectionWriter(object):
         self.tixi = Tixi()
 
         self.tixi.create(self.root)
-        self.tixi.registerNamespace("http://www.w3.org/2001/XMLSchema-instance", 'xsd')
 
         self.root = "/" + self.root
+        self.tixi.addTextAttribute(self.root, "xmlns", "http://www.w3.org/1999/xhtml")
 
     def write_section_file(self, fileName):
         """

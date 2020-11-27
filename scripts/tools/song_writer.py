@@ -11,7 +11,7 @@ import re
 from collections import namedtuple
 
 from config import CFG, ChordMode
-from tixi import Tixi
+from tixi import Tixi, TixiException
 
 LineWithChords = namedtuple("LineWithChords", ["text", "chords"])
 
@@ -29,9 +29,9 @@ class SongWriter():
         self.tixi = Tixi()
 
         self.tixi.create(self.root)
-        self.tixi.registerNamespace("http://www.w3.org/2001/XMLSchema-instance", 'xsd')
 
         self.root = "/" + self.root
+        self.tixi.addTextAttribute(self.root, "xmlns", "http://www.w3.org/1999/xhtml")
 
     def write_song_file(self, fileName) -> bool:
         """
@@ -289,7 +289,6 @@ class SongWriter():
                         author = self.src_tixi.getTextAttribute(songPath, attr)
                         if author not in authors:
                             authors.append(author)
-
 
                 #  <p class="links>
                 #    <ul>
