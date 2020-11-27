@@ -58,7 +58,9 @@ class SongWriter():
         text = self.tixi.exportDocumentAsString()
         replaceRules = {
             "&lt;br/&gt;": "<br/>",
-            "&amp;nbsp;": "&nbsp;"
+            "&amp;nbsp;": "&nbsp;",
+            "&amp;apos;": "&apos;",
+            "&amp;quot;": "&quot;"
         }
         for rr in replaceRules.keys():
             text = text.replace(rr, replaceRules[rr])
@@ -263,14 +265,14 @@ class SongWriter():
                 targetPath = self.tixi.getNewElementPath(targetPath, "ul")
                 linkPcreated = True
 
-            title = self.tixi.getTextAttribute(path, "title")
+            title = self.src_tixi.getTextAttribute(path, "title")
             if title in titles_found:
                 # Don't want to repeat if the links have already been created for this title
                 continue
             titles_found.append(title)
 
             # Find all songs that have this linked title - each will create a separate
-            # <li><a href="...xhtml">Title</a><div> (authors)</div></li> item
+            # <li><a href="...xhtml">Title</a><span> (authors)</span></li> item
             #
             xPath = "//song[@title='{}' and @xhtml]".format(title)
             for songPath in self.src_tixi.getPathsFromXPathExpression(xPath):
@@ -287,7 +289,7 @@ class SongWriter():
                         author = self.src_tixi.getTextAttribute(songPath, attr)
                         if author not in authors:
                             authors.append(author)
-                authors = "({})".format(", ".join(authors))
+
 
                 #  <p class="links>
                 #    <ul>
@@ -306,11 +308,13 @@ class SongWriter():
 
                 #  <p class="links>
                 #    <ul>
-                #        <li><a href="...xhtml">Linked song title</a><div style="..."> (authors)</div> </li>
+                #        <li><a href="...xhtml">Linked song title</a><span style="..."> (authors)</span> </li>
                 #    </ul>
                 #  </p>
-                divPath = self.tixi.getNewTextElementPath(liPath, "span", authors)
-                self.tixi.addTextAttribute(divPath, "style", "font-size:12px")
+                if authors:
+                    authors = "({})".format(", ".join(authors))
+                    sPath = self.tixi.getNewTextElementPath(liPath, "span", authors)
+                    self.tixi.addTextAttribute(sPath, "style", "font-size:12px")
 
     @staticmethod
     def _identifyLinesWithChords(text: str) -> list:
