@@ -80,6 +80,19 @@ class SongBookGenerator(object):
 
             self.tixi.addTextAttribute(xmlPath, "xhtml", fileName)
 
+        # replace all single and double quotes in attributes with &apos; and &quot; , respectively
+        for path in self.tixi.getPathsFromXPathExpression("//*[@*]"):
+            # xpath expression means all elements that have any attributes
+            for i in range(self.tixi.getNumberOfAttributes(path)):
+                attr = self.tixi.getAttributeName(path, i+1)
+                value = self.tixi.getTextAttribute(path, attr)
+                value1 = value.replace("'", "&apos;")
+                value1 = value1.replace('"', "&quot;")
+                if value == value1:
+                    continue
+                self.tixi.addTextAttribute(path, attr, value1)
+
+
     def write_songs(self):
         """
         Read the source file and for each song defined, write a properly formatted
