@@ -7,31 +7,23 @@ Created on Sat Nov 14 17:56:39 2020
 __all__ = ['LineWithChords', 'SongWriter']
 
 import os
-import re
 from collections import namedtuple
 
 from config import CFG, ChordMode
-from tixi import Tixi, TixiException
+from tixi import Tixi
+from .html_writer import HtmlWriter
 
 LineWithChords = namedtuple("LineWithChords", ["text", "chords"])
 
 
 class SongWriter():
-    def __init__(self, tixi: Tixi, path: str, settings=None):
+    def __init__(self, tixi: Tixi, path: str):
         super(SongWriter, self).__init__()
-        self.settings = settings
         self.src_tixi = tixi
         self.src_path = path
         self.dir = CFG.SONG_HTML_DIR
 
-        self.root = "html"
-
-        self.tixi = Tixi()
-
-        self.tixi.create(self.root)
-
-        self.root = "/" + self.root
-        self.tixi.addTextAttribute(self.root, "xmlns", "http://www.w3.org/1999/xhtml")
+        self.tixi, self.root = HtmlWriter.prepare_html_tixi()
 
     def write_song_file(self, fileName) -> bool:
         """
@@ -40,7 +32,6 @@ class SongWriter():
         title = self.src_tixi.getTextAttribute(self.src_path, "title")
         print("Saving song: {}\n  -- to file {}".format(title, fileName))
 
-        self.write_html_header()
         self.write_song_header(title)
 
         xpath = self.src_path + "/*[self::verse or self::chorus]"
@@ -51,42 +42,7 @@ class SongWriter():
 
         self.write_links()
 
-        self.saveFile(fileName)
-
-    def saveFile(self, fileName):
-        """Apply specific formatting andf save the content of the self.tixi to a file filename"""
-        text = self.tixi.exportDocumentAsString()
-        replaceRules = {
-            "&lt;br/&gt;": "<br/>",
-            "&amp;nbsp;": "&nbsp;",
-            "&amp;apos;": "&apos;",
-            "&amp;quot;": "&quot;"
-        }
-        for rr in replaceRules.keys():
-            text = text.replace(rr, replaceRules[rr])
-        # Now regular expressions
-
-        # fold the table rows <tr><td></td></tr>into a single line
-        text = re.sub(r"(<\/?t[dr].*?>)\s*(<\/?t[dr])", r"\1\2", text)
-
-        file = open(os.path.join(CFG.SONG_HTML_DIR, fileName), "w", encoding='utf8')
-        file.write(text)
-        file.close()
-
-    def write_html_header(self):
-        self.tixi.createElement(self.root, "head")
-        headPath = self.root + "/head"
-
-        self.tixi.addTextElement(headPath, "title", "Śpiewnik")
-        self.tixi.createElement(headPath, "link")
-
-        linkPath = headPath + "/link"
-
-        attrs = {"rel": "stylesheet",
-                 "type": "text/css",
-                 "href": "../songbook.css"}
-        for a in attrs.keys():
-            self.tixi.addTextAttribute(linkPath, a, attrs[a])
+        HtmlWriter.saveFile(self.tixi, os.path.join(CFG.SONG_HTML_DIR, fileName))
 
     def write_song_header(self, title):
         if self.src_tixi.checkAttribute(self.src_path, "music"):
