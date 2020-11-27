@@ -22,7 +22,7 @@ class AuthorsWriter(HtmlWriter):
         self.findSongsByAuthors()
 
     @staticmethod
-    def standardize_author_name(name, bandName=False):
+    def standardize_author_name(name, isBandName=False):
         """Standardize author name:
         - "J. Doe" translates to "Doe, J."
         - "John Doe" translates to "Doe, John"
@@ -30,7 +30,7 @@ class AuthorsWriter(HtmlWriter):
         - "Cher" remains "Cher"
         - "J.F. Kennedy" translates to "Kennedy, J. F."  (note the missing space in 'J.F. K...')
 
-        If input argument bandName is True, then the order of words is not kept
+        If input argument isBandName is True, then the order of words is not kept
         """
 
         # Initial modifications and standarizations
@@ -40,7 +40,7 @@ class AuthorsWriter(HtmlWriter):
 
         names = name.split(" ")
 
-        if bandName:
+        if isBandName:
             return name
         if names[0][-1] == ",":
             return name
@@ -62,7 +62,7 @@ class AuthorsWriter(HtmlWriter):
                 # For each of these attributes, if exist and not yet in the dictionary,
                 # Standardize te name. If it is a band, make sure not to alter the word order
                 if self.src_tixi.checkAttribute(path, attr):
-                    author = self.src_tixi.getTextAttribute(path, attr)
+                    author = self.src_tixi.getTextAttribute(path, attr).strip()
                     if author not in self.standardized_author_names:
                         stdName = AuthorsWriter.standardize_author_name(author, attr == "band")
                         self.standardized_author_names[author] = stdName
@@ -79,15 +79,17 @@ class AuthorsWriter(HtmlWriter):
         self.tixi.addTextElement(bPath, "h2", "Spis autorów")
 
         I = ""  # Initial
-        for author in sorted(self.standardized_author_names.values()):
-            
+        for author in sorted(self.songs_by_author.keys()):
+            hisOrHerSongs = self.songs_by_author[author]
+            if not hisOrHerSongs:
+                continue
             if author[0] > I:
                 I = author[0]
                 self.tixi.addTextElement(bPath, "h3", I)
-                ulPath = self.tixi.getNewElementPath(bPath, "ul")
 
             self.tixi.addTextElement(bPath, "h4", author)
-            hisOrHerSongs = self.songs_by_author[author]
+            ulPath = self.tixi.getNewElementPath(bPath, "ul")
+
             for song in sorted(hisOrHerSongs.keys()):
                 liPath = self.tixi.getNewElementPath(ulPath, "li")
                 file = hisOrHerSongs[song]
