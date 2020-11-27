@@ -22,6 +22,7 @@ def main(argv):
     sg.write_sections()
     sg.write_metadata()
     sg.write_toc()
+    sg.write_indexes()
 
 
 def print_exceptions(etype, value, tb):

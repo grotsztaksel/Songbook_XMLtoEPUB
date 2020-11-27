@@ -8,6 +8,7 @@ import os
 
 from config import CFG
 from tixi import Tixi
+from .index_authors_writer import AuthorsWriter
 from .song_writer import SongWriter
 from .section_writer import SectionWriter
 from .utf_simplifier import UtfSimplifier
@@ -92,6 +93,10 @@ class SongBookGenerator(object):
                     continue
                 self.tixi.addTextAttribute(path, attr, value1)
 
+    def write_indexes(self):
+        writer = AuthorsWriter(self.tixi)
+        writer.write_index()
+        writer.saveFile(os.path.join(CFG.SONG_HTML_DIR, "idx_authors.xhtml"))
 
     def write_songs(self):
         """
