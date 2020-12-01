@@ -29,6 +29,60 @@ class SongBookGenerator(object):
         self.id = None
         self.getBasicSongInfo()
 
+    @staticmethod
+    def split_song_xml(input):
+        """Read in the input song source and add the externalData attributes. Then save files with
+        Tixi
+
+        NOTE: Unfortunately, this function does not work - Tixi3 throws errors. Apparently it is not enough to add
+              externalData attributes to force Tixi save the data in a separate file.
+              Nor does the function addExternalLink split the document to more docs.
+        """
+        # externalFileName="song_title.xml"
+        # externalDataDirectory="file://./"
+        # externalDataNodePath="/songbook/section"
+        return
+        tixi = Tixi()
+        tixi.open(input, recursive=True)
+
+        usedFileNames = []
+        songXPath = "//song[@title]"
+        for song in tixi.getPathsFromXPathExpression(songXPath):
+            title = tixi.getTextAttribute(song, "title")
+
+            file_name_base = UtfSimplifier.toAscii(title).replace(" ", "_").lower()
+            suffix = ""
+            ext = ".xml"
+            fileNameTaken = True
+            number = ""
+            while fileNameTaken:
+                fileName = file_name_base + suffix + ext
+                fileNameTaken = fileName in usedFileNames
+                if not suffix:
+                    number = 0
+                number += 1
+                suffix = "_" + str(number)
+            usedFileNames.append(fileName)
+
+            # f = open(os.path.join(os.path.dirname(input), fileName), "w+")
+            # f.write('<?xml version="1.0"?>')
+            # f.close()
+            print("Add external Link to: {}\n    file: {}". format(song, os.path.join(os.path.dirname(input), fileName)))
+            tixi.addExternalLink(song, os.path.join(os.path.dirname(input), fileName), "xml")
+
+        #     tixi.addTextAttribute(song, "externalFileName", fileName)
+        #     tixi.addTextAttribute(song, "externalDataDirectory", "file://./")
+        #     tixi.addTextAttribute(song, "externalDataNodePath", tixi.parent(song))
+        #
+        #
+        #
+        # newTixi = Tixi()
+        # newTixi.openString(tixi.exportDocumentAsString())
+        outputFile = input.rsplit(".", 1)[0] + "_split.xml"
+        tixi.saveCompleteDocument(outputFile)
+        # print ("Saving to "+outputFile)
+        # newTixi.saveCompleteDocument(outputFile)
+
     def getBasicSongInfo(self):
         # First remove the songs that have attribute include="false"
         xPathToRemove = "//song[@include='false']"
@@ -85,7 +139,7 @@ class SongBookGenerator(object):
         for path in self.tixi.getPathsFromXPathExpression("//*[@*]"):
             # xpath expression means all elements that have any attributes
             for i in range(self.tixi.getNumberOfAttributes(path)):
-                attr = self.tixi.getAttributeName(path, i+1)
+                attr = self.tixi.getAttributeName(path, i + 1)
                 value = self.tixi.getTextAttribute(path, attr)
                 value1 = value.replace("'", "&apos;")
                 value1 = value1.replace('"', "&quot;")
