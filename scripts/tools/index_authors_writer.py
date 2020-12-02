@@ -59,7 +59,7 @@ class AuthorsWriter(HtmlWriter):
         """
         for path in self.src_tixi.getPathsFromXPathExpression("//song[@lyrics or @music or @band]"):
             for attr in ["lyrics", "music", "band"]:
-                isBand = attr =="band"
+                isBand = attr == "band"
                 # For each of these attributes, if exist and not yet in the dictionary,
                 # Standardize te name. If it is a band, make sure not to alter the word order
                 if self.src_tixi.checkAttribute(path, attr):
@@ -78,7 +78,7 @@ class AuthorsWriter(HtmlWriter):
                             file = self.src_tixi.getTextAttribute(path, "xhtml")
                             if stdName not in self.songs_by_author:
                                 self.songs_by_author[stdName] = dict()
-                            self.songs_by_author[stdName][title] = file
+                        self.songs_by_author[self.standardized_author_names[author]][title] = file
 
     def write_index(self):
         """Write the whole block of the index"""
