@@ -59,19 +59,26 @@ class AuthorsWriter(HtmlWriter):
         """
         for path in self.src_tixi.getPathsFromXPathExpression("//song[@lyrics or @music or @band]"):
             for attr in ["lyrics", "music", "band"]:
+                isBand = attr =="band"
                 # For each of these attributes, if exist and not yet in the dictionary,
                 # Standardize te name. If it is a band, make sure not to alter the word order
                 if self.src_tixi.checkAttribute(path, attr):
-                    author = self.src_tixi.getTextAttribute(path, attr).strip()
-                    if author not in self.standardized_author_names:
-                        stdName = AuthorsWriter.standardize_author_name(author, attr == "band")
-                        self.standardized_author_names[author] = stdName
+                    authors = self.src_tixi.getTextAttribute(path, attr).strip()
+                    if isBand:
+                        authors = list(authors)
+                    else:
+                        authors = authors.split(";")
 
-                        title = self.src_tixi.getTextAttribute(path, "title")
-                        file = self.src_tixi.getTextAttribute(path, "xhtml")
-                        if stdName not in self.songs_by_author:
-                            self.songs_by_author[stdName] = dict()
-                        self.songs_by_author[stdName][title] = file
+                    for author in authors:
+                        if author not in self.standardized_author_names:
+                            stdName = AuthorsWriter.standardize_author_name(author, isBand)
+                            self.standardized_author_names[author] = stdName
+
+                            title = self.src_tixi.getTextAttribute(path, "title")
+                            file = self.src_tixi.getTextAttribute(path, "xhtml")
+                            if stdName not in self.songs_by_author:
+                                self.songs_by_author[stdName] = dict()
+                            self.songs_by_author[stdName][title] = file
 
     def write_index(self):
         """Write the whole block of the index"""
