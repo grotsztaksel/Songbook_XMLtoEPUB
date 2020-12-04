@@ -79,6 +79,46 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
+            <xs:element name="output_dir" type="xs:string" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Name of the directory where the epub data should be written. If not present, the default value
+                        is used
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="template_dir" type="xs:string" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Name of the directory with template files:
+                        - metadata.opf
+                        - *.css file
+
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="basic_data">
+                <xs:complexType>
+                    <xs:attribute name="title" type="xs:string" default="My Songbook">
+                        <xs:annotation>
+                            <xs:documentation>
+                                Title of the entire document. It will be used in the title page of the songbook, as well
+                                as in headers of all xhtml files and If metadata.opf contains element:
+                                &lt;dc:title&gt;${title}&lt;/dc:title&gt; the title will also be used there
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="user" type="xs:string" use="optional">
+                        <xs:annotation>
+                            <xs:documentation>
+                                Name of the user that generated the songbook. If not present, system username will be
+                                taken. Will appear in the html files header and in metadata file
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                </xs:complexType>
+
+            </xs:element>
         </xs:all>
     </xs:complexType>
 
