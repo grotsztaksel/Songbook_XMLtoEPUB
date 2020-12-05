@@ -25,6 +25,24 @@ class ChordMode(Enum):
     CHORDS_BESIDE = 1
     NO_CHORDS = 2
 
+    @staticmethod
+    def get(text):
+        """Convert a text value (e.g. from the text attribute) to an Enum value"""
+        if text == "CHORDS_ABOVE":
+            return ChordMode.CHORDS_ABOVE
+        elif text == "CHORDS_BESIDE":
+            return ChordMode.CHORDS_BESIDE
+        elif text == "NO_CHORDS":
+            return ChordMode.NO_CHORDS
+
+    def __str__(self):
+        if self == ChordMode.CHORDS_ABOVE:
+            return "CHORDS_ABOVE"
+        elif self == ChordMode.CHORDS_BESIDE:
+            return "CHORDS_BESIDE"
+        elif self == ChordMode.NO_CHORDS:
+            return "NO_CHORDS"
+
 
 class EpubSongbookConfig():
     """Class responsible for setting up the output directory: creating or copying basic files like
@@ -40,6 +58,9 @@ class EpubSongbookConfig():
 
         # Set up defaults
         self.title = "My Songbook"
+        self.alphabedical_index_title = "Alphabetical index of songs"
+        self.authors_index_title = "Index of authors"
+        self.default_section_title = "Section"
         self.user = getpass.getuser()
         self.lang = "en"
         self.maxsongs = 0  # By default, 0 means that all songs should be scanned
@@ -47,6 +68,7 @@ class EpubSongbookConfig():
         self.chordType = ChordMode.CHORDS_BESIDE
 
         self.dir_out = "output"
+        self.dir_text = None
         self.template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../", "template"))
         self.CS = ">"  # [C]hord [S]eparator: character that separates the text from chords lists
         self.CI = "|"  # [C]hord [I]nsertion point: character indicating the location where the chord should be changed
@@ -88,17 +110,21 @@ class EpubSongbookConfig():
     def createOutputDir(self):
         """Use the settings to create output directory and place the essential files in it
         """
+
         if not os.path.isabs(self.dir_out):
+            file = os.path.abspath(self.tixi.getDocumentPath())
+            rel = self.dir_out
             # Get the absolute path built from the input file location and the dir_out
-            self.dir_out = os.path.abspath(os.path.join(self.tixi.getDocumentPath(), self.dir_out))
+            self.dir_out = os.path.normpath(os.path.join(file, os.path.relpath(rel, file)))
 
         shutil.rmtree(self.dir_out, ignore_errors=True)
-        os.mkdir(self.dir_out)
+        self.dir_text = os.path.join(self.dir_out, "text")
 
     def placeEssentialFiles(self):
 
         # Do not check for template existence. If it does not, an error will be thrown
         shutil.copytree(self.template_dir, self.dir_out)
+        os.makedirs(self.dir_text)
 
         # Write the mimetype from scratch. It's not too long after all...
         with open(os.path.join(self.dir_out, "mimetype"), "w") as mime:
@@ -106,7 +132,7 @@ class EpubSongbookConfig():
 
         # Slurp the metadata.opf
         meta = os.path.join(self.dir_out, "metadata.opf")
-        with open(meta, "r") as f:
+        with open(meta, "r", encoding='utf8') as f:
             metadata = f.read()
 
         metadata = metadata.replace("${user}", self.user)
@@ -114,9 +140,8 @@ class EpubSongbookConfig():
         metadata = metadata.replace("${language}", self.lang)
 
         # Rewrite the file
-        f = open(meta, "w")
-        f.write(metadata)
-        f.close()
+        with open(meta, "w", encoding='utf8') as f:
+            f.write(metadata)
 
     def setupAttributes(self):
         """Use the settings to add attributes to the toplevel elements of the songbook, so that they can be later
@@ -124,4 +149,4 @@ class EpubSongbookConfig():
         """
         xPath = "/songbook/*[self::section or self::song][not(@chord_mode)]"
         for path in self.tixi.getPathsFromXPathExpression(xPath):
-            self.tixi.addTextAttribute(path, "chord_mode", self.chordType)
+            self.tixi.addTextAttribute(path, "chord_mode", str(self.chordType))
