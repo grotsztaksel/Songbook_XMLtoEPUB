@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
 """
-Created on 01.12.2020 18:52
+Created on 05.12.2020 17:46
  
 @author: piotr
 """
+
 import os
 import re
+import sys
 
-from tixi import Tixi, TixiException, ReturnCode
+from tixi import Tixi, TixiException
+from tools import UtfSimplifier
 
-from .utf_simplifier import UtfSimplifier
+
+def main(argv):
+    splitter = SourceSplitter(argv[1])
+    return 0
 
 
 class SourceSplitter(object):
@@ -33,15 +39,12 @@ class SourceSplitter(object):
         documentParts = re.split(pattern, file, flags=re.DOTALL)
 
         for prt in documentParts:
-            output +=  self.moveToFile(prt)
-
+            output += self.moveToFile(prt)
 
         outputFile = src.rsplit(".", 1)[0] + "_split.xml"
-        o = open(outputFile, "w",  encoding='utf8')
+        o = open(outputFile, "w", encoding='utf8')
         o.write(output)
         o.close
-
-
 
     def moveToFile(self, text):
         """Try reading a song from the text and moving it to a separate file.
@@ -71,8 +74,8 @@ class SourceSplitter(object):
             number += 1
             suffix = "_" + str(number)
         self.usedFileNames.append(fileName)
-        print ("Save xml:", fileName)
-        tixi.saveCompleteDocument(os.path.join(self.dir,fileName))
+        print("Save xml:", fileName)
+        tixi.saveCompleteDocument(os.path.join(self.dir, fileName))
         tixi_ext = Tixi()
         tixi_ext.create("externaldata")
         tixi_ext.addTextAttribute("/externaldata", "title", title)
@@ -84,8 +87,6 @@ class SourceSplitter(object):
             # [1:] to skip the xml header (<?xml version="1.0"?>)
             output += spaces + line + "\n"
         return output
-
-
 
     @staticmethod
     def deIndent(text):
@@ -101,3 +102,61 @@ class SourceSplitter(object):
             output.append(line[n_spaces:])
 
         return "\n".join(output)
+
+
+def split_song_xml(input):
+    """Read in the input song source and add the externalData attributes. Then save files with
+    Tixi
+
+    NOTE: Unfortunately, this function does not work - Tixi3 throws errors. Apparently it is not enough to add
+          externalData attributes to force Tixi save the data in a separate file.
+          Nor does the function addExternalLink split the document to more docs.
+    """
+    # externalFileName="song_title.xml"
+    # externalDataDirectory="file://./"
+    # externalDataNodePath="/songbook/section"
+    return
+    tixi = Tixi()
+    tixi.open(input, recursive=True)
+
+    usedFileNames = []
+    songXPath = "//song[@title]"
+    for song in tixi.getPathsFromXPathExpression(songXPath):
+        title = tixi.getTextAttribute(song, "title")
+
+        file_name_base = UtfSimplifier.toAscii(title).replace(" ", "_").lower()
+        suffix = ""
+        ext = ".xml"
+        fileNameTaken = True
+        number = ""
+        while fileNameTaken:
+            fileName = file_name_base + suffix + ext
+            fileNameTaken = fileName in usedFileNames
+            if not suffix:
+                number = 0
+            number += 1
+            suffix = "_" + str(number)
+        usedFileNames.append(fileName)
+
+        # f = open(os.path.join(os.path.dirname(input), fileName), "w+")
+        # f.write('<?xml version="1.0"?>')
+        # f.close()
+        print("Add external Link to: {}\n    file: {}".format(song, os.path.join(os.path.dirname(input), fileName)))
+        tixi.addExternalLink(song, os.path.join(os.path.dirname(input), fileName), "xml")
+
+    #     tixi.addTextAttribute(song, "externalFileName", fileName)
+    #     tixi.addTextAttribute(song, "externalDataDirectory", "file://./")
+    #     tixi.addTextAttribute(song, "externalDataNodePath", tixi.parent(song))
+    #
+    #
+    #
+    # newTixi = Tixi()
+    # newTixi.openString(tixi.exportDocumentAsString())
+    outputFile = input.rsplit(".", 1)[0] + "_split.xml"
+    tixi.saveCompleteDocument(outputFile)
+    # print ("Saving to "+outputFile)
+    # newTixi.saveCompleteDocument(outputFile)
+
+
+if __name__ == '__main__':
+    main(sys.argv)

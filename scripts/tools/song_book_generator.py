@@ -6,7 +6,7 @@ Created on 20.11.2020 18:35
 """
 import os
 
-from config import CFG
+from config.epubsongbookconfig import EpubSongbookConfig
 from tixi import Tixi
 from .index_authors_writer import AuthorsWriter
 from .index_songs_writer import SongsIndexWriter
@@ -16,73 +16,18 @@ from .utf_simplifier import UtfSimplifier
 
 
 class SongBookGenerator(object):
-    def __init__(self, max_n=0):
+    def __init__(self, input_file):
         """
-
-        :param max_n: Maximal number of songs to be processed from the source file. If not given,
-                      all available songs will be processed
+        Master class aggregating all other tools
+        :param input_file: input xml file.
         """
         self.tixi = Tixi()
-        self.tixi.open(CFG.SONG_SRC_XML, recursive=True)
+        self.tixi.open(input_file, recursive=True)
         self.tixi.registerNamespacesFromDocument()
-        self.N = max_n
+        self.settings = EpubSongbookConfig(self.tixi)
 
         self.id = None
         self.getBasicSongInfo()
-
-    @staticmethod
-    def split_song_xml(input):
-        """Read in the input song source and add the externalData attributes. Then save files with
-        Tixi
-
-        NOTE: Unfortunately, this function does not work - Tixi3 throws errors. Apparently it is not enough to add
-              externalData attributes to force Tixi save the data in a separate file.
-              Nor does the function addExternalLink split the document to more docs.
-        """
-        # externalFileName="song_title.xml"
-        # externalDataDirectory="file://./"
-        # externalDataNodePath="/songbook/section"
-        return
-        tixi = Tixi()
-        tixi.open(input, recursive=True)
-
-        usedFileNames = []
-        songXPath = "//song[@title]"
-        for song in tixi.getPathsFromXPathExpression(songXPath):
-            title = tixi.getTextAttribute(song, "title")
-
-            file_name_base = UtfSimplifier.toAscii(title).replace(" ", "_").lower()
-            suffix = ""
-            ext = ".xml"
-            fileNameTaken = True
-            number = ""
-            while fileNameTaken:
-                fileName = file_name_base + suffix + ext
-                fileNameTaken = fileName in usedFileNames
-                if not suffix:
-                    number = 0
-                number += 1
-                suffix = "_" + str(number)
-            usedFileNames.append(fileName)
-
-            # f = open(os.path.join(os.path.dirname(input), fileName), "w+")
-            # f.write('<?xml version="1.0"?>')
-            # f.close()
-            print("Add external Link to: {}\n    file: {}". format(song, os.path.join(os.path.dirname(input), fileName)))
-            tixi.addExternalLink(song, os.path.join(os.path.dirname(input), fileName), "xml")
-
-        #     tixi.addTextAttribute(song, "externalFileName", fileName)
-        #     tixi.addTextAttribute(song, "externalDataDirectory", "file://./")
-        #     tixi.addTextAttribute(song, "externalDataNodePath", tixi.parent(song))
-        #
-        #
-        #
-        # newTixi = Tixi()
-        # newTixi.openString(tixi.exportDocumentAsString())
-        outputFile = input.rsplit(".", 1)[0] + "_split.xml"
-        tixi.saveCompleteDocument(outputFile)
-        # print ("Saving to "+outputFile)
-        # newTixi.saveCompleteDocument(outputFile)
 
     def getBasicSongInfo(self):
         # First remove the songs that have attribute include="false"
