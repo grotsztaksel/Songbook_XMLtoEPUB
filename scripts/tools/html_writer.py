@@ -24,7 +24,7 @@ class HtmlWriter(object):
 
         headPath = "/html/head"
 
-        self.tixi.addTextElement(headPath, "title", "Śpiewnik")
+        self.tixi.addTextElement(headPath, "title", self.settings.title)
         self.tixi.createElement(headPath, "link")
 
         linkPath = headPath + "/link"
