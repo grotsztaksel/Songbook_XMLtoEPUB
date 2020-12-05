@@ -46,6 +46,9 @@ class OutputSetUp(object):
 
         self.dir_out = "output"
         self.template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../", "template"))
+        self.CS = ">"  # [C]hord [S]eparator: character that separates the text from chords lists
+        self.CI = "|"  # [C]hord [I]nsertion point: character indicating the location where the chord should be changed
+        #                                      while performing the song
 
         self._getSettings()
 
@@ -59,7 +62,9 @@ class OutputSetUp(object):
                     "title": "title",
                     "language": "lang",
                     "output_dir": "dir_out",
-                    "template": "template_dir"}
+                    "template": "template_dir",
+                    "chord_separator": "CS",
+                    "chord_insertion_character": "CI"}
 
         for xmlName, myName in elements.items():
             path = spath + "/" + xmlName
@@ -93,9 +98,9 @@ class OutputSetUp(object):
         # Do not check for template existence. If it does not, an error will be thrown
         shutil.copytree(self.template_dir, self.dir_out)
 
-        mime = open(os.path.join(self.dir_out, "mimetype"), "w")
-        mime.write("application/epub+zip")
-        mime.close()
+        # Write the mimetype from scratch. It's not too long after all...
+        with open(os.path.join(self.dir_out, "mimetype"), "w") as mime:
+            mime.write("application/epub+zip")
 
         # Slurp the metadata.opf
         meta = os.path.join(self.dir_out, "metadata.opf")
