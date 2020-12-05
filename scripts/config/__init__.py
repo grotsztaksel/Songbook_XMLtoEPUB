@@ -6,4 +6,4 @@ Created on Sat Nov 14 18:18:26 2020
 """
 
 __all__ = ['CFG', 'ChordMode']
-from .config import CFG, ChordMode
+from .epubsongbookconfig import CFG, ChordMode

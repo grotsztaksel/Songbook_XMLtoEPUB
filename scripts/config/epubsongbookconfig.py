@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Created on 04.12.2020 21:28
- 
+Created on Sat Nov 14 17:32:27 2020
+
 @author: piotr
 """
+
+__all__ = ['ChordMode', 'EpubSongbookConfig']
 
 import getpass
 import os
@@ -24,7 +26,7 @@ class ChordMode(Enum):
     NO_CHORDS = 2
 
 
-class OutputSetUp(object):
+class EpubSongbookConfig():
     """Class responsible for setting up the output directory: creating or copying basic files like
           metadata, mimetypes, etc.
         This class is NOT responsible for writing the content of the songbook

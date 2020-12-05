@@ -8,13 +8,13 @@ Created on 20.11.2020 20:42
 import os
 import unittest
 
-from config import config
+from config import epubsongbookconfig
 from tixi import Tixi, TixiException, ReturnCode
 
 
 class TestSchema(unittest.TestCase):
     def setUp(self):
-        self.xsdpath = os.path.join(os.path.dirname(os.path.abspath(config.__file__)), "source_schema.xsd")
+        self.xsdpath = os.path.join(os.path.dirname(os.path.abspath(epubsongbookconfig.__file__)), "source_schema.xsd")
 
     def test_xsd(self):
         """Check if the XSD file is there at all and can be opened"""
