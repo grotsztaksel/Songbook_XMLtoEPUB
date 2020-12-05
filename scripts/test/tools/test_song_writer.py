@@ -44,7 +44,6 @@ class TestSongWriter(unittest.TestCase):
         expectedTixi.removeElement("/x:html/x:body/x:p[2]")
         self.assertEqual(1, expectedTixi.getNamedChildrenCount("/x:html/x:body", "x:p"))
         expectedTixi.removeAttribute("/x:html/x:body/x:p", "class")
-        texts = []
 
         td_all = expectedTixi.getPathsFromXPathExpression("//x:td")
         td_txt = expectedTixi.getPathsFromXPathExpression("//x:td[text()]")
