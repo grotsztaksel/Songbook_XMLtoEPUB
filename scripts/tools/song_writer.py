@@ -148,10 +148,14 @@ class SongWriter(HtmlWriter):
                         # Run out of chords. Ignore the rest of the self.CI characters.
                         chunk = "".join(textChunks)
                         chord = ""
+                        textChunks = False
+                        chords = False
                     elif not textChunks:
                         # Run out of self.CI characters. Just add the remaining chords at the end of the line
                         chunk = ""
                         chord = " ".join(chords)
+                        textChunks = False
+                        chords = False
                     else:
                         chord = chords.pop(0)
                         chunk = textChunks.pop(0)
@@ -159,6 +163,7 @@ class SongWriter(HtmlWriter):
                             chunk = chunk[:-1] + "&nbsp;"
                     self.tixi.addTextElement(crdPath, "td", chord)
                     self.tixi.addTextElement(txtPath, "td", chunk)
+
         return True
 
     def write_chords_beside(self, srcPath, targetPath):
@@ -182,7 +187,7 @@ class SongWriter(HtmlWriter):
                 trPath = self.tixi.getNewElementPath(tbPath, "tr")
                 self.tixi.addTextElement(trPath, "td", line[0].replace(self.CI, ""))
                 try:
-                    self.tixi.addTextElement(trPath, "td", line[1])
+                    self.tixi.addTextElement(trPath, "td", line[1][0])
                     self.tixi.addTextAttribute(trPath + "/td[2]", "class", "chords")
                 except IndexError:
                     pass
@@ -291,8 +296,8 @@ class SongWriter(HtmlWriter):
         noChordLines = None
 
         for line in lines:
-            chords = [s.strip() for s in line.split(self.CS)]
-            text = chords.pop(0)
+            chords = [[s.strip()] for s in line.split(self.CS)]
+            text = chords.pop(0)[0]
             if not chords:
                 if noChordLines is None:
                     noChordLines = text
