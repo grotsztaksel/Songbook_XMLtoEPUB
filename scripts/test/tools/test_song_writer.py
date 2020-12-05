@@ -21,6 +21,81 @@ class TestSongWriter(unittest.TestCase):
         self.settings.CS = ">"
         self.settings.CI = "|"
 
+    def test_write_song_header(self):
+        src_tixi = Tixi()
+        src_tixi.create("song")
+        writer = SongWriter(src_tixi, self.settings, "/song")
+
+        # ------------------
+        attrs = {
+            "lyrics": "J. Doe",
+            "music": "Sam Composer",
+            "band": "The Developers"
+        }
+        TestSongWriter.updateAttributes(src_tixi, "/song", attrs)
+
+        writer.write_song_header("My Lovely Song")
+
+        self.assertEqual("lyrics by: J. Doe, music by: Sam Composer (The Developers)",
+                         writer.tixi.getTextElement("/html/body/p"))
+        writer.tixi.removeElement("/html/body")
+
+        # ------------------
+        attrs = {
+            "lyrics": None,
+            "music": "Sam Composer",
+            "band": "The Developers"
+        }
+        TestSongWriter.updateAttributes(src_tixi, "/song", attrs)
+
+        writer.write_song_header("My Lovely Song")
+
+        self.assertEqual("lyrics by: ?, music by: Sam Composer (The Developers)",
+                         writer.tixi.getTextElement("/html/body/p"))
+        writer.tixi.removeElement("/html/body")
+
+        # ------------------
+        attrs = {
+            "lyrics": None,
+            "music": None,
+            "band": "The Developers"
+        }
+        TestSongWriter.updateAttributes(src_tixi, "/song", attrs)
+
+        writer.write_song_header("My Lovely Song")
+
+        self.assertEqual("The Developers",
+                         writer.tixi.getTextElement("/html/body/p"))
+        writer.tixi.removeElement("/html/body")
+
+        # ------------------
+        attrs = {
+            "lyrics": "J. Doe",
+            "music": None,
+            "band": None
+        }
+        TestSongWriter.updateAttributes(src_tixi, "/song", attrs)
+
+        writer.write_song_header("My Lovely Song")
+
+        self.assertEqual("lyrics by: J. Doe, music by: ?",
+                         writer.tixi.getTextElement("/html/body/p"))
+        writer.tixi.removeElement("/html/body")
+
+        # ------------------
+        attrs = {
+            "lyrics": None,
+            "music": None,
+            "band": None
+        }
+        TestSongWriter.updateAttributes(src_tixi, "/song", attrs)
+
+        writer.write_song_header("My Lovely Song")
+
+        self.assertEqual("lyrics by: ?, music by: ?",
+                         writer.tixi.getTextElement("/html/body/p"))
+        writer.tixi.removeElement("/html/body")
+
     def test_write_chors_above(self):
         src_tixi = Tixi()
         src_tixi.open("test_song.xml")
@@ -76,6 +151,18 @@ class TestSongWriter(unittest.TestCase):
             "Line 3<br/>\nLine 4"
         ]
         self.assertEqual(expected, SongWriter._identifyLinesWithChords(text))
+
+    @staticmethod
+    def updateAttributes(tixi: Tixi, path: str, attrs: dict) -> None:
+        """Helper function to quickly update the attributes in path
+            the attrs holds attribute name and value. If value is None, the attribute is removed
+        """
+        for attr, value in attrs.items():
+            if value is None:
+                if tixi.checkAttribute(path, attr):
+                    tixi.removeAttribute(path, attr)
+            else:
+                tixi.addTextAttribute(path, attr, str(value))
 
 
 if __name__ == '__main__':
