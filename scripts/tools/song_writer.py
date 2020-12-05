@@ -46,34 +46,44 @@ class SongWriter(HtmlWriter):
         self.saveFile(os.path.join(self.settings.dir_text, fileName))
 
     def write_song_header(self, title):
-        if self.src_tixi.checkAttribute(self.src_path, "music"):
-            music = self.src_tixi.getTextAttribute(self.src_path, "music")
-        else:
-            music = "trad."
+
+        text = []
         if self.src_tixi.checkAttribute(self.src_path, "lyrics"):
             lyrics = self.src_tixi.getTextAttribute(self.src_path, "lyrics")
-        else:
-            lyrics = "trad."
+            text.append("{} {}".format(self.settings.lyrics_string, lyrics))
+        if self.src_tixi.checkAttribute(self.src_path, "music"):
+            music = self.src_tixi.getTextAttribute(self.src_path, "music")
+            text.append("{} {}".format(self.settings.music_string, music))
+        if self.src_tixi.checkAttribute(self.src_path, "band"):
+            band = self.src_tixi.getTextAttribute(self.src_path, "band")
+            if len(text) > 0:
+                text.append("({})".format(band))
+            else:
+                text.append(band)
 
-        # <body/>    
+        if not text:
+            text = [self.settings.lyrics_string, self.settings.unknown_author,
+                    self.settings.music_string, self.settings.unknown_author]
+        # <body/>
         self.tixi.createElement(self.root, "body")
         bpath = self.root + "/body"
 
         # <h1>[title]</h1>
         self.tixi.addTextElement(bpath, "h1", title)
 
-        # <p class="authors">sł. [lyrics], muz. [music]</p>
-        self.tixi.addTextElement(bpath, "p",
-                                 "sł. {}, muz. {}".format(lyrics, music))
-        self.tixi.addTextAttribute(bpath + "/p", "class", "authors")
+        # <p class="authors">lyrics by: [lyrics], music by: [music] (The Developers)</p>
+        pPath = self.tixi.getNewTextElementPath(bpath, "p", " ".join(text))
+        self.tixi.addTextAttribute(pPath, "class", "authors")
 
     def write_song_part(self, srcPath):
+        """Write either a verse or chorus of the song, applying the expected formatting"""
         # voc stands for Verse Or Chorus
         voc = srcPath.split("/")[-1]  # Extract the last element in path
         voc = voc.split("[")[0]  # Get rid of the index, if there is one
 
+        mode = ChordMode.get(self.src_tixi.getInheritedAttribute(srcPath, "chord_mode"))
         path = self.root + "/body"
-        self.format_song_part(srcPath, path, self.mode)
+        self.format_song_part(srcPath, path, mode)
         n = self.tixi.getNamedChildrenCount(self.root + "/body", "p")
         path = "{}/p[{}]".format(path, n)
         self.tixi.addTextAttribute(path, "class", voc)

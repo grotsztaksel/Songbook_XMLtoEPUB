@@ -61,6 +61,9 @@ class EpubSongbookConfig():
         self.alphabedical_index_title = "Alphabetical index of songs"
         self.authors_index_title = "Index of authors"
         self.default_section_title = "Section"
+        self.lyrics_string = "lyrics by:"
+        self.music_string = "music by:"
+        self.unknown_author = "?"
         self.user = getpass.getuser()
         self.lang = "en"
         self.maxsongs = 0  # By default, 0 means that all songs should be scanned
@@ -87,6 +90,8 @@ class EpubSongbookConfig():
                     "language": "lang",
                     "output_dir": "dir_out",
                     "template": "template_dir",
+                    "lyrics_string": "lyrics_string",
+                    "music_string": "music_string",
                     "chord_separator": "CS",
                     "chord_insertion_character": "CI"}
 
