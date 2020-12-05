@@ -116,16 +116,12 @@ class SongWriter(HtmlWriter):
         if not self.CS in text:
             return False
 
-        self.tixi.createElement(targetPath, "p")
-        pPath = "{}/p[{}]".format(targetPath, self.tixi.getNamedChildrenCount(targetPath, "p"))
-
+        pPath = self.tixi.getNewElementPath(targetPath, "p")
         for line in self._identifyLinesWithChords(text):
             if isinstance(line, str):
                 self.tixi.addTextElement(pPath, "div", line)
             elif isinstance(line, LineWithChords):
-                self.tixi.createElement(pPath, "table")
-                row = self.tixi.getNamedChildrenCount(pPath, "table")
-                tbPath = "{}/table[{}]".format(pPath, row)
+                tbPath = self.tixi.getNewElementPath(pPath, "table")
 
                 # with the empty element [''] in front, the chords should have the same length as the textChunks
                 chords = [''] + line.chords[0].split(" ")
@@ -163,23 +159,23 @@ class SongWriter(HtmlWriter):
         text = self.src_tixi.getTextElement(srcPath).strip()
         if not self.CS in text:
             return False
-        lines = [line.strip().split(self.CS) for line in text.split('\n')]
 
-        self.tixi.createElement(targetPath, "p")
-        pPath = "{}/p[{}]".format(targetPath, self.tixi.getNamedChildrenCount(targetPath, "p"))
-        self.tixi.createElement(pPath, "table")
-        tbPath = pPath + "/table"
-        self.tixi.addTextAttribute(tbPath, "class", "chords_beside")
-        for line in lines:
-            self.tixi.createElement(tbPath, "tr")
-            row = self.tixi.getNamedChildrenCount(tbPath, "tr")
-            trPath = "{}/tr[{}]".format(tbPath, row)
-            self.tixi.addTextElement(trPath, "td", line[0].replace(self.CI, ""))
-            try:
-                self.tixi.addTextElement(trPath, "td", line[1])
-                self.tixi.addTextAttribute(trPath + "/td[2]", "class", "chords")
-            except IndexError:
-                pass
+        pPath = self.tixi.getNewElementPath(targetPath, "p")
+
+        for line in self._identifyLinesWithChords(text):
+            if isinstance(line, str):
+                self.tixi.addTextElement(pPath, "div", line)
+            elif isinstance(line, LineWithChords):
+                tbPath = self.tixi.getNewElementPath(pPath, "table")
+                self.tixi.addTextAttribute(tbPath, "class", "chords_beside")
+
+                trPath = self.tixi.getNewElementPath(tbPath, "tr")
+                self.tixi.addTextElement(trPath, "td", line[0].replace(self.CI, ""))
+                try:
+                    self.tixi.addTextElement(trPath, "td", line[1])
+                    self.tixi.addTextAttribute(trPath + "/td[2]", "class", "chords")
+                except IndexError:
+                    pass
 
         return True
 
