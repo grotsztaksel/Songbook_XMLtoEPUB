@@ -147,9 +147,11 @@ class SongWriter(HtmlWriter):
                     if not chords:
                         # Run out of chords. Ignore the rest of the self.CI characters.
                         chunk = "".join(textChunks)
-                        chord = ""
-                        textChunks = False
-                        chords = False
+                        lastChunk = self.tixi.getTextElement(lastText_td)
+                        if lastChunk.endswith("&#160;"):
+                            lastChunk = lastChunk[:-6] + " "
+                        self.tixi.updateTextElement(lastText_td, lastChunk + chunk)
+                        break
                     elif not textChunks:
                         # Run out of self.CI characters. Just add the remaining chords at the end of the line
                         chunk = ""
@@ -162,7 +164,7 @@ class SongWriter(HtmlWriter):
                         if chunk.endswith(" "):
                             chunk = chunk[:-1] + "&#160;"
                     self.tixi.addTextElement(crdPath, "td", chord)
-                    self.tixi.addTextElement(txtPath, "td", chunk)
+                    lastText_td = self.tixi.getNewTextElementPath(txtPath, "td", chunk)
 
         return True
 
