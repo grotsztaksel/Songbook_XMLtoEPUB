@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<package xmlns="http://www.idpf.org/2007/opf">
-  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
-    <dc:title>Śpiewnik</dc:title>
-    <dc:creator opf:file-as="Nieznany" opf:role="aut">P. Grądkowski</dc:creator>
-    <dc:language>pol</dc:language>
-  </metadata>
-</package>
