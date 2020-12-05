@@ -47,23 +47,34 @@ class SongWriter(HtmlWriter):
 
     def write_song_header(self, title):
 
-        text = []
-        if self.src_tixi.checkAttribute(self.src_path, "lyrics"):
-            lyrics = self.src_tixi.getTextAttribute(self.src_path, "lyrics")
-            text.append("{} {}".format(self.settings.lyrics_string, lyrics))
-        if self.src_tixi.checkAttribute(self.src_path, "music"):
-            music = self.src_tixi.getTextAttribute(self.src_path, "music")
-            text.append("{} {}".format(self.settings.music_string, music))
         if self.src_tixi.checkAttribute(self.src_path, "band"):
             band = self.src_tixi.getTextAttribute(self.src_path, "band")
-            if len(text) > 0:
-                text.append("({})".format(band))
-            else:
-                text.append(band)
+        else:
+            band = ""
+        if self.src_tixi.checkAttribute(self.src_path, "lyrics"):
+            lyrics = self.src_tixi.getTextAttribute(self.src_path, "lyrics")
+        else:
+            lyrics = ""
 
-        if not text:
-            text = [self.settings.lyrics_string, self.settings.unknown_author,
-                    self.settings.music_string, self.settings.unknown_author]
+        if self.src_tixi.checkAttribute(self.src_path, "music"):
+            music = self.src_tixi.getTextAttribute(self.src_path, "music")
+        else:
+            music = ""
+
+        if band and not lyrics and not music:
+            text = band
+        else:
+            if not lyrics:
+                lyrics = self.settings.unknown_author
+            if not music:
+                music = self.settings.unknown_author
+
+            text = "{} {}, {} {}".format(self.settings.lyrics_string, lyrics,
+                                         self.settings.music_string, music)
+
+            if band:
+                text += " ({})".format(band)
+
         # <body/>
         self.tixi.createElement(self.root, "body")
         bpath = self.root + "/body"
@@ -72,7 +83,7 @@ class SongWriter(HtmlWriter):
         self.tixi.addTextElement(bpath, "h1", title)
 
         # <p class="authors">lyrics by: [lyrics], music by: [music] (The Developers)</p>
-        pPath = self.tixi.getNewTextElementPath(bpath, "p", " ".join(text))
+        pPath = self.tixi.getNewTextElementPath(bpath, "p", text)
         self.tixi.addTextAttribute(pPath, "class", "authors")
 
     def write_song_part(self, srcPath):
