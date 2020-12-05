@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<song title="My Test Song" lyrics="P. Gradkowski" music="Sam Composer" band="The Developers" chord_mode="CHORDS_ABOVE">
+    <verse>
+        |Check the |same num|ber of chords in the |line     &gt;    c h O r
+        Check |more chords than ins|ertion points           &gt;    c h o r d
+        Check more ins|ertion |points |than chords          &gt;    c h
+        Check if the following lines
+        Will be groupped 
+        Outside a HTML table
+        And then next line with chords and no               &gt;    c h
+        Insertion points                                    &gt;    c h
+    </verse>
+    <verse>
+        Now a verse without any chords
+        Expecting them to be in one paragraph
+        Without any tables created
+        So that the user can tap just anywhere
+        To turn the page
+    </verse>
+    <chorus chord_mode="CHORDS_BESIDE">
+        |Say, we want |to sing |a cho|rus,                      &gt;    c h O r
+        Where |the chords are |defined beside                   &gt;    c h O r d
+        Re|gardless |of the |insertion points |marked           &gt;    c h
+        We want to see the tables for only those verses
+        Where the chords are given
+        And the rest just in a plain div section
+        Unless new chords are given for a line                  &gt;    c h
+        Exactly like here                                       &gt;    c
+    </chorus>
+</song>

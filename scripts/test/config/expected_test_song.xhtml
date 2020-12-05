@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>My Songbook</title>
+    <link rel="stylesheet" type="text/css" href="../songbook.css"/>
+  </head>
+  <body>
+      <h1>My Test Song</h1>
+    <p class="authors">s&#x142;. P. Gradkowski, muz. Sam Composer</p>
+    <p class="verse">
+    <table>
+    <tr class="chords_above">
+        <td></td><td>c</td>         <td>h</td>       <td>O</td>                    <td>r</td>   </tr>
+    <tr><td></td><td>Check the </td><td>same num</td><td>ber of chords in the </td><td>line</td></tr>
+    <tr class="chords_above">
+        <td></td>      <td>c</td>                   <td>h</td>            <td>o r d</td></tr>
+    <tr><td>Check </td><td>more chords than ins</td><td>ertion points</td><td></td>     </tr>
+    <tr class="chords_above">
+        <td></td>              <td>c</td>      <td>h</td>                 </tr>
+    <tr><td>Check more ins</td><td>ertion </td><td>points than chords</td></tr>
+    </table>
+    <div>Check if the following lines</div><br/>
+    <div>Will be groupped</div><br/>
+    <div>Outside a HTML table</div><br/>
+    <table>
+    <tr class="chords_above">
+        <td></td>                                     <td>c h</td></tr>
+    <tr><td>And then next line with chords and no</td><td></td></tr>
+        <tr class="chords_above">
+        <td></td>           <td>c</td></tr>
+    <tr><td>Insertion points</td><td></td></tr>
+    </table>
+    </p>
+    <p class="verse">
+        Now a verse without any chords<br/>
+        Expecting them to be in one paragraph<br/>
+        Without any tables created<br/>
+        So that the user can tap just anywhere<br/>
+        To turn the page
+    </p>
+    <p class="verse">
+    <table class="chords_beside">
+    <tr><td>Say, we want to sing a chorus,</td><td>c h O r</td></tr>
+    <tr><td>Where the chords are defined beside</td><td>c h O r d</td></tr>
+    <tr><td>Regardless of the insertion points marked</td><td>c h</td></tr>
+    </table>
+    <div>We want to see the tables for only those verses</div><br/>
+    <div>Where the chords are given</div><br/>
+    <div>And the rest just in a plain div section</div><br/>
+    <table class="chords_beside">
+    <tr><td>Unless new chords are given for a line</td><td>c h</td></tr>
+    <tr><td>Exactly like here</td><td>c</td></tr>
+    </table>
+    </p>
+  </body>
+</html>
