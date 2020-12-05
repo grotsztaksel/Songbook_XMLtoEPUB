@@ -5,19 +5,18 @@ Spyder Editor
 This is a temporary script file.
 """
 
-import os
-import shutil
 import sys
 
-from config import CFG
 from tools.song_book_generator import SongBookGenerator
 
 
 def main(argv):
     sys.excepthook = print_exceptions
-    shutil.rmtree(CFG.SONG_HTML_DIR, ignore_errors=True)
-    os.mkdir(CFG.SONG_HTML_DIR)
-    sg = SongBookGenerator(30)
+
+    if len(argv) < 2:
+        raise IOError("Need an XML file name as input!")
+
+    sg = SongBookGenerator(argv[1])
     sg.write_songs()
     sg.write_sections()
     sg.write_metadata()
