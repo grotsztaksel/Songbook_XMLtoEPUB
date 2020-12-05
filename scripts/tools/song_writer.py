@@ -160,7 +160,7 @@ class SongWriter(HtmlWriter):
                         chord = chords.pop(0)
                         chunk = textChunks.pop(0)
                         if chunk.endswith(" "):
-                            chunk = chunk[:-1] + "&nbsp;"
+                            chunk = chunk[:-1] + "&#160;"
                     self.tixi.addTextElement(crdPath, "td", chord)
                     self.tixi.addTextElement(txtPath, "td", chunk)
 
