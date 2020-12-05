@@ -9,16 +9,15 @@ __all__ = ['SectionWriter']
 
 import os
 
-from config import CFG
+from config.epubsongbookconfig import EpubSongbookConfig
 from tixi import Tixi
 from .html_writer import HtmlWriter
 
 
 class SectionWriter(HtmlWriter):
-    def __init__(self, tixi: Tixi, path: str):
-        super(SectionWriter, self).__init__(tixi)
+    def __init__(self, tixi: Tixi, settings: EpubSongbookConfig, path: str):
+        super(SectionWriter, self).__init__(tixi,settings)
 
-        self.dir = CFG.SONG_HTML_DIR
         self.src_path = path
 
 
@@ -31,7 +30,7 @@ class SectionWriter(HtmlWriter):
 
         self.write_toc()
 
-        self.saveFile(os.path.join(CFG.SONG_HTML_DIR, fileName))
+        self.saveFile(os.path.join(self.settings.dir_text, fileName))
 
     def write_toc(self):
         # <body/>
@@ -40,7 +39,7 @@ class SectionWriter(HtmlWriter):
         if self.src_tixi.getTextAttribute(self.src_path, "title"):
             title = self.src_tixi.getTextAttribute(self.src_path, "title")
         else:
-            title = "Spis piosenek"
+            title = self.settings.default_section_title
 
         self.tixi.addTextElement(bpath, "h2", title)
 

@@ -5,8 +5,7 @@ Created on 02.12.2020 19:39
 @author: piotr
 """
 
-import re
-
+from config import EpubSongbookConfig
 from tixi import Tixi
 from .html_writer import HtmlWriter
 
@@ -14,8 +13,8 @@ from .html_writer import HtmlWriter
 class SongsIndexWriter(HtmlWriter):
     """Class responsible for writing the alphabetical index of songs"""
 
-    def __init__(self, tixi: Tixi):
-        super(SongsIndexWriter, self).__init__(tixi)
+    def __init__(self, tixi: Tixi, settings: EpubSongbookConfig):
+        super(SongsIndexWriter, self).__init__(tixi, settings)
 
         self.songs = dict()
 
@@ -37,7 +36,7 @@ class SongsIndexWriter(HtmlWriter):
 
     def write_index(self):
         bPath = self.tixi.getNewElementPath("/html", "body")
-        self.tixi.addTextElement(bPath, "h2", "Alfabetyczny spis piosenek")
+        self.tixi.addTextElement(bPath, "h2", self.settings.alphabedical_index_title)
 
         I = ""  # Initial
         for file in sorted(self.songs.keys()):

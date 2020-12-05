@@ -6,6 +6,7 @@ Created on 27.11.2020 19:51
 """
 import re
 
+from config import EpubSongbookConfig
 from tixi import Tixi
 from .html_writer import HtmlWriter
 
@@ -13,8 +14,8 @@ from .html_writer import HtmlWriter
 class AuthorsWriter(HtmlWriter):
     """Class responsible for writing the index of authors"""
 
-    def __init__(self, tixi: Tixi):
-        super(AuthorsWriter, self).__init__(tixi)
+    def __init__(self, tixi: Tixi, settings: EpubSongbookConfig):
+        super(AuthorsWriter, self).__init__(tixi, settings)
         # This the author strings to standardized author names to appear in the index
 
         self.standardized_author_names = dict()
@@ -83,7 +84,7 @@ class AuthorsWriter(HtmlWriter):
     def write_index(self):
         """Write the whole block of the index"""
         bPath = self.tixi.getNewElementPath("/html", "body")
-        self.tixi.addTextElement(bPath, "h2", "Spis autorów")
+        self.tixi.addTextElement(bPath, "h2", self.settings.authors_index_title)
 
         I = ""  # Initial
         for author in sorted(self.songs_by_author.keys()):

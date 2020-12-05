@@ -7,16 +7,16 @@ Created on 27.11.2020 20:34
 import os
 import re
 
-from typing import Tuple
-
+from config import EpubSongbookConfig
 from tixi import Tixi
 
 
 class HtmlWriter(object):
     """A generic class used to write the xhtml files."""
 
-    def __init__(self, tixi: Tixi):
+    def __init__(self, tixi: Tixi, settings: EpubSongbookConfig):
         self.src_tixi = tixi
+        self.settings = settings
         self.tixi = Tixi()
         self.tixi.create("html")
         self.tixi.addTextAttribute("/html", "xmlns", "http://www.w3.org/1999/xhtml")

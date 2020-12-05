@@ -6,12 +6,12 @@ Created on 20.11.2020 18:35
 """
 import os
 
-from config.epubsongbookconfig import EpubSongbookConfig
-from tixi import Tixi
+from config import EpubSongbookConfig
+from tixi import Tixi, TixiException, ReturnCode
 from .index_authors_writer import AuthorsWriter
 from .index_songs_writer import SongsIndexWriter
-from .song_writer import SongWriter
 from .section_writer import SectionWriter
+from .song_writer import SongWriter
 from .utf_simplifier import UtfSimplifier
 
 
@@ -28,6 +28,7 @@ class SongBookGenerator(object):
         self.settings.defineOutputDir()
         self.settings.placeEssentialFiles()
         self.settings.setupAttributes()
+        self.N = self.settings.maxsongs
 
         self.id = None
         self.getBasicSongInfo()
@@ -97,11 +98,11 @@ class SongBookGenerator(object):
                 self.tixi.addTextAttribute(path, attr, value1)
 
     def write_indexes(self):
-        writer = AuthorsWriter(self.tixi)
+        writer = AuthorsWriter(self.tixi, self.settings)
         writer.write_index()
         writer.saveFile(os.path.join(self.settings.dir_out, "idx_authors.xhtml"))
 
-        writer = SongsIndexWriter(self.tixi)
+        writer = SongsIndexWriter(self.tixi, self.settings)
         writer.write_index()
         writer.saveFile(os.path.join(self.settings.dir_out, "idx_songs.xhtml"))
 
@@ -115,7 +116,7 @@ class SongBookGenerator(object):
         for xml in self.tixi.getPathsFromXPathExpression(xPath):
             file = self.tixi.getTextAttribute(xml, "xhtml")
 
-            writer = SongWriter(self.tixi, xml)
+            writer = SongWriter(self.tixi, self.settings, xml)
             writer.write_song_file(file)
 
     def write_sections(self):
@@ -128,7 +129,7 @@ class SongBookGenerator(object):
         for xml in self.tixi.getPathsFromXPathExpression(xPath):
             file = self.tixi.getTextAttribute(xml, "xhtml")
 
-            writer = SectionWriter(self.tixi, xml)
+            writer = SectionWriter(self.tixi, self.settings, xml)
             writer.write_section_file(file)
 
     def createTwoWayLinks(self):
@@ -244,16 +245,22 @@ class SongBookGenerator(object):
         """Cleanup and rewrite the toc.ncx"""
         tixi = Tixi()
         toc = os.path.join(self.settings.dir_out, "toc.ncx")
-        tixi.open(toc)
+        try:
+            tixi.open(toc)
+        except TixiException as e:
+            if e.code != ReturnCode.OPEN_FAILED:
+                raise e
+            tixi = self._createEmptyToC()
         tixi.registerNamespacesFromDocument()
-        tixi.registerNamespace("http://www.daisy.org/z3986/2005/ncx/", "ncx")
+        uri = "http://www.daisy.org/z3986/2005/ncx/"
+        tixi.registerNamespace(uri, "ncx")
         tixi.registerNamespace("http://www.w3.org/XML/", "xml")
 
         if tixi.checkElement("/ncx:ncx/ncx:navMap"):
             tixi.removeElement("/ncx:ncx/ncx:navMap")
 
-        tixi.createElement("/ncx:ncx", "navMap")
-        navMap = "/ncx:ncx/navMap"
+        tixi.createElement("/ncx", "navMap")
+        navMap = "/ncx/navMap"
 
         assert tixi.checkElement(navMap)
 
@@ -293,3 +300,17 @@ class SongBookGenerator(object):
 
         for path in self.tixi.getPathsFromXPathExpression(xPath):
             self._createNavPoint(path, my_npPath, tixi_ncx)
+
+    def _createEmptyToC(self):
+        """Create the empty template for the toc.ncx"""
+        tixi = Tixi()
+        uri = "http://www.daisy.org/z3986/2005/ncx/"
+        tixi.create("ncx")
+        tixi.addTextAttribute("/ncx", "xmlns", uri)
+        tixi.addTextAttribute("/ncx", "version", "2005-1")
+        tixi.addTextAttribute("/ncx", "xml:lang", self.settings.lang)
+
+        tixi.createElement("/ncx", "head"),
+        tpath = tixi.getNewElementPath("/ncx", "docTitle")
+        tixi.addTextElement(tpath, "text", self.settings.title)
+        return tixi

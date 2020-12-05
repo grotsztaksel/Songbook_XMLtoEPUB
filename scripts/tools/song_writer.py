@@ -9,7 +9,7 @@ __all__ = ['LineWithChords', 'SongWriter']
 import os
 from collections import namedtuple
 
-from config import CFG, ChordMode
+from config import EpubSongbookConfig, ChordMode
 from tixi import Tixi
 from .html_writer import HtmlWriter
 
@@ -17,13 +17,14 @@ LineWithChords = namedtuple("LineWithChords", ["text", "chords"])
 
 
 class SongWriter(HtmlWriter):
-    def __init__(self, tixi: Tixi, path: str):
-        super(SongWriter, self).__init__(tixi)
+    def __init__(self, tixi: Tixi, settings: EpubSongbookConfig, path: str):
+        super(SongWriter, self).__init__(tixi, settings)
 
         self.src_path = path
-        self.dir = CFG.SONG_HTML_DIR
+        self.CS = self.settings.CS
+        self.CI = self.settings.CI
 
-
+        self.mode = ChordMode.get(self.src_tixi.getInheritedAttribute(path, "chord_mode"))
 
     def write_song_file(self, fileName) -> bool:
         """
@@ -42,7 +43,7 @@ class SongWriter(HtmlWriter):
 
         self.write_links()
 
-        self.saveFile(os.path.join(CFG.SONG_HTML_DIR, fileName))
+        self.saveFile(os.path.join(self.settings.dir_text, fileName))
 
     def write_song_header(self, title):
         if self.src_tixi.checkAttribute(self.src_path, "music"):
@@ -67,12 +68,12 @@ class SongWriter(HtmlWriter):
         self.tixi.addTextAttribute(bpath + "/p", "class", "authors")
 
     def write_song_part(self, srcPath):
-        # vop stands for Verse Or Chorus
+        # voc stands for Verse Or Chorus
         voc = srcPath.split("/")[-1]  # Extract the last element in path
         voc = voc.split("[")[0]  # Get rid of the index, if there is one
 
         path = self.root + "/body"
-        self.format_song_part(srcPath, path, CFG.MODE)
+        self.format_song_part(srcPath, path, self.mode)
         n = self.tixi.getNamedChildrenCount(self.root + "/body", "p")
         path = "{}/p[{}]".format(path, n)
         self.tixi.addTextAttribute(path, "class", voc)
@@ -112,13 +113,13 @@ class SongWriter(HtmlWriter):
         one for the line of text
         """
         text = self.src_tixi.getTextElement(srcPath).strip()
-        if not CFG.CS in text:
+        if not self.CS in text:
             return False
 
         self.tixi.createElement(targetPath, "p")
         pPath = "{}/p[{}]".format(targetPath, self.tixi.getNamedChildrenCount(targetPath, "p"))
 
-        for line in SongWriter._identifyLinesWithChords(text):
+        for line in self._identifyLinesWithChords(text):
             if isinstance(line, str):
                 self.tixi.addTextElement(pPath, "div", line)
             elif isinstance(line, LineWithChords):
@@ -128,7 +129,7 @@ class SongWriter(HtmlWriter):
 
                 # with the empty element [''] in front, the chords should have the same length as the textChunks
                 chords = [''] + line.chords[0].split(" ")
-                textChunks = line.text.split(CFG.CI)
+                textChunks = line.text.split(self.CI)
 
                 self.tixi.createElement(tbPath, "tr")
                 self.tixi.createElement(tbPath, "tr")
@@ -138,11 +139,11 @@ class SongWriter(HtmlWriter):
 
                 while chords or textChunks:
                     if not chords:
-                        # Run out of chords. Ignore the rest of the CFG.CI characters.
+                        # Run out of chords. Ignore the rest of the self.CI characters.
                         chunk = "".join(textChunks)
                         chord = ""
                     elif not textChunks:
-                        # Run out of CFG.CI characters. Just add the remaining chords at the end of the line
+                        # Run out of self.CI characters. Just add the remaining chords at the end of the line
                         chunk = ""
                         chord = " ".join(chords)
                     else:
@@ -160,9 +161,9 @@ class SongWriter(HtmlWriter):
         every row has two columns: one for the line of text, the other for chords
         """
         text = self.src_tixi.getTextElement(srcPath).strip()
-        if not CFG.CS in text:
+        if not self.CS in text:
             return False
-        lines = [line.strip().split(CFG.CS) for line in text.split('\n')]
+        lines = [line.strip().split(self.CS) for line in text.split('\n')]
 
         self.tixi.createElement(targetPath, "p")
         pPath = "{}/p[{}]".format(targetPath, self.tixi.getNamedChildrenCount(targetPath, "p"))
@@ -173,7 +174,7 @@ class SongWriter(HtmlWriter):
             self.tixi.createElement(tbPath, "tr")
             row = self.tixi.getNamedChildrenCount(tbPath, "tr")
             trPath = "{}/tr[{}]".format(tbPath, row)
-            self.tixi.addTextElement(trPath, "td", line[0].replace(CFG.CI, ""))
+            self.tixi.addTextElement(trPath, "td", line[0].replace(self.CI, ""))
             try:
                 self.tixi.addTextElement(trPath, "td", line[1])
                 self.tixi.addTextAttribute(trPath + "/td[2]", "class", "chords")
@@ -190,7 +191,7 @@ class SongWriter(HtmlWriter):
         """
 
         text = self.src_tixi.getTextElement(srcPath).strip()
-        lines = [line.strip().split(CFG.CS)[0].replace(CFG.CI, "") for line in text.split('\n')]
+        lines = [line.strip().split(self.CS)[0].replace(self.CI, "") for line in text.split('\n')]
         text = "<br/>\n".join(lines)  # Leave the \n for better appearance
 
         self.tixi.addTextElement(self.root + "/body", "p", "\n{}\n".format(text))
@@ -271,8 +272,7 @@ class SongWriter(HtmlWriter):
                     sPath = self.tixi.getNewTextElementPath(liPath, "span", authors)
                     self.tixi.addTextAttribute(sPath, "style", "font-size:12px")
 
-    @staticmethod
-    def _identifyLinesWithChords(text: str) -> list:
+    def _identifyLinesWithChords(self, text: str) -> list:
         """
         Split the text on newlines and return a list of items.
         If a line contains chords, return it as namedtuple LineWithChords
@@ -285,9 +285,9 @@ class SongWriter(HtmlWriter):
         noChordLines = None
 
         for line in lines:
-            chords = [s.strip() for s in line.split(CFG.CS)]
+            chords = [s.strip() for s in line.split(self.CS)]
             text = chords.pop(0)
-            if chords == []:
+            if not chords:
                 if noChordLines is None:
                     noChordLines = text
                 else:
