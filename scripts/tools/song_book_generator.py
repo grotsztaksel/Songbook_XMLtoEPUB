@@ -25,6 +25,9 @@ class SongBookGenerator(object):
         self.tixi.open(input_file, recursive=True)
         self.tixi.registerNamespacesFromDocument()
         self.settings = EpubSongbookConfig(self.tixi)
+        self.settings.defineOutputDir()
+        self.settings.placeEssentialFiles()
+        self.settings.setupAttributes()
 
         self.id = None
         self.getBasicSongInfo()
@@ -96,11 +99,11 @@ class SongBookGenerator(object):
     def write_indexes(self):
         writer = AuthorsWriter(self.tixi)
         writer.write_index()
-        writer.saveFile(os.path.join(CFG.SONG_HTML_DIR, "idx_authors.xhtml"))
+        writer.saveFile(os.path.join(self.settings.dir_out, "idx_authors.xhtml"))
 
         writer = SongsIndexWriter(self.tixi)
         writer.write_index()
-        writer.saveFile(os.path.join(CFG.SONG_HTML_DIR, "idx_songs.xhtml"))
+        writer.saveFile(os.path.join(self.settings.dir_out, "idx_songs.xhtml"))
 
     def write_songs(self):
         """
@@ -182,7 +185,7 @@ class SongBookGenerator(object):
     def write_metadata(self):
         """Cleanup and rewrite the metadata.opf"""
         tixi = Tixi()
-        opf = os.path.join(CFG.OUTPUT_DIR, "metadata.opf")
+        opf = os.path.join(self.settings.dir_out, "metadata.opf")
         opfuri = "http://www.idpf.org/2007/opf"
         tixi.open(opf)
         tixi.registerNamespacesFromDocument()
@@ -220,27 +223,27 @@ class SongBookGenerator(object):
         xPath = "//*[self::song or self::section]"
         for i, xml in enumerate(self.tixi.getPathsFromXPathExpression(xPath)):
             fileName = self.tixi.getTextAttribute(xml, "xhtml")
-            id = "id{}".format(i + 1)
+            id_attr = "id{}".format(i + 1)
 
             tixi.createElement(manifest, "item")
             n = tixi.getNamedChildrenCount(manifest, "item")
             path = manifest + "/item[{}]".format(n)
 
-            file = os.path.basename(CFG.SONG_HTML_DIR) + "/" + fileName
+            file = os.path.join(os.path.basename(self.settings.dir_text), fileName)
             tixi.addTextAttribute(path, "href", file)
-            tixi.addTextAttribute(path, "id", id)
+            tixi.addTextAttribute(path, "id", id_attr)
             tixi.addTextAttribute(path, "media-type", "application/xhtml+xml")
 
             tixi.createElementNS(spine, "itemref", opfuri)
             n = tixi.getNamedChildrenCount(spine, "opf:itemref")
             path = spine + "/opf:itemref[{}]".format(n)
-            tixi.addTextAttribute(path, "idref", id)
+            tixi.addTextAttribute(path, "idref", id_attr)
         tixi.saveDocument(opf)
 
     def write_toc(self):
         """Cleanup and rewrite the toc.ncx"""
         tixi = Tixi()
-        toc = os.path.join(CFG.OUTPUT_DIR, "toc.ncx")
+        toc = os.path.join(self.settings.dir_out, "toc.ncx")
         tixi.open(toc)
         tixi.registerNamespacesFromDocument()
         tixi.registerNamespace("http://www.daisy.org/z3986/2005/ncx/", "ncx")
