@@ -208,8 +208,7 @@ class SongBookGenerator(object):
 
         tixi.addTextAttribute(spine, "toc", "ncx")
 
-        itemAttributes = [{"href": "start.xhtml", "id": "start", "media-type": "application/xhtml+xml"},
-                          {"href": "toc.ncx", "id": "ncx", "media-type": "application/x-dtbncx+xml"},
+        itemAttributes = [{"href": "toc.ncx", "id": "ncx", "media-type": "application/x-dtbncx+xml"},
                           {"href": "songbook.css", "id": "css", "media-type": "text/css"}]
 
         for i, d in enumerate(itemAttributes):
@@ -217,9 +216,6 @@ class SongBookGenerator(object):
             path = manifest + "/opf:item[{}]".format(i + 1)
             for key, value in d.items():
                 tixi.addTextAttribute(path, key, value)
-
-        tixi.createElementNS(spine, "itemref", opfuri)
-        tixi.addTextAttribute(spine + "/opf:itemref", "idref", "start")
 
         xPath = "//*[self::song or self::section]"
         for i, xml in enumerate(self.tixi.getPathsFromXPathExpression(xPath)):
