@@ -118,6 +118,7 @@ class TestSongWriter(unittest.TestCase):
         # Now removing the last <p/> without checking!
         expectedTixi.removeElement("/x:html/x:body/x:p[2]")
         self.assertEqual(1, expectedTixi.getNamedChildrenCount("/x:html/x:body", "x:p"))
+        # The class="chorus" attribute is assigned by another function. So, remove it from the expected
         expectedTixi.removeAttribute("/x:html/x:body/x:p", "class")
 
         td_all = expectedTixi.getPathsFromXPathExpression("//x:td")
@@ -127,6 +128,64 @@ class TestSongWriter(unittest.TestCase):
             if path in td_txt:
                 continue
             expectedTixi.updateTextElement(path, "")
+
+        # If we're still here, the expectedTixi has been properly formed.
+        self.assertEqual(expectedTixi.exportDocumentAsString(),
+                         writer.tixi.exportDocumentAsString())
+
+    def test_write_chors_beside(self):
+        src_tixi = Tixi()
+        src_tixi.open("test_song.xml")
+        writer = SongWriter(src_tixi, self.settings, "/song")
+        writer.tixi.createElement("/html", "body")
+        # "/html" is ok, because the function doesn't really check where the target is
+        writer.write_chords_beside("/song/chorus", "/html/body")
+
+        expectedTixi = Tixi()
+        expectedTixi.open("expected_test_song.xhtml")
+        expectedTixi.registerNamespace("http://www.w3.org/1999/xhtml", "x")
+        # Need to trim it a little - don't want things we're not checking
+        expectedTixi.removeElement("/x:html/x:body/x:h1")
+        self.assertTrue(expectedTixi.checkAttribute("/x:html/x:body/x:p[1]", "class"))
+        self.assertEqual("authors", expectedTixi.getTextAttribute("/x:html/x:body/x:p[1]", "class"))
+        expectedTixi.removeElement("/x:html/x:body/x:p[1]")
+
+        for path in reversed(expectedTixi.getPathsFromXPathExpression('//*[@class="verse"]')):
+            expectedTixi.removeElement(path)
+
+        self.assertEqual(1, expectedTixi.getNamedChildrenCount("/x:html/x:body", "x:p"))
+
+        # The class="chorus" attribute is assigned by another function. So, remove it from the expected
+        expectedTixi.removeAttribute("/x:html/x:body/x:p", "class")
+
+        # If we're still here, the expectedTixi has been properly formed.
+        self.assertEqual(expectedTixi.exportDocumentAsString(),
+                         writer.tixi.exportDocumentAsString())
+
+    def test_write_without_chords(self):
+        src_tixi = Tixi()
+        src_tixi.open("test_song.xml")
+        writer = SongWriter(src_tixi, self.settings, "/song")
+        writer.tixi.createElement("/html", "body")
+        # "/html" is ok, because the function doesn't really check where the target is
+        writer.write_without_chords("/song/verse[2]", "/html/body")
+
+        expectedTixi = Tixi()
+        expectedTixi.open("expected_test_song.xhtml")
+        expectedTixi.registerNamespace("http://www.w3.org/1999/xhtml", "x")
+        # Need to trim it a little - don't want things we're not checking
+        expectedTixi.removeElement("/x:html/x:body/x:h1")
+        self.assertTrue(expectedTixi.checkAttribute("/x:html/x:body/x:p[1]", "class"))
+        self.assertEqual("authors", expectedTixi.getTextAttribute("/x:html/x:body/x:p[1]", "class"))
+
+        # After the following removals, only the, what used to be p[3] should remain
+        expectedTixi.removeElement("/x:html/x:body/x:p[1]")  # authors
+        expectedTixi.removeElement("/x:html/x:body/x:p[1]")  # verse 1
+        expectedTixi.removeElement("/x:html/x:body/x:p[2]")  # chorus
+        self.assertEqual(1, expectedTixi.getNamedChildrenCount("/x:html/x:body", "x:p"))
+
+        # The class="chorus" attribute is assigned by another function. So, remove it from the expected
+        expectedTixi.removeAttribute("/x:html/x:body/x:p", "class")
 
         # If we're still here, the expectedTixi has been properly formed.
         self.assertEqual(expectedTixi.exportDocumentAsString(),

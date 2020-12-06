@@ -111,6 +111,7 @@ class SongWriter(HtmlWriter):
         ChordMode.NO_CHORD - the chords will not be written at all. The text will be as a whole, replacing newline characters with newline markers
             
         """
+
         if mode is None:
             mode = ChordMode.CHORDS_ABOVE
 
@@ -190,11 +191,15 @@ class SongWriter(HtmlWriter):
 
         pPath = self.tixi.getNewElementPath(targetPath, "p")
 
+        previousWasTable = False
         for line in self._identifyLinesWithChords(text):
             if isinstance(line, str):
                 self.tixi.addTextElement(pPath, "div", line)
+                previousWasTable = False
             elif isinstance(line, LineWithChords):
-                tbPath = self.tixi.getNewElementPath(pPath, "table")
+                if not previousWasTable:
+                    tbPath = self.tixi.getNewElementPath(pPath, "table")
+                previousWasTable = True
                 self.tixi.addTextAttribute(tbPath, "class", "chords_beside")
 
                 trPath = self.tixi.getNewElementPath(tbPath, "tr")
