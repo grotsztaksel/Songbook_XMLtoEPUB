@@ -238,8 +238,8 @@ class SongWriter(HtmlWriter):
             if not linkPcreated:
                 # Create the new paragraph to store the links
 
-                #  <h3>Zobacz też</h3>
-                self.tixi.addTextElement(targetPath, "h3", "Zobacz też")
+                #  <h3>See also</h3>
+                self.tixi.addTextElement(targetPath, "h3", self.settings.links_header)
 
                 #  <p class="links/>
                 targetPath = self.tixi.getNewElementPath(targetPath, "p")

@@ -61,6 +61,7 @@ class EpubSongbookConfig():
         self.alphabedical_index_title = "Alphabetical index of songs"
         self.authors_index_title = "Index of authors"
         self.default_section_title = "Section"
+        self.links_header = "See also:"
         self.lyrics_string = "lyrics by:"
         self.music_string = "music by:"
         self.unknown_author = "?"
@@ -87,6 +88,10 @@ class EpubSongbookConfig():
 
         elements = {"username": "user",
                     "title": "title",
+                    "section_title": "default_section_title",
+                    "authors_index_title": "authors_index_title",
+                    "alphabedical_index_title": "alphabedical_index_title",
+                    "links_header": "links_header",
                     "language": "lang",
                     "output_dir": "dir_out",
                     "template": "template_dir",
