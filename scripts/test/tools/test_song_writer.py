@@ -6,6 +6,7 @@ Created on 16.11.2020 22:14
 """
 
 import unittest
+import os
 
 from config import EpubSongbookConfig, ChordMode
 from tixi import Tixi, TixiException, ReturnCode
@@ -18,8 +19,27 @@ class TestSongWriter(unittest.TestCase):
         cfgTixi = Tixi()
         cfgTixi.create("songbook")
         self.settings = EpubSongbookConfig(cfgTixi)
+        self.settings.dir_text = os.path.dirname(__file__)
         self.settings.CS = ">"
         self.settings.CI = "|"
+        self.testFile = "test_output_song.xhtml"
+
+    def tearDown(self):
+        if os.path.isfile(os.path.join(self.settings.dir_text, self.testFile)):
+            os.remove(self.testFile)
+
+    def test_write_song_file(self):
+        expectedTixi = Tixi()
+        expectedTixi.open("expected_test_song.xhtml")
+        expectedTixi.registerNamespace("http://www.w3.org/1999/xhtml", "x")
+
+        src_tixi = Tixi()
+        src_tixi.open("test_song.xml")
+
+        writer = SongWriter(src_tixi, self.settings, "/song")
+        writer.write_song_file(self.testFile)
+
+        self.assertTrue(os.path.isfile(self.testFile))
 
     def test_write_song_header(self):
         src_tixi = Tixi()
@@ -95,6 +115,27 @@ class TestSongWriter(unittest.TestCase):
         self.assertEqual("lyrics by: ?, music by: ?",
                          writer.tixi.getTextElement("/html/body/p"))
         writer.tixi.removeElement("/html/body")
+
+    def test_write_song_part(self):
+        src_tixi = Tixi()
+        src_tixi.open("test_song.xml")
+        writer = SongWriter(src_tixi, self.settings, "/song")
+        writer.tixi.createElement("/html", "body")
+        # "/html" is ok, because the function doesn't really check where the target is
+
+        expectedTixi = Tixi()
+        expectedTixi.open("expected_test_song.xhtml")
+        expectedTixi.registerNamespace("http://www.w3.org/1999/xhtml", "x")
+        # Need to trim it a little - don't want things we're not checking
+        expectedTixi.removeElement("/x:html/x:body/x:h1")
+        expectedTixi.removeElement("/x:html/x:body/x:p[1]")
+
+        writer.write_song_part("/song/verse[1]")
+        writer.write_song_part("/song/verse[2]")
+        writer.write_song_part("/song/chorus")
+
+        self.assertEqual(expectedTixi.exportDocumentAsString(),
+                         writer.tixi.exportDocumentAsString())
 
     def test_format_song_part(self):
         src_tixi = Tixi()
