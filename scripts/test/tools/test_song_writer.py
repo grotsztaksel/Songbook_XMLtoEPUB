@@ -7,7 +7,7 @@ Created on 16.11.2020 22:14
 
 import unittest
 
-from config import EpubSongbookConfig
+from config import EpubSongbookConfig, ChordMode
 from tixi import Tixi, TixiException, ReturnCode
 from tools.song_writer import SongWriter, LineWithChords
 
@@ -96,7 +96,31 @@ class TestSongWriter(unittest.TestCase):
                          writer.tixi.getTextElement("/html/body/p"))
         writer.tixi.removeElement("/html/body")
 
-    def test_write_chors_above(self):
+    def test_format_song_part(self):
+        src_tixi = Tixi()
+        src_tixi.open("test_song.xml")
+        writer = SongWriter(src_tixi, self.settings, "/song")
+        writer.tixi.createElement("/html", "body")
+        # "/html" is ok, because the function doesn't really check where the target is
+
+        expectedTixi = Tixi()
+        expectedTixi.open("expected_test_song.xhtml")
+        expectedTixi.registerNamespace("http://www.w3.org/1999/xhtml", "x")
+        # Need to trim it a little - don't want things we're not checking
+        expectedTixi.removeElement("/x:html/x:body/x:h1")
+        expectedTixi.removeElement("/x:html/x:body/x:p[1]")
+        expectedTixi.removeAttribute("/x:html/x:body/x:p[1]", "class")
+        expectedTixi.removeAttribute("/x:html/x:body/x:p[2]", "class")
+        expectedTixi.removeAttribute("/x:html/x:body/x:p[3]", "class")
+
+        writer.format_song_part("/song/verse[1]", "/html/body")
+        writer.format_song_part("/song/verse[2]", "/html/body")
+        writer.format_song_part("/song/chorus", "/html/body", mode=ChordMode.CHORDS_BESIDE)
+
+        self.assertEqual(expectedTixi.exportDocumentAsString(),
+                         writer.tixi.exportDocumentAsString())
+
+    def test_write_chords_above(self):
         src_tixi = Tixi()
         src_tixi.open("test_song.xml")
         writer = SongWriter(src_tixi, self.settings, "/song")
@@ -121,13 +145,7 @@ class TestSongWriter(unittest.TestCase):
         # The class="chorus" attribute is assigned by another function. So, remove it from the expected
         expectedTixi.removeAttribute("/x:html/x:body/x:p", "class")
 
-        td_all = expectedTixi.getPathsFromXPathExpression("//x:td")
-        td_txt = expectedTixi.getPathsFromXPathExpression("//x:td[text()]")
 
-        for path in td_all:
-            if path in td_txt:
-                continue
-            expectedTixi.updateTextElement(path, "")
 
         # If we're still here, the expectedTixi has been properly formed.
         self.assertEqual(expectedTixi.exportDocumentAsString(),
@@ -192,13 +210,18 @@ class TestSongWriter(unittest.TestCase):
                          writer.tixi.exportDocumentAsString())
 
     def test_identifyLinesWithChords(self):
+        # Need to initialize the writer to access the self.CS; Tixi and target path to not matter
+        src_tixi = Tixi()
+        src_tixi.open("test_song.xml")
+        writer = SongWriter(src_tixi, self.settings, "/song")
+
         text = "\n".join(["Line 1",
                           "Line 2",
                           "Line 3",
                           "Line 4"])
 
         # Should basically get the text with <br/> tags in newlines
-        self.assertEqual([text.replace("\n", "<br/>\n")], SongWriter._identifyLinesWithChords(text))
+        self.assertEqual([text.replace("\n", "<br/>\n")], writer._identifyLinesWithChords(text))
 
         text = "\n".join(["Line 1" + self.settings.CS + "F E E D",
                           "Line 2" + self.settings.CS + "F E E D",
@@ -209,7 +232,7 @@ class TestSongWriter(unittest.TestCase):
             LineWithChords("Line 2", ["F E E D"]),
             "Line 3<br/>\nLine 4"
         ]
-        self.assertEqual(expected, SongWriter._identifyLinesWithChords(text))
+        self.assertEqual(expected, writer._identifyLinesWithChords(text))
 
     @staticmethod
     def updateAttributes(tixi: Tixi, path: str, attrs: dict) -> None:
