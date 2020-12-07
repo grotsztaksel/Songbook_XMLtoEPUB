@@ -10,8 +10,8 @@ import shutil
 import unittest
 from collections import namedtuple
 
-from config import CFG
-from tixi import Tixi, tryXPathEvaluateNodeNumber
+from config import EpubSongbookConfig
+from tixi import Tixi
 from tools.song_book_generator import SongBookGenerator
 
 Song = namedtuple("Song", ["file", "title", "xml"])
@@ -19,28 +19,32 @@ Song = namedtuple("Song", ["file", "title", "xml"])
 
 class TestSongBookGenerator(unittest.TestCase):
     def setUp(self):
-        test_song_src = os.path.join(os.path.abspath(os.path.dirname(__file__)), "test_song_src.xml")
-        CFG.SONG_SRC_XML = test_song_src
+        self.test_song_src = os.path.join(os.path.abspath(os.path.dirname(__file__)), "test_song_src.xml")
+        self.test_src2 = self.test_song_src + "2"
+        self.sg = SongBookGenerator(self.test_song_src)
 
-        self.sg = SongBookGenerator()
+    def tearDown(self):
+        shutil.rmtree(self.sg.settings.dir_out, ignore_errors=True)
+        if os.path.isfile(self.test_src2):
+            os.remove(self.test_src2)
 
     def test_init(self):
         tixi = self.sg.tixi
+
+        # One section should be completely ignored
         self.assertEqual(2, tixi.getNamedChildrenCount("/songbook", "section"))
+
+        self.assertEqual(6, self.sg.N)  # The total number of songs that are kept in the tixi
 
         xPath = "//*[self::verse or self::chorus]"
 
-        n = tryXPathEvaluateNodeNumber(tixi, xPath)
-        self.assertEqual(15, n)
-        for i in range(n):
-            # There should be only "La La La" in the lyrics
-            path = tixi.xPathExpressionGetXPath(xPath, i + 1)
-            text = tixi.getTextElement(path).replace("La", "").strip()
-            self.assertEqual("", text)
+        n = tixi.tryXPathEvaluateNodeNumber(xPath)
+        self.assertEqual(18, n)  # The total number of verses and choruses in the songs
 
     def test_getBasicSongInfo(self):
         # The getBasicSongInfo has already been called in __init__
-        expected = [Song("sng_song_a.xhtml", "Song A", "/songbook/section[1]/section[1]/song"),
+        expected = [Song("sng_my_test_song.xhtml", "My Test Song", "/songbook/section[1]/section[1]/song[1]"),
+                    Song("sng_song_a.xhtml", "Song A", "/songbook/section[1]/section[1]/song[2]"),
                     Song("sng_song_b.xhtml", "Song B", "/songbook/section[1]/section[2]/song[1]"),
                     Song("sng_song_c.xhtml", "Song C", "/songbook/section[1]/section[2]/song[2]"),
                     Song("sng_song_a_1.xhtml", "Song A", "/songbook/section[2]/song[1]"),
@@ -51,9 +55,15 @@ class TestSongBookGenerator(unittest.TestCase):
             self.assertEqual(item.file, self.sg.tixi.getTextAttribute(item.xml, "xhtml"))
 
         # Now make some empty sections (by adding new and removing songs from exisiting). Rerun the function
-        # and see if these sections are removed
+        # and see if these sections are removed.
+        # Use a modified input file
+        preparing_tixi = Tixi()
+        preparing_tixi.open(self.test_song_src, recursive=True)
+        preparing_tixi.removeElement("/songbook/section/section[1]/song[2]")
+        preparing_tixi.addTextElement("/songbook/settings", "max_songs", "3")
+        preparing_tixi.saveCompleteDocument(self.test_src2)
 
-        self.sg = SongBookGenerator(3)
+        self.sg = SongBookGenerator(self.test_src2)
         expected = [Song("sng_song_a.xhtml", "Song A", "/songbook/section/section[1]/song"),
                     Song("sng_song_b.xhtml", "Song B", "/songbook/section/section[2]/song[1]"),
                     Song("sng_song_c.xhtml", "Song C", "/songbook/section/section[2]/song[2]")]
@@ -124,7 +134,6 @@ class TestSongBookGenerator(unittest.TestCase):
         self.assertTrue(os.path.isdir(test_dir))
         opf_target = os.path.join(test_dir, "metadata.opf")
         shutil.copyfile(opf_original, opf_target)
-
 
         self.sg.write_metadata()
 
