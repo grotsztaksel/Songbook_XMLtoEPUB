@@ -175,8 +175,14 @@ class SongWriter(HtmlWriter):
                         chunk = textChunks.pop(0)
                         if chunk.endswith(" "):
                             chunk = chunk[:-1] + "&#160;"
-                    self.tixi.addTextElement(crdPath, "td", chord)
-                    lastText_td = self.tixi.getNewTextElementPath(txtPath, "td", chunk)
+                    if chord:
+                        self.tixi.addTextElement(crdPath, "td", chord)
+                    else:
+                        self.tixi.createElement(crdPath, "td")
+                    if chunk:
+                        lastText_td = self.tixi.getNewTextElementPath(txtPath, "td", chunk)
+                    else:
+                        lastText_td = self.tixi.getNewElementPath(txtPath, "td")
 
         return True
 
