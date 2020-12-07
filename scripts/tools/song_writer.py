@@ -140,8 +140,12 @@ class SongWriter(HtmlWriter):
 
         pPath = self.tixi.getNewElementPath(targetPath, "p")
         for line in self._identifyLinesWithChords(text):
-            if isinstance(line, str):
-                self.tixi.addTextElement(pPath, "div", line)
+            if isinstance(line, list):
+                while line:
+                    l = line.pop(0)
+                    self.tixi.addTextElement(pPath, "span", l)
+                    if line:
+                        self.tixi.createElement(pPath, "br")
             elif isinstance(line, LineWithChords):
                 tbPath = self.tixi.getNewElementPath(pPath, "table")
 
@@ -199,8 +203,12 @@ class SongWriter(HtmlWriter):
 
         previousWasTable = False
         for line in self._identifyLinesWithChords(text):
-            if isinstance(line, str):
-                self.tixi.addTextElement(pPath, "div", line)
+            if isinstance(line, list):
+                while line:
+                    l = line.pop(0)
+                    self.tixi.addTextElement(pPath, "span", l)
+                    if line:
+                        self.tixi.createElement(pPath, "br")
                 previousWasTable = False
             elif isinstance(line, LineWithChords):
                 if not previousWasTable:
@@ -227,9 +235,12 @@ class SongWriter(HtmlWriter):
 
         text = self.src_tixi.getTextElement(srcPath).strip()
         lines = [line.strip().split(self.CS)[0].replace(self.CI, "") for line in text.split('\n')]
-        text = "<br/>\n".join(lines)  # Leave the \n for better appearance
-
-        self.tixi.addTextElement(self.root + "/body", "p", "\n{}\n".format(text))
+        pPath = self.tixi.getNewElementPath(self.root + "/body", "p")
+        while lines:
+            line = lines.pop(0)
+            self.tixi.addTextElement(pPath, "span", line)
+            if lines:
+                self.tixi.createElement(pPath, "br")
         return True
 
     def write_links(self):
@@ -324,9 +335,9 @@ class SongWriter(HtmlWriter):
             text = chords.pop(0)[0]
             if not chords:
                 if noChordLines is None:
-                    noChordLines = text
+                    noChordLines = [text]
                 else:
-                    noChordLines += "<br/>\n" + text
+                    noChordLines.append(text)
             else:
                 if noChordLines is not None:
                     # Append the chunk of text to the output and reset the noChordLines collector

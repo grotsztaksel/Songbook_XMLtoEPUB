@@ -137,15 +137,13 @@ class TestSongWriter(unittest.TestCase):
         self.assertEqual("authors", expectedTixi.getTextAttribute("/x:html/x:body/x:p[1]", "class"))
         expectedTixi.removeElement("/x:html/x:body/x:p[1]")
 
-        self.assertIn("Now a verse without any chords", expectedTixi.getTextElement("/x:html/x:body/x:p[2]"))
+        self.assertIn("Now a verse without any chords", expectedTixi.getTextElement("/x:html/x:body/x:p[2]/x:span[1]"))
         expectedTixi.removeElement("/x:html/x:body/x:p[2]")
         # Now removing the last <p/> without checking!
         expectedTixi.removeElement("/x:html/x:body/x:p[2]")
         self.assertEqual(1, expectedTixi.getNamedChildrenCount("/x:html/x:body", "x:p"))
         # The class="chorus" attribute is assigned by another function. So, remove it from the expected
         expectedTixi.removeAttribute("/x:html/x:body/x:p", "class")
-
-
 
         # If we're still here, the expectedTixi has been properly formed.
         self.assertEqual(expectedTixi.exportDocumentAsString(),
@@ -219,9 +217,9 @@ class TestSongWriter(unittest.TestCase):
                           "Line 2",
                           "Line 3",
                           "Line 4"])
-
+        expected = ["Line 1", "Line 2", "Line 3", "Line 4"]
         # Should basically get the text with <br/> tags in newlines
-        self.assertEqual([text.replace("\n", "<br/>\n")], writer._identifyLinesWithChords(text))
+        self.assertEqual([expected], writer._identifyLinesWithChords(text))
 
         text = "\n".join(["Line 1" + self.settings.CS + "F E E D",
                           "Line 2" + self.settings.CS + "F E E D",
@@ -230,7 +228,7 @@ class TestSongWriter(unittest.TestCase):
         expected = [
             LineWithChords("Line 1", ["F E E D"]),
             LineWithChords("Line 2", ["F E E D"]),
-            "Line 3<br/>\nLine 4"
+            ["Line 3", "Line 4"]
         ]
         self.assertEqual(expected, writer._identifyLinesWithChords(text))
 
