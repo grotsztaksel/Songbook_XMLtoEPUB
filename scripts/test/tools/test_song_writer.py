@@ -22,7 +22,7 @@ class TestSongWriter(unittest.TestCase):
         self.settings.dir_text = os.path.dirname(__file__)
         self.settings.CS = ">"
         self.settings.CI = "|"
-        self.testFile = "test_output_song.xhtml"
+        self.testFile = os.path.join(os.path.dirname(__file__),"test_output_song.xhtml")
 
     def tearDown(self):
         if os.path.isfile(os.path.join(self.settings.dir_text, self.testFile)):
@@ -37,9 +37,17 @@ class TestSongWriter(unittest.TestCase):
         src_tixi.open("test_song.xml")
 
         writer = SongWriter(src_tixi, self.settings, "/song")
+
+
         writer.write_song_file(self.testFile)
 
         self.assertTrue(os.path.isfile(self.testFile))
+
+        actualTixi = Tixi()
+        actualTixi.open(self.testFile)
+
+        self.assertEqual(expectedTixi.exportDocumentAsString(),
+                         actualTixi.exportDocumentAsString())
 
     def test_write_song_header(self):
         src_tixi = Tixi()
@@ -135,7 +143,7 @@ class TestSongWriter(unittest.TestCase):
         writer.write_song_part("/song/chorus")
 
         self.assertEqual(expectedTixi.exportDocumentAsString(),
-                         writer.tixi.exportDocumentAsString())
+                         writer.tixi.exportDocumentAsString().replace("&amp;", "&"))
 
     def test_format_song_part(self):
         src_tixi = Tixi()
@@ -159,7 +167,7 @@ class TestSongWriter(unittest.TestCase):
         writer.format_song_part("/song/chorus", "/html/body", mode=ChordMode.CHORDS_BESIDE)
 
         self.assertEqual(expectedTixi.exportDocumentAsString(),
-                         writer.tixi.exportDocumentAsString())
+                         writer.tixi.exportDocumentAsString().replace("&amp;", "&"))
 
     def test_write_chords_above(self):
         src_tixi = Tixi()
@@ -188,7 +196,7 @@ class TestSongWriter(unittest.TestCase):
 
         # If we're still here, the expectedTixi has been properly formed.
         self.assertEqual(expectedTixi.exportDocumentAsString(),
-                         writer.tixi.exportDocumentAsString())
+                         writer.tixi.exportDocumentAsString().replace("&amp;", "&"))
 
     def test_write_chors_beside(self):
         src_tixi = Tixi()
