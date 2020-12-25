@@ -4,13 +4,31 @@ Created on 27.11.2020 22:21
  
 @author: piotr
 """
-
+import os
 import unittest
 
+from config import EpubSongbookConfig
+from tixi import Tixi
 from tools.index_authors_writer import AuthorsWriter
 
 
 class TestAuthorsWriter(unittest.TestCase):
+    def setUp(self):
+        self.src_file = os.path.join(os.path.dirname(__file__), "test_song_src.xml")
+        tixi = Tixi()
+        tixi.open(self.src_file)
+        self.settings = EpubSongbookConfig(tixi)
+        self.writer = AuthorsWriter(tixi, self.settings)
+
+    def test_findSOngsByAuthor(self):
+        # The method should've been called upon initialization
+        expected_std_author_names = {"John Doe": "Doe, John",
+                  "Mike Moo": "Moo, Mike",
+                  "P. Gradkowski": "Gradkowski, P",
+                  "Sam Composer": "Composer, Sam"
+                  }
+        self.assertEqual(expected_std_author_names, self.writer.standardize_author_names)
+
     def test_standardize_author_name(self):
         self.assertEqual("Kowalski, M.", AuthorsWriter.standardize_author_name("M.Kowalski"))
         self.assertEqual("Kowalski, M.", AuthorsWriter.standardize_author_name("M. Kowalski"))
