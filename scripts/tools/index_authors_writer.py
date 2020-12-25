@@ -70,7 +70,8 @@ class AuthorsWriter(HtmlWriter):
                     else:
                         authors = authors.split(";")
 
-                    for author in authors:
+                    for a in authors:
+                        author = a.strip()
                         if author not in self.standardized_author_names:
                             stdName = AuthorsWriter.standardize_author_name(author, isBand)
                             self.standardized_author_names[author] = stdName
