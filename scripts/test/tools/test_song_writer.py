@@ -22,7 +22,7 @@ class TestSongWriter(unittest.TestCase):
         self.settings.dir_text = os.path.dirname(__file__)
         self.settings.CS = ">"
         self.settings.CI = "|"
-        self.testFile = os.path.join(os.path.dirname(__file__),"test_output_song.xhtml")
+        self.testFile = os.path.join(os.path.dirname(__file__), "test_output_song.xhtml")
 
     def tearDown(self):
         if os.path.isfile(os.path.join(self.settings.dir_text, self.testFile)):
@@ -37,7 +37,6 @@ class TestSongWriter(unittest.TestCase):
         src_tixi.open("test_song.xml")
 
         writer = SongWriter(src_tixi, self.settings, "/song")
-
 
         writer.write_song_file(self.testFile)
 
