@@ -19,7 +19,8 @@ Song = namedtuple("Song", ["file", "title", "xml"])
 
 class TestSongBookGenerator(unittest.TestCase):
     def setUp(self):
-        self.test_song_src = os.path.join(os.path.abspath(os.path.dirname(__file__)), "resources", "test_song_src.xml")
+        self.references = os.path.join(os.path.abspath(os.path.dirname(__file__)), "resources")
+        self.test_song_src = os.path.join(self.references, "test_song_src.xml")
         self.test_src2 = self.test_song_src + "2"
         self.test_dir = os.path.abspath(os.path.join(os.path.dirname(self.test_song_src), "..", "test_dir"))
         shutil.rmtree(self.test_dir, ignore_errors=True)
@@ -131,26 +132,31 @@ class TestSongBookGenerator(unittest.TestCase):
             run = "end"
 
     def test_write_metadata(self):
-
-        opf_expected = os.path.join(self.test_dir, "expected_opf.opf")
-
-        self.assertFalse(os.path.isfile(opf_expected))
+        opf_expected = os.path.join(self.references, "expected_opf.opf")
+        opf_created = os.path.join(self.test_dir, "metadata.opf")
+        self.assertTrue(os.path.isfile(opf_expected))
+        # Should have already copied the file from template by the initializer
+        self.assertTrue(os.path.isfile(opf_created))
 
         self.sg.write_metadata()
+
         self.assertTrue(os.path.isfile(opf_expected))
 
         tixi_expected = Tixi()
         tixi_expected.open(opf_expected)
         tixi_result = Tixi()
-        tixi_result.open(opf_target)
+        tixi_result.open(opf_created)
 
+        # Clean comments from the tixi - some items may have been commented out
+        for tixi in [tixi_expected, tixi_result]:
+            tixi.clearComments()
         self.assertEqual(tixi_expected.exportDocumentAsString(),
                          tixi_result.exportDocumentAsString())
-        os.remove(opf_target)
+        os.remove(opf_created)
 
     def test_write_toc(self):
         # First copy the toc.ncx to the test dir and use it.
-        toc_expected = os.path.abspath(os.path.join(os.path.dirname(self.test_song_src), "expected_toc.ncx"))
+        toc_expected = os.path.join(self.references, "expected_toc.ncx")
         toc_created = os.path.join(self.test_dir, "toc.ncx")
         self.assertTrue(os.path.isfile(toc_expected))
         self.assertFalse(os.path.isfile(toc_created))

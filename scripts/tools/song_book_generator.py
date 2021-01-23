@@ -226,7 +226,7 @@ class SongBookGenerator(object):
             n = tixi.getNamedChildrenCount(manifest, "item")
             path = manifest + "/item[{}]".format(n)
 
-            file = os.path.join(os.path.basename(self.settings.dir_text), fileName)
+            file = os.path.join(os.path.basename(self.settings.dir_text), fileName).replace("\\", "/")
             tixi.addTextAttribute(path, "href", file)
             tixi.addTextAttribute(path, "id", id_attr)
             tixi.addTextAttribute(path, "media-type", "application/xhtml+xml")
