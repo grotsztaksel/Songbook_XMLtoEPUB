@@ -35,7 +35,7 @@ class TestEpubSongbookConfig(unittest.TestCase):
         self.assertTrue(os.path.isfile(self.text_xml))
         self.tixi = Tixi()
         self.test_dir_abs = os.path.join(os.path.abspath(os.path.dirname(__file__)), "test_dir")
-        self.test_dir_rel = os.path.abspath(os.path.join(os.path.abspath(self.text_xml), "..", "test_dir"))
+        self.test_dir_rel = os.path.abspath(os.path.join(os.path.dirname(self.text_xml), "..", "test_dir"))
         self.tixi.open(self.text_xml, recursive=True)
 
     def tearDown(self):
@@ -99,15 +99,15 @@ class TestEpubSongbookConfig(unittest.TestCase):
         cfg = EpubSongbookConfig(self.tixi)
 
         self.assertFalse(os.path.isdir(self.test_dir_rel))
-        cfg.createOutputDir()
+        cfg.defineOutputDir()
         self.assertEqual(os.path.abspath(self.test_dir_rel),
                          os.path.abspath(cfg.dir_out))
-        self.assertTrue(os.path.isdir(self.test_dir_rel))
+        self.assertFalse(os.path.isdir(self.test_dir_rel))
 
         self.assertFalse(os.path.isdir(self.test_dir_abs))
         cfg.dir_out = self.test_dir_abs
-        cfg.createOutputDir()
-        self.assertTrue(os.path.isdir(self.test_dir_abs))
+        cfg.defineOutputDir()
+        self.assertFalse(os.path.isdir(self.test_dir_abs))
 
     def test_placeEssentialFiles(self):
         cfg = EpubSongbookConfig(self.tixi)
