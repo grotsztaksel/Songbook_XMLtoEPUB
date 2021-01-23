@@ -19,8 +19,8 @@ def main(argv):
 
 
 class SourceSplitter(object):
-    """Read in the source song file and produce a number of smaller song out of it.
-    Might be useful, if your songbook source becomes large and your text edior
+    """Read in the source song file and produce a number of smaller songs out of it.
+    Might be useful, if your songbook source becomes large and your text editor
     gets sluggish with it.
     """
 
