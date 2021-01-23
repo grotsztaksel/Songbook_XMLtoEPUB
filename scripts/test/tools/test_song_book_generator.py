@@ -21,11 +21,14 @@ class TestSongBookGenerator(unittest.TestCase):
     def setUp(self):
         self.test_song_src = os.path.join(os.path.abspath(os.path.dirname(__file__)), "resources", "test_song_src.xml")
         self.test_src2 = self.test_song_src + "2"
-        self.test_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "test_dir")
+        self.test_dir = os.path.abspath(os.path.join(os.path.dirname(self.test_song_src), "..", "test_dir"))
+        shutil.rmtree(self.test_dir, ignore_errors=True)
         self.sg = SongBookGenerator(self.test_song_src)
         # Overwrite the output directory
         self.sg.settings.dir_out = self.test_dir
 
+        # The constructor should have created the dir
+        self.assertTrue(os.path.isdir(self.test_dir))
 
     def tearDown(self):
         shutil.rmtree(self.test_dir, ignore_errors=True)
@@ -131,9 +134,7 @@ class TestSongBookGenerator(unittest.TestCase):
 
         opf_expected = os.path.join(self.test_dir, "expected_opf.opf")
 
-
         self.assertFalse(os.path.isfile(opf_expected))
-
 
         self.sg.write_metadata()
         self.assertTrue(os.path.isfile(opf_expected))
@@ -149,26 +150,22 @@ class TestSongBookGenerator(unittest.TestCase):
 
     def test_write_toc(self):
         # First copy the toc.ncx to the test dir and use it.
-        toc_original = os.path.join(CFG.OUTPUT_DIR, "toc.ncx")
-        toc_expected = os.path.join(os.path.dirname(__file__), "expected_toc.ncx")
-        test_dir = os.path.dirname(CFG.SONG_SRC_XML)
-        CFG.OUTPUT_DIR = test_dir
-        self.assertTrue(os.path.isfile(toc_original))
+        toc_expected = os.path.abspath(os.path.join(os.path.dirname(self.test_song_src), "expected_toc.ncx"))
+        toc_created = os.path.join(self.test_dir, "toc.ncx")
         self.assertTrue(os.path.isfile(toc_expected))
-        self.assertTrue(os.path.isdir(test_dir))
-        toc_target = os.path.join(test_dir, "toc.ncx")
-        shutil.copyfile(toc_original, toc_target)
-        self.sg.write_toc()
+        self.assertFalse(os.path.isfile(toc_created))
 
+        self.sg.write_toc()
+        self.assertTrue(os.path.isfile(toc_created))
         tixi_expected = Tixi()
         tixi_expected.open(toc_expected)
         tixi_result = Tixi()
-        tixi_result.open(toc_target)
+        tixi_result.open(toc_created)
 
         self.assertEqual(tixi_expected.exportDocumentAsString(),
                          tixi_result.exportDocumentAsString())
 
-        os.remove(toc_target)
+        os.remove(toc_created)
 
 
 if __name__ == '__main__':
