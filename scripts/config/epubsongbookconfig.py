@@ -128,16 +128,17 @@ class EpubSongbookConfig():
             file = os.path.abspath(self.tixi.getDocumentPath())
             rel = self.dir_out
             # Get the absolute path built from the input file location and the dir_out
-            self.dir_out = os.path.normpath(os.path.join(file, os.path.relpath(rel, file)))
+            self.dir_out = os.path.normpath(os.path.join(file, rel))
 
         shutil.rmtree(self.dir_out, ignore_errors=True)
         self.dir_text = os.path.join(self.dir_out, "text")
+        os.makedirs(self.dir_text, exist_ok=True)
 
     def placeEssentialFiles(self):
 
         # Do not check for template existence. If it does not, an error will be thrown
         shutil.copytree(self.template_dir, self.dir_out)
-        os.makedirs(self.dir_text)
+        os.makedirs(self.dir_text, exist_ok=True)
 
         # Write the mimetype from scratch. It's not too long after all...
         with open(os.path.join(self.dir_out, "mimetype"), "w") as mime:
