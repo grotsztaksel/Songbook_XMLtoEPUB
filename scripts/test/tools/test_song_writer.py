@@ -255,6 +255,56 @@ class TestSongWriter(unittest.TestCase):
         self.assertEqual(expectedTixi.exportDocumentAsString(),
                          writer.tixi.exportDocumentAsString())
 
+    def test_write_links(self):
+        expected_html = """
+        <?xml version="1.0"?>
+        <html xmlns="http://www.w3.org/1999/xhtml">
+        <head>
+        <title>My Songbook</title>
+        <link rel="stylesheet" type="text/css" href="../songbook.css"/>
+        </head>
+        <body>
+        <h3>See also:</h3>
+        <p class="links">
+            <ul>
+                <li><a href="song_file_3.xhtml">Song A</a><span style="font-size:12px">(John Doe)</span></li>
+                <li><a href="song_file_6.xhtml">Song A</a><span style="font-size:12px">(Mike Moo)</span></li>
+                <li><a href="song_file_9.xhtml">Song ABBA</a><span style="font-size:12px">(John Doe)</span></li>
+            </ul>
+        </p>
+        </body>
+        </html>
+        """
+
+        src_tixi = Tixi()
+        src_tixi.open("test_song_src.xml", recursive=True)
+        songPath = "/songbook/section[1]/section[1]/song[2]"
+        writer = SongWriter(src_tixi, self.settings, songPath)
+        writer.tixi.createElement(writer.root, "body")
+        empty_html = writer.tixi.exportDocumentAsString()
+
+        # There are no links defined in the song. Should do nothing
+        writer.write_links()
+        self.assertEqual(empty_html, writer.tixi.exportDocumentAsString())
+
+        # Add links in the investigated song
+        lPath = src_tixi.getNewElementPathAtIndex(songPath, "link", 1)
+        src_tixi.addTextAttribute(lPath, "title", "Song A")
+        lPath = src_tixi.getNewElementPathAtIndex(songPath, "link", 2)
+        src_tixi.addTextAttribute(lPath, "title", "Song ABBA")
+
+        # Need to add fake xhtml attributes, otherwise the AuthorsWriter will bomb out
+        i = 0
+        for path in src_tixi.getPathsFromXPathExpression("//song"):
+            i += 1
+            src_tixi.addTextAttribute(path, "xhtml", "song_file_{}.xhtml".format(i))
+
+        expectedTixi = Tixi()
+        expectedTixi.openString(expected_html.strip())
+        writer.write_links()
+        self.assertEqual(expectedTixi.exportDocumentAsString(),
+                         writer.tixi.exportDocumentAsString())
+
     def test_identifyLinesWithChords(self):
         # Need to initialize the writer to access the self.CS; Tixi and target path to not matter
         src_tixi = Tixi()
