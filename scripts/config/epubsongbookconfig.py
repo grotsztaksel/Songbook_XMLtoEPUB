@@ -120,19 +120,18 @@ class EpubSongbookConfig():
                  "CHORDS_BESIDE": ChordMode.CHORDS_BESIDE,
                  "NO_CHORDS": ChordMode.NO_CHORDS}[self.tixi.getTextElement(path)]
 
-    def createOutputDir(self):
+    def defineOutputDir(self):
         """Use the settings to create output directory and place the essential files in it
         """
 
         if not os.path.isabs(self.dir_out):
-            file = os.path.abspath(self.tixi.getDocumentPath())
+            file = os.path.abspath(os.path.dirname(self.tixi.getDocumentPath()))
             rel = self.dir_out
             # Get the absolute path built from the input file location and the dir_out
             self.dir_out = os.path.normpath(os.path.join(file, rel))
 
         shutil.rmtree(self.dir_out, ignore_errors=True)
         self.dir_text = os.path.join(self.dir_out, "text")
-        os.makedirs(self.dir_text, exist_ok=True)
 
     def placeEssentialFiles(self):
 
