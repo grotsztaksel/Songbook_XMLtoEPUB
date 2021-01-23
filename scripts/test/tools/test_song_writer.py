@@ -30,11 +30,11 @@ class TestSongWriter(unittest.TestCase):
 
     def test_write_song_file(self):
         expectedTixi = Tixi()
-        expectedTixi.open("expected_test_song.xhtml")
+        expectedTixi.open("resources/expected_test_song.xhtml")
         expectedTixi.registerNamespace("http://www.w3.org/1999/xhtml", "x")
 
         src_tixi = Tixi()
-        src_tixi.open("test_song.xml")
+        src_tixi.open("resources/test_song.xml")
 
         writer = SongWriter(src_tixi, self.settings, "/song")
 
@@ -125,13 +125,13 @@ class TestSongWriter(unittest.TestCase):
 
     def test_write_song_part(self):
         src_tixi = Tixi()
-        src_tixi.open("test_song.xml")
+        src_tixi.open("resources/test_song.xml")
         writer = SongWriter(src_tixi, self.settings, "/song")
         writer.tixi.createElement("/html", "body")
         # "/html" is ok, because the function doesn't really check where the target is
 
         expectedTixi = Tixi()
-        expectedTixi.open("expected_test_song.xhtml")
+        expectedTixi.open("resources/expected_test_song.xhtml")
         expectedTixi.registerNamespace("http://www.w3.org/1999/xhtml", "x")
         # Need to trim it a little - don't want things we're not checking
         expectedTixi.removeElement("/x:html/x:body/x:h1")
@@ -146,13 +146,13 @@ class TestSongWriter(unittest.TestCase):
 
     def test_format_song_part(self):
         src_tixi = Tixi()
-        src_tixi.open("test_song.xml")
+        src_tixi.open("resources/test_song.xml")
         writer = SongWriter(src_tixi, self.settings, "/song")
         writer.tixi.createElement("/html", "body")
         # "/html" is ok, because the function doesn't really check where the target is
 
         expectedTixi = Tixi()
-        expectedTixi.open("expected_test_song.xhtml")
+        expectedTixi.open("resources/expected_test_song.xhtml")
         expectedTixi.registerNamespace("http://www.w3.org/1999/xhtml", "x")
         # Need to trim it a little - don't want things we're not checking
         expectedTixi.removeElement("/x:html/x:body/x:h1")
@@ -170,14 +170,14 @@ class TestSongWriter(unittest.TestCase):
 
     def test_write_chords_above(self):
         src_tixi = Tixi()
-        src_tixi.open("test_song.xml")
+        src_tixi.open("resources/test_song.xml")
         writer = SongWriter(src_tixi, self.settings, "/song")
         writer.tixi.createElement("/html", "body")
         # "/html" is ok, because the function doesn't really check where the target is
         writer.write_chords_above("/song/verse[1]", "/html/body")
 
         expectedTixi = Tixi()
-        expectedTixi.open("expected_test_song.xhtml")
+        expectedTixi.open("resources/expected_test_song.xhtml")
         expectedTixi.registerNamespace("http://www.w3.org/1999/xhtml", "x")
         # Need to trim it a little - don't want things we're not checking
         expectedTixi.removeElement("/x:html/x:body/x:h1")
@@ -199,14 +199,14 @@ class TestSongWriter(unittest.TestCase):
 
     def test_write_chors_beside(self):
         src_tixi = Tixi()
-        src_tixi.open("test_song.xml")
+        src_tixi.open("resources/test_song.xml")
         writer = SongWriter(src_tixi, self.settings, "/song")
         writer.tixi.createElement("/html", "body")
         # "/html" is ok, because the function doesn't really check where the target is
         writer.write_chords_beside("/song/chorus", "/html/body")
 
         expectedTixi = Tixi()
-        expectedTixi.open("expected_test_song.xhtml")
+        expectedTixi.open("resources/expected_test_song.xhtml")
         expectedTixi.registerNamespace("http://www.w3.org/1999/xhtml", "x")
         # Need to trim it a little - don't want things we're not checking
         expectedTixi.removeElement("/x:html/x:body/x:h1")
@@ -228,14 +228,14 @@ class TestSongWriter(unittest.TestCase):
 
     def test_write_without_chords(self):
         src_tixi = Tixi()
-        src_tixi.open("test_song.xml")
+        src_tixi.open("resources/test_song.xml")
         writer = SongWriter(src_tixi, self.settings, "/song")
         writer.tixi.createElement("/html", "body")
         # "/html" is ok, because the function doesn't really check where the target is
         writer.write_without_chords("/song/verse[2]", "/html/body")
 
         expectedTixi = Tixi()
-        expectedTixi.open("expected_test_song.xhtml")
+        expectedTixi.open("resources/expected_test_song.xhtml")
         expectedTixi.registerNamespace("http://www.w3.org/1999/xhtml", "x")
         # Need to trim it a little - don't want things we're not checking
         expectedTixi.removeElement("/x:html/x:body/x:h1")
@@ -277,7 +277,7 @@ class TestSongWriter(unittest.TestCase):
         """
 
         src_tixi = Tixi()
-        src_tixi.open("test_song_src.xml", recursive=True)
+        src_tixi.open("resources/test_song_src.xml", recursive=True)
         songPath = "/songbook/section[1]/section[1]/song[2]"
         writer = SongWriter(src_tixi, self.settings, songPath)
         writer.tixi.createElement(writer.root, "body")
@@ -308,7 +308,7 @@ class TestSongWriter(unittest.TestCase):
     def test_identifyLinesWithChords(self):
         # Need to initialize the writer to access the self.CS; Tixi and target path to not matter
         src_tixi = Tixi()
-        src_tixi.open("test_song.xml")
+        src_tixi.open("resources/test_song.xml")
         writer = SongWriter(src_tixi, self.settings, "/song")
 
         text = "\n".join(["Line 1",

@@ -14,7 +14,7 @@ from tools.index_authors_writer import AuthorsWriter
 
 class TestAuthorsWriter(unittest.TestCase):
     def setUp(self):
-        self.src_file = os.path.join(os.path.dirname(__file__), "test_song_src.xml")
+        self.src_file = os.path.join(os.path.dirname(__file__), "resources", "test_song_src.xml")
         tixi = Tixi()
         tixi.open(self.src_file, recursive=True)
         self.settings = EpubSongbookConfig(tixi)
@@ -70,7 +70,7 @@ class TestAuthorsWriter(unittest.TestCase):
         self.assertEqual("Led Zeppelin", AuthorsWriter.standardize_author_name("Led Zeppelin", isBandName=True))
 
     def test_write_index(self):
-        file_to_compare = os.path.join(os.path.dirname(__file__), "expected_test_index.xhtml")
+        file_to_compare = os.path.join(os.path.dirname(__file__), "resources", "expected_test_index.xhtml")
         tixi = Tixi()
         tixi.open(file_to_compare)
 
