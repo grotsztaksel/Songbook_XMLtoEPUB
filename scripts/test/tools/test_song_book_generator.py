@@ -19,12 +19,16 @@ Song = namedtuple("Song", ["file", "title", "xml"])
 
 class TestSongBookGenerator(unittest.TestCase):
     def setUp(self):
-        self.test_song_src = os.path.join(os.path.abspath(os.path.dirname(__file__)), "test_song_src.xml")
+        self.test_song_src = os.path.join(os.path.abspath(os.path.dirname(__file__)), "resources", "test_song_src.xml")
         self.test_src2 = self.test_song_src + "2"
+        self.test_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "test_dir")
         self.sg = SongBookGenerator(self.test_song_src)
+        # Overwrite the output directory
+        self.sg.settings.dir_out = self.test_dir
+
 
     def tearDown(self):
-        shutil.rmtree(self.sg.settings.dir_out, ignore_errors=True)
+        shutil.rmtree(self.test_dir, ignore_errors=True)
         if os.path.isfile(self.test_src2):
             os.remove(self.test_src2)
 
@@ -92,14 +96,14 @@ class TestSongBookGenerator(unittest.TestCase):
             self.assertEqual(item.file, self.sg.tixi.getTextAttribute(item.xml, "xhtml"))
 
     def test_createTwoWayLinks(self):
-        links_start = {"/songbook/section[1]/section[1]/song[1]/link": "Song B",
+        links_start = {"/songbook/section[1]/section[1]/song[2]/link": "Song B",
                        "/songbook/section[1]/section[2]/song[1]/link": None,
                        "/songbook/section[1]/section[2]/song[2]/link": "No Such Title",
                        "/songbook/section[2]/song[1]/link": None,
                        "/songbook/section[2]/song[2]/link": "Song A"}
 
-        links_end = {"/songbook/section[1]/section[1]/song[1]/link[1]": "Song B",
-                     "/songbook/section[1]/section[1]/song[1]/link[2]": "Song ABBA",
+        links_end = {"/songbook/section[1]/section[1]/song[2]/link[1]": "Song B",
+                     "/songbook/section[1]/section[1]/song[2]/link[2]": "Song ABBA",
                      "/songbook/section[1]/section[2]/song[1]/link": "Song A",
                      "/songbook/section[1]/section[2]/song[2]/link": None,
                      "/songbook/section[2]/song[1]/link[1]": "Song ABBA",
@@ -111,7 +115,7 @@ class TestSongBookGenerator(unittest.TestCase):
         for links_dict in [links_start, links_end]:
             for i, path in enumerate(links_dict.keys()):
                 link_exists = bool(links_dict[path])
-                self.assertEqual(link_exists, tixi.checkElement(path), "Run: {}, path {}".format(run, i + 1))
+                self.assertEqual(link_exists, tixi.checkElement(path), "Run: {}, path {}: {}".format(run, i + 1, path))
                 if link_exists:
                     title = links_dict[path]
                     try:
@@ -124,18 +128,15 @@ class TestSongBookGenerator(unittest.TestCase):
             run = "end"
 
     def test_write_metadata(self):
-        # First copy the toc.ncx to the test dir and use it.
-        opf_original = os.path.join(CFG.OUTPUT_DIR, "metadata.opf")
-        opf_expected = os.path.join(os.path.dirname(__file__), "expected_opf.opf")
-        test_dir = os.path.dirname(CFG.SONG_SRC_XML)
-        CFG.OUTPUT_DIR = test_dir
-        self.assertTrue(os.path.isfile(opf_original))
-        self.assertTrue(os.path.isfile(opf_expected))
-        self.assertTrue(os.path.isdir(test_dir))
-        opf_target = os.path.join(test_dir, "metadata.opf")
-        shutil.copyfile(opf_original, opf_target)
+
+        opf_expected = os.path.join(self.test_dir, "expected_opf.opf")
+
+
+        self.assertFalse(os.path.isfile(opf_expected))
+
 
         self.sg.write_metadata()
+        self.assertTrue(os.path.isfile(opf_expected))
 
         tixi_expected = Tixi()
         tixi_expected.open(opf_expected)
