@@ -69,6 +69,16 @@ class TestAuthorsWriter(unittest.TestCase):
         self.assertEqual("Cher", AuthorsWriter.standardize_author_name("Cher"))
         self.assertEqual("Led Zeppelin", AuthorsWriter.standardize_author_name("Led Zeppelin", isBandName=True))
 
+    def test_write_index(self):
+        file_to_compare = os.path.join(os.path.dirname(__file__), "expected_test_index.xhtml")
+        tixi = Tixi()
+        tixi.open(file_to_compare)
+
+        self.writer.write_index()
+
+        self.assertEqual(tixi.exportDocumentAsString(),
+                         self.writer.tixi.exportDocumentAsString())
+
 
 if __name__ == '__main__':
     unittest.main()
