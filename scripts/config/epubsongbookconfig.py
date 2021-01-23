@@ -109,7 +109,10 @@ class EpubSongbookConfig():
         # ToDo: Need to find a better way to loop over these attributes
         path = spath + "/max_songs"
         if self.tixi.checkElement(path):
-            self.maxsongs = int(self.tixi.getTextElement(path))
+            try:
+                self.maxsongs = int(self.tixi.getTextElement(path))
+            except ValueError:
+                pass
         path = spath + "/preferred_chord_mode"
         if self.tixi.checkElement(path):
             self.chordType = \
