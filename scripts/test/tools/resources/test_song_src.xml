@@ -2,6 +2,7 @@
 <songbook>
     <settings>
         <prefered_chords_mode>CHORDS_ABOVE</prefered_chords_mode>
+        <output_dir>../test_dir</output_dir>
     </settings>
     <section title="Section 1" chord_mode="CHORDS_BESIDE">
         <section title="Section 1.1" chord_mode="CHORDS_BESIDE">
