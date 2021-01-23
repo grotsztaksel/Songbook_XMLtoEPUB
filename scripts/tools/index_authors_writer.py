@@ -66,20 +66,19 @@ class AuthorsWriter(HtmlWriter):
                 if self.src_tixi.checkAttribute(path, attr):
                     authors = self.src_tixi.getTextAttribute(path, attr).strip()
                     if isBand:
-                        authors = list(authors)
+                        authors = [authors]
                     else:
                         authors = authors.split(";")
 
                     for a in authors:
                         author = a.strip()
-                        if author not in self.standardized_author_names:
-                            stdName = AuthorsWriter.standardize_author_name(author, isBand)
-                            self.standardized_author_names[author] = stdName
+                        stdName = AuthorsWriter.standardize_author_name(author, isBand)
+                        self.standardized_author_names[author] = stdName
 
-                            title = self.src_tixi.getTextAttribute(path, "title")
-                            file = self.src_tixi.getTextAttribute(path, "xhtml")
-                            if stdName not in self.songs_by_author:
-                                self.songs_by_author[stdName] = dict()
+                        title = self.src_tixi.getTextAttribute(path, "title")
+                        file = self.src_tixi.getTextAttribute(path, "xhtml")
+                        if stdName not in self.songs_by_author:
+                            self.songs_by_author[stdName] = dict()
                         self.songs_by_author[self.standardized_author_names[author]][title] = file
 
     def write_index(self):
