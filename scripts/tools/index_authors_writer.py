@@ -22,6 +22,7 @@ class AuthorsWriter(HtmlWriter):
         self.songs_by_author = dict()
         self.findSongsByAuthors()
 
+    #
     @staticmethod
     def standardize_author_name(name, isBandName=False):
         """Standardize author name:
@@ -54,6 +55,7 @@ class AuthorsWriter(HtmlWriter):
         newName.extend(names)
         return " ".join(newName)
 
+    #
     def findSongsByAuthors(self):
         """For each author name in the dictionary, find the songs associated with that name. Then, find
            the standardized name and create a list (so that it can be sorted) of tuples (title, file)
@@ -81,6 +83,7 @@ class AuthorsWriter(HtmlWriter):
                             self.songs_by_author[stdName] = dict()
                         self.songs_by_author[self.standardized_author_names[author]][title] = file
 
+    #
     def write_index(self):
         """Write the whole block of the index"""
         bPath = self.tixi.getNewElementPath("/html", "body")

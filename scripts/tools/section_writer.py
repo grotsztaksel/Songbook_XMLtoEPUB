@@ -16,11 +16,11 @@ from .html_writer import HtmlWriter
 
 class SectionWriter(HtmlWriter):
     def __init__(self, tixi: Tixi, settings: EpubSongbookConfig, path: str):
-        super(SectionWriter, self).__init__(tixi,settings)
+        super(SectionWriter, self).__init__(tixi, settings)
 
         self.src_path = path
 
-
+    #
     def write_section_file(self, fileName):
         """
         Read the xml node for the section in and write a valid HTML file out of it in the desired location
@@ -32,6 +32,7 @@ class SectionWriter(HtmlWriter):
 
         self.saveFile(os.path.join(self.settings.dir_text, fileName))
 
+    #
     def write_toc(self):
         # <body/>
         self.tixi.createElement(self.root, "body")

@@ -25,6 +25,7 @@ class ChordMode(Enum):
     CHORDS_BESIDE = 1
     NO_CHORDS = 2
 
+    #
     @staticmethod
     def get(text):
         """Convert a text value (e.g. from the text attribute) to an Enum value"""
@@ -35,6 +36,7 @@ class ChordMode(Enum):
         elif text == "NO_CHORDS":
             return ChordMode.NO_CHORDS
 
+    #
     def __str__(self):
         if self == ChordMode.CHORDS_ABOVE:
             return "CHORDS_ABOVE"
@@ -81,6 +83,7 @@ class EpubSongbookConfig():
 
         self._getSettings()
 
+    #
     def _getSettings(self):
         """Try reading the settings written in the input file.
         If a given setting is present, override the default one """
@@ -124,6 +127,7 @@ class EpubSongbookConfig():
                  "CHORDS_BESIDE": ChordMode.CHORDS_BESIDE,
                  "NO_CHORDS": ChordMode.NO_CHORDS}[self.tixi.getTextElement(path)]
 
+    #
     def defineOutputDir(self):
         """Use the settings to create output directory and place the essential files in it
         """
@@ -137,6 +141,7 @@ class EpubSongbookConfig():
         shutil.rmtree(self.dir_out, ignore_errors=True)
         self.dir_text = os.path.join(self.dir_out, "text")
 
+    #
     def placeEssentialFiles(self):
 
         # Do not check for template existence. If it does not, an error will be thrown
@@ -160,6 +165,7 @@ class EpubSongbookConfig():
         with open(meta, "w", encoding='utf8') as f:
             f.write(metadata)
 
+    #
     def setupAttributes(self):
         """Use the settings to add attributes to the toplevel elements of the songbook, so that they can be later
         overriden

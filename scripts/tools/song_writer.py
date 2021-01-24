@@ -26,6 +26,7 @@ class SongWriter(HtmlWriter):
 
         self.mode = ChordMode.get(self.src_tixi.getInheritedAttribute(path, "chord_mode"))
 
+    #
     def write_song_file(self, fileName) -> bool:
         """
         Read the xml node in song_path and write a valid HTML file out of it in the desired location
@@ -45,6 +46,7 @@ class SongWriter(HtmlWriter):
 
         self.saveFile(os.path.join(self.settings.dir_text, fileName))
 
+    #
     def write_song_header(self, title):
 
         if self.src_tixi.checkAttribute(self.src_path, "band"):
@@ -86,6 +88,7 @@ class SongWriter(HtmlWriter):
         pPath = self.tixi.getNewTextElementPath(bpath, "p", text)
         self.tixi.addTextAttribute(pPath, "class", "authors")
 
+    #
     def write_song_part(self, srcPath):
         """Write either a verse or chorus of the song, applying the expected formatting"""
         # voc stands for Verse Or Chorus
@@ -99,6 +102,7 @@ class SongWriter(HtmlWriter):
         path = "{}/p[{}]".format(path, n)
         self.tixi.addTextAttribute(path, "class", voc)
 
+    #
     def format_song_part(self, srcPath, targetPath, mode=None):
         """
         Basing on the global settings, read the content of the verse/chorus 
@@ -128,6 +132,7 @@ class SongWriter(HtmlWriter):
         if mode == ChordMode.NO_CHORDS:
             self.write_without_chords(srcPath, targetPath)
 
+    #
     def write_chords_above(self, srcPath, targetPath):
         """
         In this format, the <p/> element contains N <table/> elements, where
@@ -190,6 +195,7 @@ class SongWriter(HtmlWriter):
 
         return True
 
+    #
     def write_chords_beside(self, srcPath, targetPath):
         """
         In this format, the <p/> element contains one <table/> element, where
@@ -226,6 +232,7 @@ class SongWriter(HtmlWriter):
 
         return True
 
+    #
     def write_without_chords(self, srcPath, targetPath):
         """
         Get rid of all chord markers and ignore the presence of chords. 
@@ -243,6 +250,7 @@ class SongWriter(HtmlWriter):
                 self.tixi.createElement(pPath, "br")
         return True
 
+    #
     def write_links(self):
         """If the song contains <link> elements, find all other songs that have the same title as mentioned in the link
             and create approptiate <a href=...> elements
@@ -318,6 +326,7 @@ class SongWriter(HtmlWriter):
                     sPath = self.tixi.getNewTextElementPath(liPath, "span", authors)
                     self.tixi.addTextAttribute(sPath, "style", "font-size:12px")
 
+    #
     def _identifyLinesWithChords(self, text: str) -> list:
         """
         Split the text on newlines and return a list of items.

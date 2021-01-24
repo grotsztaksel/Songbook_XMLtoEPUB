@@ -98,6 +98,7 @@ class SongBookGenerator(object):
                     continue
                 self.tixi.addTextAttribute(path, attr, value1)
 
+    #
     def write_indexes(self):
         writer = AuthorsWriter(self.tixi, self.settings)
         writer.write_index()
@@ -107,6 +108,7 @@ class SongBookGenerator(object):
         writer.write_index()
         writer.saveFile(os.path.join(self.settings.dir_out, "idx_songs.xhtml"))
 
+    #
     def write_songs(self):
         """
         Read the source file and for each song defined, write a properly formatted
@@ -120,6 +122,7 @@ class SongBookGenerator(object):
             writer = SongWriter(self.tixi, self.settings, xml)
             writer.write_song_file(file)
 
+    #
     def write_sections(self):
         """
         Read the source file and for each section defined, write a properly formatted
