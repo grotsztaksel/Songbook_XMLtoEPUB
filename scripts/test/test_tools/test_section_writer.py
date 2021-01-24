@@ -60,7 +60,7 @@ class TestSectionWriter(unittest.TestCase):
               </ul>
             </p>
           </body>
-        </html>""".replace("        <","<").strip()
+        </html>""".replace("        <", "<").strip()
 
         sw = SectionWriter(self.tixi, self.sg.settings, "/songbook/section[1]")
         sw.write_section_file(self.test_output)
@@ -70,19 +70,6 @@ class TestSectionWriter(unittest.TestCase):
             content = f.read()
 
         self.assertEqual(expected, content.strip())
-
-
-    def test_write_html_header(self):
-        sw = SectionWriter(self.tixi, self.sg.settings, "/songbook/section[1]")
-
-        expectedTixi = Tixi()
-        expectedTixi.openString("""<?xml version="1.0"?><html xmlns="http://www.w3.org/1999/xhtml">
-        <head>
-        <title>My Songbook</title><link rel="stylesheet" type="text/css" href="../songbook.css"/>
-        </head></html>""")
-
-        self.assertEqual(expectedTixi.exportDocumentAsString(),
-                         sw.tixi.exportDocumentAsString())
 
     def test_write_toc(self):
         sw = SectionWriter(self.tixi, self.sg.settings, "/songbook/section[1]")
