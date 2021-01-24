@@ -98,6 +98,33 @@ class TestSectionWriter(unittest.TestCase):
         self.assertEqual(expectedTixi.exportDocumentAsString(),
                          sw.tixi.exportDocumentAsString())
 
+    def test_createUl(self):
+        sw = SectionWriter(self.tixi, self.sg.settings, "/songbook/section[1]")
+        # Replace writer's tixi with an empty one
+        tixi = Tixi()
+        tixi.create("root")
+
+        sw.tixi = tixi
+        sw._createUl("/root", "/songbook/section[1]")
+
+        expected_str = """<root>
+                        <ul><li><a href="sec_section_1.1.xhtml">Section 1.1</a>
+                                 <ul><li><a href="sng_song_a.xhtml">Song A</a></li></ul>
+                            </li>
+                            <li><a href="sec_section_1.2.xhtml">Section 1.2</a>
+                                <ul>
+                                    <li><a href="sng_song_b.xhtml">Song B</a></li>
+                                    <li><a href="sng_song_c.xhtml">Song C</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                        </root>"""
+        expectedTixi = Tixi()
+        expectedTixi.openString(expected_str)
+
+        self.assertEqual(expectedTixi.exportDocumentAsString(),
+                         sw.tixi.exportDocumentAsString())
+
 
 if __name__ == '__main__':
     unittest.main()
