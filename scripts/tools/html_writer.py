@@ -49,7 +49,9 @@ class HtmlWriter(object):
         # Now regular expressions
 
         # fold the table rows <tr><td></td></tr>into a single line
-        text = re.sub(r"(<\/?t[dr].*?>)\s*(<\/?t[dr])", r"\1\2", text)
+        text = re.sub(r"(<\/?t[dr].*?>)\s+(<\/?t[dr])", r"\1\2", text)
+        # repeat to catch also the overlapping tokens: possible if td is empty (<td/>)
+        text = re.sub(r"(<\/?t[dr].*?>)\s+(<\/?t[dr])", r"\1\2", text)
 
         file = open(os.path.join(fileName), "w", encoding='utf8')
         file.write(text)
