@@ -61,7 +61,7 @@ class TestSchema(unittest.TestCase):
 
     def test_testXMLschemaCompliant(self):
         test_xml_file = os.path.join(os.path.dirname(__file__),
-                                     "..", "tools","resources", "test_song_src.xml")
+                                     "..", "test_tools","resources", "test_song_src.xml")
         self.assertTrue(os.path.isfile(test_xml_file))
         tixi = Tixi()
         tixi.open(test_xml_file, recursive=True)

@@ -6,7 +6,7 @@ Created on 01.12.2020 19:07
 """
 
 import unittest
-from ...split_song_xml import SourceSplitter
+from split_song_xml import SourceSplitter
 
 
 class MyTestCase(unittest.TestCase):

@@ -29,7 +29,7 @@ class TestChordMode(unittest.TestCase):
 
 class TestEpubSongbookConfig(unittest.TestCase):
     def setUp(self):
-        self.text_xml = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "tools", "resources",
+        self.text_xml = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "test_tools", "resources",
                                      "test_song_src.xml")
 
         self.assertTrue(os.path.isfile(self.text_xml))
