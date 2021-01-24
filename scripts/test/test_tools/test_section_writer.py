@@ -28,7 +28,7 @@ class TestSectionWriter(unittest.TestCase):
             os.remove(self.test_output)
 
     def test_write_section_file(self):
-        expected = """<?xml version="1.0"?>
+        expected = """<?xml version="1.0" encoding='utf-8'?>
         <html xmlns="http://www.w3.org/1999/xhtml">
           <head>
             <title>My Songbook</title>

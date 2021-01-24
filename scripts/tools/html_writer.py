@@ -40,6 +40,10 @@ class HtmlWriter(object):
     def saveFile(self, fileName):
         """Apply specific formatting and save the content of the self.self.tixi to a file filename"""
         text = self.tixi.exportDocumentAsString()
+
+        # First of all, add encoding if present
+        if self.settings.encoding is not None:
+            text = text[:19] + " encoding='{}'".format(self.settings.encoding) + text[19:]
         replaceRules = {
             "&lt;br/&gt;": "<br/>",
             "&amp;": "&"

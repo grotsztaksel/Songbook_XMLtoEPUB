@@ -71,6 +71,7 @@ class EpubSongbookConfig():
 
         self.chordType = ChordMode.CHORDS_BESIDE
 
+        self.encoding = "utf-8"
         self.dir_out = "output"
         self.dir_text = None
         self.template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../", "template"))
@@ -93,6 +94,7 @@ class EpubSongbookConfig():
                     "alphabedical_index_title": "alphabedical_index_title",
                     "links_header": "links_header",
                     "language": "lang",
+                    "encoding": "encoding",
                     "output_dir": "dir_out",
                     "template": "template_dir",
                     "lyrics_string": "lyrics_string",
@@ -104,6 +106,8 @@ class EpubSongbookConfig():
             path = spath + "/" + xmlName
             if self.tixi.checkElement(path):
                 value = self.tixi.getTextElement(path)
+                if xmlName == "encoding" and value == "":
+                    value = None
                 setattr(self, myName, value)
 
         # ToDo: Need to find a better way to loop over these attributes

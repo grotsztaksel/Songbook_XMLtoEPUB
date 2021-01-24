@@ -173,6 +173,52 @@ class TestSongBookGenerator(unittest.TestCase):
 
         os.remove(toc_created)
 
+    def test_createNavPoint(self):
+        tixi_ncx = Tixi()
+        tixi_ncx.create("root")
+
+        self.sg.id = 365
+        self.sg._createNavPoint("/songbook", "/root", tixi_ncx)
+
+        expected = """
+        <?xml version='1.0'?>
+        <root>
+        <navPoint id="num_365" playOrder="365"><navLabel><text>Section 1</text></navLabel><content src="text/sec_section_1.xhtml"/>
+        <navPoint id="num_366" playOrder="366"><navLabel><text>Section 1.1</text></navLabel><content src="text/sec_section_1.1.xhtml"/>
+        <navPoint id="num_367" playOrder="367"><navLabel><text>My Test Song</text></navLabel><content src="text/sng_my_test_song.xhtml"/></navPoint>
+        <navPoint id="num_368" playOrder="368"><navLabel><text>Song A</text></navLabel><content src="text/sng_song_a.xhtml"/></navPoint>
+        </navPoint>
+        <navPoint id="num_369" playOrder="369"><navLabel><text>Section 1.2</text></navLabel><content src="text/sec_section_1.2.xhtml"/>
+        <navPoint id="num_370" playOrder="370"><navLabel><text>Song B</text></navLabel><content src="text/sng_song_b.xhtml"/></navPoint>
+        <navPoint id="num_371" playOrder="371"><navLabel><text>Song C</text></navLabel><content src="text/sng_song_c.xhtml"/></navPoint>
+        </navPoint>
+        </navPoint>
+        <navPoint id="num_372" playOrder="372"><navLabel><text>Section 2</text></navLabel><content src="text/sec_section_2.xhtml"/>
+        <navPoint id="num_373" playOrder="373"><navLabel><text>Song A</text></navLabel><content src="text/sng_song_a_1.xhtml"/></navPoint>
+        <navPoint id="num_374" playOrder="374"><navLabel><text>Song ABBA</text></navLabel><content src="text/sng_song_abba.xhtml"/></navPoint>
+        </navPoint>
+        </root>""".strip()
+        expected_tixi = Tixi()
+        expected_tixi.openString(expected)
+
+        self.assertEqual(expected_tixi.exportDocumentAsString(),
+                         tixi_ncx.exportDocumentAsString())
+
+    def test_createEmptyToc(self):
+        expected="""
+        <?xml version='1.0'?>
+        <ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1" xml:lang="en">
+        <head/><docTitle><text>My Songbook</text></docTitle>
+        </ncx>""".strip()
+
+        etixi = Tixi()
+        etixi.openString(expected)
+        output = self.sg._createEmptyToC()
+
+        self.assertEqual(etixi.exportDocumentAsString(),
+                         output.exportDocumentAsString())
+
+
 
 if __name__ == '__main__':
     unittest.main()

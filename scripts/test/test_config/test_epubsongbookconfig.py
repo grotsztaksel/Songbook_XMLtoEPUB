@@ -82,6 +82,7 @@ class TestEpubSongbookConfig(unittest.TestCase):
         self.assertEqual("?", cfg.unknown_author)
         self.assertEqual(getpass.getuser(), cfg.user)
         self.assertEqual("en", cfg.lang)
+        self.assertEqual("utf-8", cfg.encoding)
         self.assertEqual(0, cfg.maxsongs)
         self.assertEqual(ChordMode.CHORDS_BESIDE, cfg.chordType)
         self.assertEqual("../test_dir", cfg.dir_out)
@@ -92,8 +93,10 @@ class TestEpubSongbookConfig(unittest.TestCase):
         self.assertEqual("|", cfg.CI)
 
         self.tixi.updateTextElement("/songbook/settings/max_songs", "14")
+        self.tixi.addTextElement("/songbook/settings", "encoding", "")
         cfg._getSettings()
         self.assertEqual(14, cfg.maxsongs)
+        self.assertIsNone(cfg.encoding)
 
     def test_createOutputDir(self):
         cfg = EpubSongbookConfig(self.tixi)
@@ -187,6 +190,7 @@ class TestEpubSongbookConfig(unittest.TestCase):
             self.assertEqual(bool(chmode), cfg.tixi.checkAttribute(path, "chord_mode"), path)
             if chmode:
                 self.assertEqual(str(chmode), cfg.tixi.getTextAttribute(path, "chord_mode"), path)
+
 
 if __name__ == '__main__':
     unittest.main()

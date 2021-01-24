@@ -75,7 +75,7 @@ class TestHtmlWriter(unittest.TestCase):
         self.assertEqual(html_before, tixi.exportDocumentAsString().strip())
 
         html_after = """
-        <?xml version="1.0"?>
+        <?xml version="1.0" encoding='utf-8'?>
         <html xmlns="http://www.w3.org/1999/xhtml">
             <head>
                 <title>My Songbook</title>

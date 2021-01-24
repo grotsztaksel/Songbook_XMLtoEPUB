@@ -33,6 +33,7 @@ class SongBookGenerator(object):
         self.id = None
         self.getBasicSongInfo()
 
+    #
     def getBasicSongInfo(self):
         # First remove the songs that have attribute include="false"
         xPathToRemove = "//song[@include='false']"
@@ -132,6 +133,7 @@ class SongBookGenerator(object):
             writer = SectionWriter(self.tixi, self.settings, xml)
             writer.write_section_file(file)
 
+    #
     def createTwoWayLinks(self):
         """
             Find all songs that have links to other songs. Then, find that other songs and create links to the songs
@@ -183,6 +185,7 @@ class SongBookGenerator(object):
             for link in reversed(linksToRemove):
                 self.tixi.removeElement(link)
 
+    #
     def write_metadata(self):
         """Cleanup and rewrite the metadata.opf"""
         tixi = Tixi()
@@ -237,6 +240,7 @@ class SongBookGenerator(object):
             tixi.addTextAttribute(path, "idref", id_attr)
         tixi.saveDocument(opf)
 
+    #
     def write_toc(self):
         """Cleanup and rewrite the toc.ncx"""
         tixi = Tixi()
@@ -265,6 +269,7 @@ class SongBookGenerator(object):
 
         tixi.saveDocument(toc)
 
+    #
     def _createNavPoint(self, secsongPath: str, npPath: str, tixi_ncx: Tixi) -> None:
         """
             Recursive helper function creating navPoint elements for each song/section in the source tixi
@@ -297,6 +302,7 @@ class SongBookGenerator(object):
         for path in self.tixi.getPathsFromXPathExpression(xPath):
             self._createNavPoint(path, my_npPath, tixi_ncx)
 
+    #
     def _createEmptyToC(self):
         """Create the empty template for the toc.ncx"""
         tixi = Tixi()

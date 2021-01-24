@@ -20,16 +20,16 @@ class TestSongWriter(unittest.TestCase):
         self.src_all_songs = os.path.join(os.path.dirname(__file__), "resources", "test_song_src.xml")
         self.src_tixi = Tixi()
         self.src_tixi.open(self.src_file)
-        
+
         cfgTixi = Tixi()
         cfgTixi.create("songbook")
-        
+
         self.settings = EpubSongbookConfig(cfgTixi)
         self.settings.dir_text = os.path.dirname(__file__)
         self.settings.CS = ">"
         self.settings.CI = "|"
         self.testFile = os.path.join(os.path.dirname(__file__), "test_output_song.xhtml")
-        
+
         self.expectedTixi = Tixi()
         self.expected_output = os.path.join(os.path.dirname(__file__), "resources", "expected_test_song.xhtml")
         self.expectedTixi.open(self.expected_output)
@@ -42,9 +42,7 @@ class TestSongWriter(unittest.TestCase):
             os.remove(self.testFile)
 
     def test_write_song_file(self):
-
-
-
+        self.writer.settings.encoding = None  # Otherwise the HtmlWriter.saveFile() will append an " encoding='utf-8'"
         self.writer.write_song_file(self.testFile)
 
         self.assertTrue(os.path.isfile(self.testFile))
@@ -175,7 +173,8 @@ class TestSongWriter(unittest.TestCase):
         self.assertEqual("authors", self.expectedTixi.getTextAttribute("/x:html/x:body/x:p[1]", "class"))
         self.expectedTixi.removeElement("/x:html/x:body/x:p[1]")
 
-        self.assertIn("Now a verse without any chords", self.expectedTixi.getTextElement("/x:html/x:body/x:p[2]/x:span[1]"))
+        self.assertIn("Now a verse without any chords",
+                      self.expectedTixi.getTextElement("/x:html/x:body/x:p[2]/x:span[1]"))
         self.expectedTixi.removeElement("/x:html/x:body/x:p[2]")
         # Now removing the last <p/> without checking!
         self.expectedTixi.removeElement("/x:html/x:body/x:p[2]")
