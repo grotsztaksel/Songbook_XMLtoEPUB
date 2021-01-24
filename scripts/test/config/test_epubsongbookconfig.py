@@ -11,7 +11,7 @@ import shutil
 import unittest
 
 from tixi import Tixi
-from ...config import ChordMode, EpubSongbookConfig, epubsongbookconfig
+from config import ChordMode, EpubSongbookConfig, epubsongbookconfig
 
 
 class TestChordMode(unittest.TestCase):
