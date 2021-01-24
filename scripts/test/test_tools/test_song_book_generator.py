@@ -99,6 +99,57 @@ class TestSongBookGenerator(unittest.TestCase):
             self.assertEqual(item.title, self.sg.tixi.getTextAttribute(item.xml, "title"))
             self.assertEqual(item.file, self.sg.tixi.getTextAttribute(item.xml, "xhtml"))
 
+    def test_write_indexes(self):
+        self.assertEqual(self.test_dir, self.sg.settings.dir_out)
+        expected_files = ["idx_authors.xhtml", "idx_songs.xhtml"]
+        for file in expected_files:
+            self.assertFalse(os.path.isfile(os.path.join(self.test_dir, file)))
+
+        self.sg.write_indexes()
+
+        for file in expected_files:
+            self.assertTrue(os.path.isfile(os.path.join(self.test_dir, file)))
+
+    def test_write_songs(self):
+        self.assertEqual(os.path.join(self.test_dir, "text"), self.sg.settings.dir_text)
+        expected_files = ["sec_section_1.xhtml",
+                          "sec_section_1.1.xhtml",
+                          "sng_my_test_song.xhtml",
+                          "sng_song_a.xhtml",
+                          "sec_section_1.2.xhtml",
+                          "sng_song_b.xhtml",
+                          "sng_song_c.xhtml",
+                          "sec_section_2.xhtml",
+                          "sng_song_a_1.xhtml",
+                          "sng_song_abba.xhtml"]
+        for file in expected_files:
+            self.assertFalse(os.path.isfile(os.path.join(self.test_dir, "text", file)))
+
+        self.sg.write_songs()
+
+        for file in expected_files:
+            self.assertEqual(file[:3] == "sng", os.path.isfile(os.path.join(self.test_dir, "text", file)))
+
+    def test_write_sections(self):
+        self.assertEqual(os.path.join(self.test_dir, "text"), self.sg.settings.dir_text)
+        expected_files = ["sec_section_1.xhtml",
+                          "sec_section_1.1.xhtml",
+                          "sng_my_test_song.xhtml",
+                          "sng_song_a.xhtml",
+                          "sec_section_1.2.xhtml",
+                          "sng_song_b.xhtml",
+                          "sng_song_c.xhtml",
+                          "sec_section_2.xhtml",
+                          "sng_song_a_1.xhtml",
+                          "sng_song_abba.xhtml"]
+        for file in expected_files:
+            self.assertFalse(os.path.isfile(os.path.join(self.test_dir, "text", file)))
+
+        self.sg.write_sections()
+
+        for file in expected_files:
+            self.assertEqual(file[:3] == "sec", os.path.isfile(os.path.join(self.test_dir, "text", file)))
+
     def test_createTwoWayLinks(self):
         links_start = {"/songbook/section[1]/section[1]/song[2]/link": "Song B",
                        "/songbook/section[1]/section[2]/song[1]/link": None,
@@ -205,7 +256,7 @@ class TestSongBookGenerator(unittest.TestCase):
                          tixi_ncx.exportDocumentAsString())
 
     def test_createEmptyToc(self):
-        expected="""
+        expected = """
         <?xml version='1.0'?>
         <ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1" xml:lang="en">
         <head/><docTitle><text>My Songbook</text></docTitle>
@@ -217,7 +268,6 @@ class TestSongBookGenerator(unittest.TestCase):
 
         self.assertEqual(etixi.exportDocumentAsString(),
                          output.exportDocumentAsString())
-
 
 
 if __name__ == '__main__':
