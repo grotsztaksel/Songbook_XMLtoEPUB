@@ -40,30 +40,44 @@ class SongBookGenerator(object):
 
     #
     def getBasicSongInfo(self):
+        self._removeIgnoredContent()
+
+        self._findAmbiguousSongsContent()
+
+        self._pullAttributesFromSRCs()
+
+        self._assignXHTMLattributes()
+
+        self._escapeQuoteMarks()
+
+    def _removeIgnoredContent(self):
+        """Remove elements that should not be taken into account while processing the data:
+            -   those with attribute ignore="true"
+            -   those that exceed the max number of songs to be processed
+            -   sections that are empty after previous operations
+        """
         # First remove the songs that have attribute include="false"
         xPathToRemove = "//song[@include='false']"
         for path in reversed(self.tixi.getPathsFromXPathExpression(xPathToRemove)):
             self.tixi.removeElement(path)
-
         xPath = "//song[@title]"
         n = self.tixi.tryXPathEvaluateNodeNumber(xPath)
         print("Found {} songs".format(n))
         if self.N > 0 and n < self.N or self.N == 0:
             self.N = n
-
         # Remove the abundant songs
         while self.tixi.tryXPathEvaluateNodeNumber(xPath) > self.N:
             path = self.tixi.xPathExpressionGetXPath(xPath, self.N + 1)
             self.tixi.removeElement(path)
-
         # Now remove sections that do not have songs inside
         xPath_emptySection = "//section[not(descendant::song)]"
         for path in reversed(self.tixi.getPathsFromXPathExpression(xPath_emptySection)):
             self.tixi.removeElement(path)
-
         print("Will process {} songs".format(self.N))
 
-        # Find songs that have both "src" attribute and some children in the same tixi
+    def _findAmbiguousSongsContent(self):
+        """Find song elements that have both "src" attribute and some children in the same tixi. If such elements
+        are found, raise an error"""
         xPath = "//song[@src]/*"
         wrongPaths = dict()
         for path in self.tixi.getPathsFromXPathExpression(xPath):
@@ -73,7 +87,6 @@ class SongBookGenerator(object):
                 continue
 
             wrongPaths[parent] = self.tixi.getTextAttribute(parent, "title")
-
         message = "\n".join(["{} ({})".format(title, path) for path, title in wrongPaths.items()])
         if message:
             e = TixiException(ReturnCode.NOT_SCHEMA_COMPLIANT)
@@ -81,8 +94,9 @@ class SongBookGenerator(object):
                       "in master XML and in separate src files:\n{}".format(message)
             raise e
 
-        # Check if songs in src files don't have different attributes than song elements in toplevel tixi
-        # and copy these attributes
+    def _pullAttributesFromSRCs(self):
+        """Check if songs in src files don't have different attributes than song elements in toplevel tixi
+        and copy these attributes"""
         xPath = "//song[@src]"
         spath = "/song"
         missingFiles = dict()
@@ -109,12 +123,16 @@ class SongBookGenerator(object):
                     if attrValue != myValue:
                         ambiguousAttributes["{}, {}".format(path, attrName)] = [attrValue, myValue]
 
+    def _assignXHTMLattributes(self):
+        """For each song and section element, add an attribute that will describe what output xhtml file the given
+        song or section should create. The file names are built by replacing spaces in title with underscores and
+        simplifying the UTF characters to ASCII. If file name is already used, the the new will have an increased
+        number appended
+        """
         usedFileNames = []
         xPath = "//*[self::song or self::section][@title]"
 
         for xmlPath in self.tixi.getPathsFromXPathExpression(xPath):
-            if not self.tixi.checkElement(xmlPath):
-                return False
             title = self.tixi.getTextAttribute(xmlPath, "title")
 
             if Tixi.elementName(xmlPath) == "song":
@@ -137,7 +155,8 @@ class SongBookGenerator(object):
 
             self.tixi.addTextAttribute(xmlPath, "xhtml", fileName)
 
-        # replace all single and double quotes in attributes with &apos; and &quot; , respectively
+    def _escapeQuoteMarks(self):
+        """replace all single and double quotes in attributes with &apos; and &quot; , respectively"""
         for path in self.tixi.getPathsFromXPathExpression("//*[@*]"):
             # xpath expression means all elements that have any attributes
             for i in range(self.tixi.getNumberOfAttributes(path)):
