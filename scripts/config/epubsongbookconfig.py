@@ -50,15 +50,22 @@ class EpubSongbookConfig():
     """Class responsible for setting up the output directory: creating or copying basic files like
           metadata, mimetypes, etc.
         This class is NOT responsible for writing the content of the songbook
-
-        The defaults are:
-
      """
 
-    def __init__(self, tixi: Tixi):
+    def __init__(self, tixi: Tixi, xsd_file: str = None):
+        """
+
+        :param tixi: input tixi to find the <settings> element
+        :param xsd_file: XSD schema file (to take default values)
+        """
         self.tixi = tixi
 
-        # Set up defaults
+        self._setup_defaults()
+
+        self._getSettings()
+
+    def _setup_defaults(self):
+        """Set up defaults"""
         self.title = "My Songbook"
         self.alphabedical_index_title = "Alphabetical index of songs"
         self.authors_index_title = "Index of authors"
@@ -70,18 +77,14 @@ class EpubSongbookConfig():
         self.user = getpass.getuser()
         self.lang = "en"
         self.maxsongs = 0  # By default, 0 means that all songs should be scanned
-
         self.chordType = ChordMode.CHORDS_BESIDE
-
         self.encoding = "utf-8"
         self.dir_out = "output"
         self.dir_text = None
         self.template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../", "template"))
-        self.CS = ">"  # [C]hord [S]eparator: character that separates the text from chords lists
-        self.CI = "|"  # [C]hord [I]nsertion point: character indicating the location where the chord should be changed
+        self.CS = "|"  # [C]hord [S]eparator: character that separates the text from chords lists
+        self.CI = "\\"  # [C]hord [I]nsertion point: character indicating the location where the chord should be changed
         #                                      while performing the song
-
-        self._getSettings()
 
     #
     def _getSettings(self):
@@ -102,6 +105,7 @@ class EpubSongbookConfig():
                     "template": "template_dir",
                     "lyrics_string": "lyrics_string",
                     "music_string": "music_string",
+                    "unknown_author": "unknown_author",
                     "chord_separator": "CS",
                     "chord_insertion_character": "CI"}
 
@@ -120,7 +124,7 @@ class EpubSongbookConfig():
                 self.maxsongs = int(self.tixi.getTextElement(path))
             except ValueError:
                 pass
-        path = spath + "/preferred_chord_mode"
+        path = spath + "/prefered_chord_mode"
         if self.tixi.checkElement(path):
             self.chordType = \
                 {"CHORDS_ABOVE": ChordMode.CHORDS_ABOVE,

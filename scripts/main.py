@@ -5,6 +5,7 @@ Spyder Editor
 This is a temporary script file.
 """
 
+import os
 import sys
 
 from tools.song_book_generator import SongBookGenerator
@@ -16,7 +17,10 @@ def main(argv):
     if len(argv) < 2:
         raise IOError("Need an XML file name as input!")
 
-    sg = SongBookGenerator(argv[1])
+    xsd_file = os.path.join(os.path.dirname(__file__), "config", "source_schema.xsd")
+    if not os.path.isfile(xsd_file):
+        xsd_file = None
+    sg = SongBookGenerator(argv[1], xsd_file)
     sg.write_songs()
     sg.write_sections()
     sg.write_metadata()
