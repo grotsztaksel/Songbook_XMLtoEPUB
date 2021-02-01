@@ -71,7 +71,7 @@
                     </xs:restriction>
                 </xs:simpleType>
             </xs:element>
-            <xs:element name="prefered_chords_mode" type="chord_mode" minOccurs="0" maxOccurs="1">
+            <xs:element name="prefered_chord_mode" type="chord_mode" minOccurs="0" maxOccurs="1">
                 <xs:annotation>
                     <xs:documentation>
                         Chord mode to be preferred in all processed songs. Can be overriden by the song's "chords_mode"
@@ -79,11 +79,10 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="output_dir" type="xs:string" minOccurs="0" maxOccurs="1">
+            <xs:element name="output_dir" type="xs:string" default="./output" minOccurs="0" maxOccurs="1">
                 <xs:annotation>
                     <xs:documentation>
-                        Name of the directory where the epub data should be written. If not present, the default value
-                        is used
+                        Name of the directory where the epub data should be written.
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
@@ -106,11 +105,98 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="user" type="xs:string" minOccurs="0" maxOccurs="1">
+            <xs:element name="username" type="xs:string" minOccurs="0" maxOccurs="1">
                 <xs:annotation>
                     <xs:documentation>
                         Name of the user that generated the songbook. If not present, system username will be
                         taken. Will appear in the html files header and in metadata file
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="section_title" type="xs:string" default="Section" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Default title of a section. If a given section does not have attribute "title", then this one
+                        will be used
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="authors_index_title" type="xs:string" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="alphabedical_index_title" type="xs:string" default="Alphabetical index of songs"
+                        minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Title of the alphabetical index of songs
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="links_header" type="xs:string" minOccurs="0" maxOccurs="1" default="See also">
+                <xs:annotation>
+                    <xs:documentation>
+                        Title of the link section in songs. If the song element contains &lt;link/&gt; child(ren), then
+                        the links to these songs will be created in the section.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="language" type="xs:string" default="en" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Main language of the songbook
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="encoding" type="xs:string" default="utf-8" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Encoding used in the output XHTML files. This information is necessary to set the "encoding"
+                        attribute in the XML declaration in all generated files:
+                        &lt;?xml version="1.0" encoding=?&gt;
+                        To prevent any "encoding" attribute, define this element with empty text value
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="lyrics_string" type="xs:string" default="lyrics by:" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        String preceding the name of the author(s) of lyrics
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="music_string" type="xs:string" default="music by:" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        String preceding the name of the author(s) of music
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="unknown_author" type="xs:string" default="?" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        String used to mark the unknown music and/or lyrics author
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="chord_separator" type="xs:string" default="|" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        String (preferably short (preferably single character)) used to separate the lyrics line from
+                        the chords played at that line. The chords themselves should be whitespace separated so that the
+                        tool can recognize them.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="chord_insertion_character" type="xs:string" default="\" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        String (preferably short (preferably single character)) used to mark the position where the
+                        lyrics lines correspond to a given chord. The song elements can be written without these
+                        characters whatsoever, but in such case the mode "CHORDS_ABOVE" will not be available.
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
@@ -138,10 +224,10 @@
                         </xs:documentation>
                     </xs:annotation>
                     <xs:complexType>
-                        <xs:attribute name="src" type="xs:string">
+                        <xs:attribute name="src" type="xs:string" use="required">
                             <xs:annotation>
                                 <xs:documentation>
-                                    Path &amp; name of the source file
+                                    Path (relative) &amp; name of the source file
                                 </xs:documentation>
                             </xs:annotation>
                         </xs:attribute>
@@ -245,6 +331,19 @@
         <xs:attribute name="chord_mode" type="chord_mode" use="optional">
             <xs:annotation>
                 <xs:documentation>If present, overrides the upper level chord mode</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="src" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    Relative path to an xml file, where the song is defined separately. For large song collections it is
+                    recommended to split the XML. Otherwise processing of such single file may be sluggish (depending on
+                    the editor used). Besides, it is easier to organize the content of the songbook (move songs up/down,
+                    adn to/from sections)
+
+                    WARNING: If this attribute is present, then the host element &lt;song/&gt; cannot contain any child
+                    elements!
+                </xs:documentation>
             </xs:annotation>
         </xs:attribute>
         <xs:attribute name="include" type="xs:boolean" default="true">
