@@ -10,7 +10,7 @@ import os
 from collections import namedtuple
 
 from config import EpubSongbookConfig, ChordMode
-from tixi import Tixi
+from tixi import Tixi, TixiException, ReturnCode
 from .html_writer import HtmlWriter
 
 LineWithChords = namedtuple("LineWithChords", ["text", "chords"])
@@ -21,10 +21,25 @@ class SongWriter(HtmlWriter):
         super(SongWriter, self).__init__(tixi, settings)
 
         self.src_path = path
+        if self.src_tixi.checkAttribute(self.src_path, "src"):
+            songFilePath = os.path.join(os.path.dirname(self.src_tixi.getDocumentPath()),
+                                        self.src_tixi.getTextAttribute(self.src_path, "src"))
+            assert os.path.isfile(songFilePath)
+            self.song_tixi = Tixi()
+            self.song_tixi.open(songFilePath)
+            self.song_path = "/song"
+        else:
+            self.song_tixi = self.src_tixi
+            self.song_path = self.src_path
+
         self.CS = self.settings.CS
         self.CI = self.settings.CI
 
-        self.mode = ChordMode.get(self.src_tixi.getInheritedAttribute(path, "chord_mode"))
+        result = self._compareAttributes()
+        if result.code != ReturnCode.SUCCESS:
+            raise result
+
+        self.mode = ChordMode.get(self.src_tixi.getInheritedTextAttribute(path, "chord_mode"))
 
     #
     def write_song_file(self, fileName) -> bool:
@@ -36,10 +51,10 @@ class SongWriter(HtmlWriter):
 
         self.write_song_header(title)
 
-        xpath = self.src_path + "/*[self::verse or self::chorus]"
-        nparts = self.src_tixi.xPathEvaluateNodeNumber(xpath)
+        xpath = self.song_path + "/*[self::verse or self::chorus]"
+        nparts = self.song_tixi.xPathEvaluateNodeNumber(xpath)
         for i in range(1, nparts + 1):
-            path = self.src_tixi.xPathExpressionGetXPath(xpath, i)
+            path = self.song_tixi.xPathExpressionGetXPath(xpath, i)
             self.write_song_part(path)
 
         self.write_links()
@@ -95,7 +110,7 @@ class SongWriter(HtmlWriter):
         voc = srcPath.split("/")[-1]  # Extract the last element in path
         voc = voc.split("[")[0]  # Get rid of the index, if there is one
 
-        mode = ChordMode.get(self.src_tixi.getInheritedAttribute(srcPath, "chord_mode"))
+        mode = ChordMode.get(self.song_tixi.getInheritedTextAttribute(srcPath, "chord_mode"))
         path = self.root + "/body"
         self.format_song_part(srcPath, path, mode)
         n = self.tixi.getNamedChildrenCount(self.root + "/body", "p")
@@ -139,7 +154,7 @@ class SongWriter(HtmlWriter):
         N is the number of lines. Every table has two rows: one for the chords above,
         one for the line of text
         """
-        text = self.src_tixi.getTextElement(srcPath).strip()
+        text = self.song_tixi.getTextElement(srcPath).strip()
         if not self.CS in text:
             return False
 
@@ -201,7 +216,7 @@ class SongWriter(HtmlWriter):
         In this format, the <p/> element contains one <table/> element, where
         every row has two columns: one for the line of text, the other for chords
         """
-        text = self.src_tixi.getTextElement(srcPath).strip()
+        text = self.song_tixi.getTextElement(srcPath).strip()
         if not self.CS in text:
             return False
 
@@ -240,7 +255,7 @@ class SongWriter(HtmlWriter):
         with newline HTML markers
         """
 
-        text = self.src_tixi.getTextElement(srcPath).strip()
+        text = self.song_tixi.getTextElement(srcPath).strip()
         lines = [line.strip().split(self.CS)[0].replace(self.CI, "") for line in text.split('\n')]
         pPath = self.tixi.getNewElementPath(self.root + "/body", "p")
         while lines:
@@ -359,3 +374,29 @@ class SongWriter(HtmlWriter):
             output.append(noChordLines)
 
         return output
+
+    def _compareAttributes(self)->TixiException:
+        """
+        If the song is written in a separate tixi than the src_tixi, make sure that none of the attributes in the
+        source path and song path has different value. If the attributes do not repeat, everything is fine.
+        :return: TixiException. If attributes are not contradicting, returns with code SUCCESS. Otherwise with code
+                 NOT_SCHEMA_COMPLAINT
+        """
+        nonMatchingAttributes = dict()
+        e = TixiException(ReturnCode.SUCCESS)
+
+        for i in range(1, self.src_tixi.getNumberOfAttributes(self.src_path) + 1):
+            attrName = self.src_tixi.getAttributeName(self.src_path, i)
+            if self.song_tixi.checkAttribute(self.song_path, attrName):
+                src_attribute_value = self.src_tixi.getTextAttribute(self.src_path, attrName)
+                sng_attribute_value = self.song_tixi.getTextAttribute(self.song_path, attrName)
+                if sng_attribute_value != src_attribute_value:
+                    nonMatchingAttributes[attrName] = [src_attribute_value, sng_attribute_value]
+        if nonMatchingAttributes:
+            attrs = ['{}: "{}"'.format(attr, '" vs "'.join(nonMatchingAttributes[attr])) for attr in
+                     nonMatchingAttributes.keys()]
+
+            e = TixiException(ReturnCode.NOT_SCHEMA_COMPLIANT)
+            e.error = "Containing XML and Song XML <song> element has incoherent attributes:\n{}".format(
+                "\n".join(attrs))
+        return e
