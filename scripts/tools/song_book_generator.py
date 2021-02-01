@@ -63,6 +63,52 @@ class SongBookGenerator(object):
 
         print("Will process {} songs".format(self.N))
 
+        # Find songs that have both "src" attribute and some children in the same tixi
+        xPath = "//song[@src]/*"
+        wrongPaths = dict()
+        for path in self.tixi.getPathsFromXPathExpression(xPath):
+            parent = Tixi.parent(path)
+            if parent in wrongPaths:
+                # No need to do the same for every verse/chorus/link etc.
+                continue
+
+            wrongPaths[parent] = self.tixi.getTextAttribute(parent, "title")
+
+        message = "\n".join(["{} ({})".format(title, path) for path, title in wrongPaths.items()])
+        if message:
+            e = TixiException(ReturnCode.NOT_SCHEMA_COMPLIANT)
+            e.error = "Ambiguous content!\nFollowing songs are defined both " \
+                      "in master XML and in separate src files:\n{}".format(message)
+            raise e
+
+        # Check if songs in src files don't have different attributes than song elements in toplevel tixi
+        # and copy these attributes
+        xPath = "//song[@src]"
+        spath = "/song"
+        missingFiles = dict()
+        ambiguousAttributes = dict()
+        for path in self.tixi.getPathsFromXPathExpression(xPath):
+            src = self.tixi.getTextAttribute(path, "src")
+            file = os.path.join(self.tixi.getDocumentPath(), src)
+            if not os.path.isfile(file):
+                missingFiles[path] = src
+                continue
+            tmp_tixi = Tixi()
+            try:
+                tmp_tixi.open(file)
+            except TixiException:
+                missingFiles[path] = src
+                continue
+
+            for attrName, attrValue in tmp_tixi.getAttributes(spath):
+                if not self.tixi.checkAttribute(path, attrName):
+                    self.tixi.addTextAttribute(path, attrName, attrValue)
+                    continue
+                else:
+                    myValue = self.tixi.getTextAttribute(path, attrName)
+                    if attrValue != myValue:
+                        ambiguousAttributes["{}, {}".format(path, attrName)] = [attrValue, myValue]
+
         usedFileNames = []
         xPath = "//*[self::song or self::section][@title]"
 
