@@ -36,10 +36,10 @@ class SongBookGenerator(object):
         self.N = self.settings.maxsongs  # definitely a shorter notation
 
         self.id = None
-        self.getBasicSongInfo()
+        self._preprocess()
 
     #
-    def getBasicSongInfo(self):
+    def _preprocess(self):
         self._removeIgnoredContent()
 
         self._findAmbiguousSongsContent()
@@ -95,8 +95,13 @@ class SongBookGenerator(object):
             raise e
 
     def _pullAttributesFromSRCs(self):
-        """Check if songs in src files don't have different attributes than song elements in toplevel tixi
-        and copy these attributes"""
+        """
+        Get all attributes from the separate song file to which path is provided in the src attributes of song elements
+        and copy them to the elements. This allows for collecting all attributes in one element, and also for accessing
+        the inherited attributes (like chord_mode) that can be defined higher in the XML tree.
+
+        Moreover, check if songs in src files don't have different attributes than song elements in toplevel tixi
+        and copy these attributes, because that is considered an unambiguity"""
         xPath = "//song[@src]"
         spath = "/song"
         missingFiles = dict()
@@ -117,7 +122,6 @@ class SongBookGenerator(object):
             for attrName, attrValue in tmp_tixi.getAttributes(spath):
                 if not self.tixi.checkAttribute(path, attrName):
                     self.tixi.addTextAttribute(path, attrName, attrValue)
-                    continue
                 else:
                     myValue = self.tixi.getTextAttribute(path, attrName)
                     if attrValue != myValue:

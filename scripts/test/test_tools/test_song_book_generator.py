@@ -49,7 +49,7 @@ class TestSongBookGenerator(unittest.TestCase):
         n = tixi.tryXPathEvaluateNodeNumber(xPath)
         self.assertEqual(15, n)  # The total number of verses and choruses in the songs
 
-    def test_getBasicSongInfo(self):
+    def test_preprocess(self):
         # The getBasicSongInfo has already been called in __init__
         expected = [Song("sng_my_test_song.xhtml", "My Test Song", "/songbook/section[1]/section[1]/song[1]"),
                     Song("sng_song_a.xhtml", "Song A", "/songbook/section[1]/section[1]/song[2]"),
@@ -93,7 +93,7 @@ class TestSongBookGenerator(unittest.TestCase):
         self.sg.tixi.createElement("/songbook/section[2]/section", "section")
         self.sg.tixi.createElement("/songbook/section[2]/section[1]/section[2]", "section")
 
-        self.sg.getBasicSongInfo()
+        self.sg._preprocess()
         self.assertFalse(self.sg.tixi.checkElement("/songbook/section[2]"))
         for item in expected:
             self.assertEqual(item.title, self.sg.tixi.getTextAttribute(item.xml, "title"))

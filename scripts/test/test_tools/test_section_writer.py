@@ -19,7 +19,7 @@ class TestSectionWriter(unittest.TestCase):
         tixi.open(src_xml)
         self.sg = SongBookGenerator(src_xml)
         self.sg.tixi = tixi
-        self.sg.getBasicSongInfo()
+        self.sg._preprocess()
         self.tixi = self.sg.tixi
         self.test_output = os.path.join(os.path.dirname(__file__), "test_section.xml")
 
