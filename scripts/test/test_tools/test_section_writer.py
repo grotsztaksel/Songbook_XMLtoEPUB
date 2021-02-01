@@ -42,6 +42,9 @@ class TestSectionWriter(unittest.TestCase):
                   <a href="sec_section_1.1.xhtml">Section 1.1</a>
                   <ul>
                     <li>
+                      <a href="sng_my_test_song.xhtml">My Test Song</a>
+                    </li>
+                    <li>
                       <a href="sng_song_a.xhtml">Song A</a>
                     </li>
                   </ul>
@@ -83,7 +86,9 @@ class TestSectionWriter(unittest.TestCase):
                 <h2>Section 1</h2>
                 <p>
                   <ul><li><a href="sec_section_1.1.xhtml">Section 1.1</a>
-                          <ul><li><a href="sng_song_a.xhtml">Song A</a></li></ul>
+                       <ul><li><a href="sng_my_test_song.xhtml">My Test Song</a></li>
+                           <li><a href="sng_song_a.xhtml">Song A</a></li>
+                       </ul>
                       </li>
                       <li><a href="sec_section_1.2.xhtml">Section 1.2</a>
                           <ul><li><a href="sng_song_b.xhtml">Song B</a></li>
@@ -109,7 +114,9 @@ class TestSectionWriter(unittest.TestCase):
 
         expected_str = """<root>
                         <ul><li><a href="sec_section_1.1.xhtml">Section 1.1</a>
-                                 <ul><li><a href="sng_song_a.xhtml">Song A</a></li></ul>
+                                 <ul><li><a href="sng_my_test_song.xhtml">My Test Song</a></li>
+                                     <li><a href="sng_song_a.xhtml">Song A</a></li>
+                                 </ul>
                             </li>
                             <li><a href="sec_section_1.2.xhtml">Section 1.2</a>
                                 <ul>

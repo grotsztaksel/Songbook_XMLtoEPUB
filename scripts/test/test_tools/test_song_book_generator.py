@@ -47,7 +47,7 @@ class TestSongBookGenerator(unittest.TestCase):
         xPath = "//*[self::verse or self::chorus]"
 
         n = tixi.tryXPathEvaluateNodeNumber(xPath)
-        self.assertEqual(18, n)  # The total number of verses and choruses in the songs
+        self.assertEqual(15, n)  # The total number of verses and choruses in the songs
 
     def test_getBasicSongInfo(self):
         # The getBasicSongInfo has already been called in __init__

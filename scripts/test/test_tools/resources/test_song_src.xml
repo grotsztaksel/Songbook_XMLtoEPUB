@@ -21,10 +21,7 @@
                     La La La
                 </verse>
             </song>
-            <externaldata title="The title here just doesn't matter. The actual will be read from the song node">
-                <path>file://./</path>
-                <filename>test_song.xml</filename>
-            </externaldata>
+            <song title="My Test Song" band="The Developers" src="./test_song.xml"/>
             <song title="Song A" lyrics="John Doe" music="John Doe">
                 <link title="Song B"/>
                 <verse>
