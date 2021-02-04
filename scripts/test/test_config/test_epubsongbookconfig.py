@@ -93,7 +93,7 @@ class TestEpubSongbookConfig(unittest.TestCase):
         self.assertEqual("en", cfg.lang)
         self.assertEqual("utf-8", cfg.encoding)
         self.assertEqual(0, cfg.maxsongs)
-        self.assertEqual(ChordMode.CHORDS_BESIDE, cfg.chordType)
+        self.assertEqual(ChordMode.CHORDS_ABOVE, cfg.chordType)
         self.assertEqual("../test_dir", cfg.dir_out)
         self.assertEqual(None, cfg.dir_text)
         self.assertEqual(os.path.abspath(os.path.join(epubsongbookconfig.__file__, "..", "..", "template")),
@@ -176,7 +176,7 @@ class TestEpubSongbookConfig(unittest.TestCase):
         }
         cfg = EpubSongbookConfig(self.tixi)
 
-        self.assertEqual(ChordMode.CHORDS_BESIDE, cfg.chordType)
+        self.assertEqual(ChordMode.CHORDS_ABOVE, cfg.chordType)
         # Check before
         for p, chmode in attributes.items():
             path = "/songbook" + p
@@ -188,8 +188,8 @@ class TestEpubSongbookConfig(unittest.TestCase):
         cfg.setupAttributes()
 
         # Check after
-        attributes["/section[2]"] = ChordMode.CHORDS_BESIDE
-        attributes["/section[3]"] = ChordMode.CHORDS_BESIDE
+        attributes["/section[2]"] = ChordMode.CHORDS_ABOVE
+        attributes["/section[3]"] = ChordMode.CHORDS_ABOVE
 
         # Note that the cfg didn't have _getSettings called before, so it used the default CHORDS_BESIDE, and not the
         # value from the test xml file.

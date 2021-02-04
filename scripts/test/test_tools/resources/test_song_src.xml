@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <songbook>
     <settings>
-        <prefered_chords_mode>CHORDS_ABOVE</prefered_chords_mode>
+        <prefered_chord_mode>CHORDS_ABOVE</prefered_chord_mode>
         <output_dir>../test_dir</output_dir>
     </settings>
     <section title="Section 1" chord_mode="CHORDS_BESIDE">
