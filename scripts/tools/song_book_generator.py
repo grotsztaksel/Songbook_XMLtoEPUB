@@ -44,9 +44,32 @@ class SongBookGenerator(object):
     def _preprocess(self):
         self._removeIgnoredContent()
 
-        self._findAmbiguousSongsContent()
+        ambiguousSongs = self._findAmbiguousSongsContent()
 
-        self._pullAttributesFromSRCs()
+        missingFiles, ambiguousAttributes = self._pullAttributesFromSRCs()
+
+        errorMessage = []
+        if ambiguousSongs:
+            errorMessage.append("The following songs have both content in master XML and source defined:")
+            for path, title in ambiguousSongs.items():
+                errorMessage.append("- \"{}\" ({})".format(title, path))
+            errorMessage.append(40 * "-" + "\n")
+
+        if missingFiles:
+            errorMessage.append("The following songs source files not found:")
+            for path, src in missingFiles.items():
+                errorMessage.append("- {} (\"{}\")".format(src, title))
+            errorMessage.append(40 * "-" + "\n")
+
+        if ambiguousAttributes:
+            errorMessage.append("The following songs have their attributes defined in both master XML and in source "
+                                "file, and they are not the same:")
+            for path, attrs in ambiguousAttributes.items():
+                errorMessage.append("- {}: '{}' vs '{}'".format(path, attrs[0], attrs[1]))
+            errorMessage.append(40 * "-" + "\n")
+
+        if errorMessage:
+            raise ValueError("\n".join(errorMessage))
 
         self._assignXHTMLattributes()
 
