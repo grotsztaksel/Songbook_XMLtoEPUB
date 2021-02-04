@@ -16,7 +16,7 @@ from .utf_simplifier import UtfSimplifier
 
 
 class SongBookGenerator(object):
-    def __init__(self, input_file, xsd_file=None, preprocess = True):
+    def __init__(self, input_file, xsd_file=None, preprocess=True):
         """
         Master class aggregating all other tools
         :param input_file: input xml file.
@@ -89,12 +89,7 @@ class SongBookGenerator(object):
                 continue
 
             wrongPaths[parent] = self.tixi.getTextAttribute(parent, "title")
-        message = "\n".join(["{} ({})".format(title, path) for path, title in wrongPaths.items()])
-        if message:
-            e = TixiException(ReturnCode.NOT_SCHEMA_COMPLIANT)
-            e.error = "Ambiguous content!\nFollowing songs are defined both " \
-                      "in master XML and in separate src files:\n{}".format(message)
-            raise e
+        return wrongPaths
 
     def _pullAttributesFromSRCs(self):
         """
@@ -110,7 +105,10 @@ class SongBookGenerator(object):
         ambiguousAttributes = dict()
         for path in self.tixi.getPathsFromXPathExpression(xPath):
             src = self.tixi.getTextAttribute(path, "src")
-            file = os.path.join(self.tixi.getDocumentPath(), src)
+            if os.path.isfile(os.path.abspath(src)):
+                file = src
+            else:
+                file = os.path.join(os.path.dirname(self.tixi.getDocumentPath()), src)
             if not os.path.isfile(file):
                 missingFiles[path] = src
                 continue
@@ -121,13 +119,15 @@ class SongBookGenerator(object):
                 missingFiles[path] = src
                 continue
 
-            for attrName, attrValue in tmp_tixi.getAttributes(spath):
+            for attrName, attrValue in tmp_tixi.getAttributes(spath).items():
                 if not self.tixi.checkAttribute(path, attrName):
                     self.tixi.addTextAttribute(path, attrName, attrValue)
                 else:
                     myValue = self.tixi.getTextAttribute(path, attrName)
                     if attrValue != myValue:
                         ambiguousAttributes["{}, {}".format(path, attrName)] = [attrValue, myValue]
+
+        return (missingFiles, ambiguousAttributes)
 
     def _assignXHTMLattributes(self):
         """For each song and section element, add an attribute that will describe what output xhtml file the given

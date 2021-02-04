@@ -127,7 +127,98 @@ class TestSongBookGenerator(unittest.TestCase):
         self.assertEqual(54 - (sum(titles_to_exclude.values()) + 1), self.sg.tixi.xPathEvaluateNodeNumber("//*"))
 
     def test_findAmbiguousSongsContent(self):
-        pass
+
+        self.assertEqual({}, self.sg._findAmbiguousSongsContent())
+
+        # Now break the test data
+        song = "/songbook/section[1]/section[1]/song[2]"
+        self.sg.tixi.addTextElement(song, "verse", "La la la\n I shouldn't be here!")
+        self.sg.tixi.addTextElement(song, "chorus", "Oh Oh Oh\n I shouldn't be here!")
+        self.sg.tixi.addTextElement(song, "verse", "La la la\n I shouldn't be here!")
+        self.assertEqual({song: "My Test Song"}, self.sg._findAmbiguousSongsContent())
+
+    def test_pullAttributesFromSRCs(self):
+        song = "/songbook/section[1]/section[1]/song[2]"
+        attributes = {"title": "My Test Song",
+                      "band": "The Developers",
+                      "src": "./test_song.xml"}
+        for attr, value in attributes.items():
+            self.assertEqual(value, self.sg.tixi.getTextAttribute(song, attr), attr)
+        self.assertEqual(len(attributes), self.sg.tixi.getNumberOfAttributes(song))
+
+        self.assertEqual(({}, {}), self.sg._pullAttributesFromSRCs())
+
+        newAttributes = {"lyrics": "P. Gradkowski",
+                         "music": "Sam Composer",
+                         "band": "The Developers",
+                         "chord_mode": "CHORDS_ABOVE"}
+
+        attributes.update(newAttributes)
+
+        for attr, value in attributes.items():
+            self.assertEqual(value, self.sg.tixi.getTextAttribute(song, attr), attr)
+        self.assertEqual(len(attributes), self.sg.tixi.getNumberOfAttributes(song))
+
+        dummyfile = os.path.abspath(os.path.join(self.test_dir, "dummy.xml"))
+        with open(dummyfile, 'w') as f:
+            f.write("This won't make a valid XML file")
+            f.write("Tixi should fail trying to open it")
+
+        self.assertTrue(os.path.isfile(dummyfile))
+
+        # Now check missing and wrong files and non-matching attributes
+        wrong_files = {"/songbook/section[1]/section[1]/song[1]": "./non_existent_file",
+                       "/songbook/section[1]/section[1]/song[1]": dummyfile}
+        for path, file in wrong_files.items():
+            self.sg.tixi.addTextAttribute(path, "src", file)
+        self.sg.tixi.addTextAttribute(song, "title", "This title will not match")
+        self.sg.tixi.addTextAttribute(song, "band", "Another band")
+
+        wrong_attributes = {song + ", title": ["My Test Song", "This title will not match"],
+                            song + ", band": ["The Developers", "Another band"]}
+
+        output = self.sg._pullAttributesFromSRCs()
+
+        self.assertEqual((wrong_files, wrong_attributes), output)
+
+    def test_assignXHTMLattributes(self):
+        expected = [
+            Song("sng_song_to_exclude_1.xhtml", "Song to exclude 1", "/songbook/section[1]/section[1]/song[1]"),
+            Song("sng_my_test_song.xhtml", "My Test Song", "/songbook/section[1]/section[1]/song[2]"),
+            Song("sng_song_a.xhtml", "Song A", "/songbook/section[1]/section[1]/song[3]"),
+            Song("sng_song_b.xhtml", "Song B", "/songbook/section[1]/section[2]/song[1]"),
+            Song("sng_song_c.xhtml", "Song C", "/songbook/section[1]/section[2]/song[2]"),
+            Song("sng_song_a_1.xhtml", "Song A", "/songbook/section[2]/song[1]"),
+            Song("sng_song_to_exclude_2.xhtml", "Song to exclude 2", "/songbook/section[2]/song[2]"),
+            Song("sng_song_to_exclude_3.xhtml", "Song to exclude 3", "/songbook/section[2]/song[3]"),
+            Song("sng_song_abba.xhtml", "Song ABBA", "/songbook/section[2]/song[4]"),
+            Song("sng_youll_never_see_me.xhtml", "You'll never see me", "/songbook/section[3]/song[1]"),
+            Song("sng_youll_never_see_me_again.xhtml", "You'll never see me again", "/songbook/section[3]/song[2]")
+        ]
+
+        for item in expected:
+            self.assertEqual(item.title, self.sg.tixi.getTextAttribute(item.xml, "title"))
+            self.assertFalse(self.sg.tixi.checkAttribute(item.xml, "xhtml"))
+
+        self.sg._assignXHTMLattributes()
+
+        for item in expected:
+            self.assertEqual(item.title, self.sg.tixi.getTextAttribute(item.xml, "title"))
+            self.assertEqual(item.file, self.sg.tixi.getTextAttribute(item.xml, "xhtml"))
+
+    def test_escapeQuoteMarks(self):
+
+        self.assertEqual("You'll never see me", self.sg.tixi.getTextAttribute("/songbook/section[3]/song[1]", "title"))
+        self.assertEqual("You'll never see me again",
+                         self.sg.tixi.getTextAttribute("/songbook/section[3]/song[2]", "title"))
+
+        self.sg.tixi.addTextAttribute("/songbook/section[3]/song[1]", "title", "You\"ll never see me")
+
+        self.sg._escapeQuoteMarks()
+        self.assertEqual("You&quot;ll never see me",
+                         self.sg.tixi.getTextAttribute("/songbook/section[3]/song[1]", "title"))
+        self.assertEqual("You&apos;ll never see me again",
+                         self.sg.tixi.getTextAttribute("/songbook/section[3]/song[2]", "title"))
 
     def test_write_indexes(self):
         self.sg._preprocess()
