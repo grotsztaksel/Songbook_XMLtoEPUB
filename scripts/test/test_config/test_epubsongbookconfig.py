@@ -37,6 +37,15 @@ class TestEpubSongbookConfig(unittest.TestCase):
         self.test_dir_abs = os.path.join(os.path.abspath(os.path.dirname(__file__)), "test_dir")
         self.test_dir_rel = os.path.abspath(os.path.join(os.path.dirname(self.text_xml), "..", "test_dir"))
         self.tixi.open(self.text_xml, recursive=True)
+        # get the authors attributes for the song that is defined in separate file (has attribute "src")
+        path = "/songbook/section[1]/section[1]/song[2]"
+        self.assertEqual("My Test Song", self.tixi.getTextAttribute(path, "title"))
+        newAttributes = {"lyrics": "P. Gradkowski",
+                         "music": "Sam Composer",
+                         "band": "The Developers",
+                         "chord_mode": "CHORDS_ABOVE"}
+        for a, v in newAttributes.items():
+            self.tixi.addTextAttribute(path, a, v)
 
     def tearDown(self):
         shutil.rmtree(self.test_dir_abs, ignore_errors=True)
@@ -64,8 +73,8 @@ class TestEpubSongbookConfig(unittest.TestCase):
         self.assertEqual(None, cfg.dir_text)
         self.assertEqual(os.path.abspath(os.path.join(epubsongbookconfig.__file__, "..", "..", "template")),
                          cfg.template_dir)
-        self.assertEqual(">", cfg.CS)
-        self.assertEqual("|", cfg.CI)
+        self.assertEqual("|", cfg.CS)
+        self.assertEqual("\\", cfg.CI)
 
     def test_getSettings(self):
         # Change one entry to test max_songs
@@ -89,8 +98,8 @@ class TestEpubSongbookConfig(unittest.TestCase):
         self.assertEqual(None, cfg.dir_text)
         self.assertEqual(os.path.abspath(os.path.join(epubsongbookconfig.__file__, "..", "..", "template")),
                          cfg.template_dir)
-        self.assertEqual(">", cfg.CS)
-        self.assertEqual("|", cfg.CI)
+        self.assertEqual("|", cfg.CS)
+        self.assertEqual("\\", cfg.CI)
 
         self.tixi.updateTextElement("/songbook/settings/max_songs", "14")
         self.tixi.addTextElement("/songbook/settings", "encoding", "")

@@ -23,6 +23,15 @@ class TestAuthorsWriter(unittest.TestCase):
         for path in tixi.getPathsFromXPathExpression("//song"):
             i += 1
             tixi.addTextAttribute(path, "xhtml", "song_file_{}.xhtml".format(i))
+        # get the authors attributes for the song that is defined in separate file (has attribute "src")
+        path = "/songbook/section[1]/section[1]/song[2]"
+        self.assertEqual("My Test Song", tixi.getTextAttribute(path, "title"))
+        newAttributes = {"lyrics": "P. Gradkowski",
+                         "music": "Sam Composer",
+                         "band": "The Developers",
+                         "chord_mode": "CHORDS_ABOVE"}
+        for a, v in newAttributes.items():
+            tixi.addTextAttribute(path, a, v)
 
         self.writer = AuthorsWriter(tixi, self.settings)
 
