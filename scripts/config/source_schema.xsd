@@ -58,7 +58,7 @@
             </xs:documentation>
         </xs:annotation>
         <xs:all>
-            <xs:element name="max_songs" minOccurs="0" maxOccurs="1">
+            <xs:element name="max_songs" default="0" minOccurs="0" maxOccurs="1">
                 <xs:annotation>
                     <xs:documentation>
                         Max number of songs that should be processed by the generator. If not present, all available
@@ -67,11 +67,12 @@
                 </xs:annotation>
                 <xs:simpleType>
                     <xs:restriction base="xs:nonNegativeInteger">
-                        <xs:minInclusive value="1"/>
+                        <xs:minInclusive value="0"/>
                     </xs:restriction>
                 </xs:simpleType>
             </xs:element>
-            <xs:element name="prefered_chord_mode" type="chord_mode" minOccurs="0" maxOccurs="1">
+            <xs:element name="prefered_chord_mode" type="chord_mode" default="CHORDS_BESIDE" minOccurs="0"
+                        maxOccurs="1">
                 <xs:annotation>
                     <xs:documentation>
                         Chord mode to be preferred in all processed songs. Can be overriden by the song's "chords_mode"
@@ -121,7 +122,8 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="authors_index_title" type="xs:string" minOccurs="0" maxOccurs="1">
+            <xs:element name="authors_index_title" type="xs:string" default="Index of authors" minOccurs="0"
+                        maxOccurs="1">
                 <xs:annotation>
                     <xs:documentation>
 
@@ -136,7 +138,7 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="links_header" type="xs:string" minOccurs="0" maxOccurs="1" default="See also">
+            <xs:element name="links_header" type="xs:string" minOccurs="0" maxOccurs="1" default="See also:">
                 <xs:annotation>
                     <xs:documentation>
                         Title of the link section in songs. If the song element contains &lt;link/&gt; child(ren), then

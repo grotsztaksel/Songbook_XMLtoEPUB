@@ -30,7 +30,7 @@ class SongBookGenerator(object):
             self.tixi.schemaValidateFromFile(xsd_file)
 
         self.tixi.registerNamespacesFromDocument()
-        self.settings = EpubSongbookConfig(self.tixi, xsd_file)
+        self.settings = EpubSongbookConfig(self.tixi)
         self.settings.defineOutputDir()
         self.settings.placeEssentialFiles()
         self.settings.setupAttributes()

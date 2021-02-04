@@ -51,7 +51,7 @@ class TestEpubSongbookConfig(unittest.TestCase):
         shutil.rmtree(self.test_dir_abs, ignore_errors=True)
         shutil.rmtree(self.test_dir_rel, ignore_errors=True)
 
-    def test_defaults(self):
+    def test_setup_defaults(self):
         # Clear all settings
         self.tixi.removeElement("/songbook/settings")
         self.tixi.createElementAtIndex("/songbook", "settings", 1)
@@ -69,7 +69,7 @@ class TestEpubSongbookConfig(unittest.TestCase):
         self.assertEqual("en", cfg.lang)
         self.assertEqual(0, cfg.maxsongs)
         self.assertEqual(ChordMode.CHORDS_BESIDE, cfg.chordType)
-        self.assertEqual("output", cfg.dir_out)
+        self.assertEqual("./output", cfg.dir_out)
         self.assertEqual(None, cfg.dir_text)
         self.assertEqual(os.path.abspath(os.path.join(epubsongbookconfig.__file__, "..", "..", "template")),
                          cfg.template_dir)
@@ -78,7 +78,7 @@ class TestEpubSongbookConfig(unittest.TestCase):
 
     def test_getSettings(self):
         # Change one entry to test max_songs
-        self.tixi.addTextElement("/songbook/settings", "max_songs", "blah")
+        self.tixi.addTextElement("/songbook/settings", "max_songs", "36")
 
         cfg = EpubSongbookConfig(self.tixi)
         self.assertEqual("My Songbook", cfg.title)
@@ -92,7 +92,7 @@ class TestEpubSongbookConfig(unittest.TestCase):
         self.assertEqual(getpass.getuser(), cfg.user)
         self.assertEqual("en", cfg.lang)
         self.assertEqual("utf-8", cfg.encoding)
-        self.assertEqual(0, cfg.maxsongs)
+        self.assertEqual(36, cfg.maxsongs)
         self.assertEqual(ChordMode.CHORDS_ABOVE, cfg.chordType)
         self.assertEqual("../test_dir", cfg.dir_out)
         self.assertEqual(None, cfg.dir_text)

@@ -11,8 +11,9 @@ import getpass
 import os
 import shutil
 from enum import Enum
+from typing import Any
 
-from tixi import Tixi
+from tixi import Tixi, TixiException, ReturnCode
 
 
 class ChordMode(Enum):
@@ -52,7 +53,7 @@ class EpubSongbookConfig():
         This class is NOT responsible for writing the content of the songbook
      """
 
-    def __init__(self, tixi: Tixi, xsd_file: str = None):
+    def __init__(self, tixi: Tixi):
         """
 
         :param tixi: input tixi to find the <settings> element
@@ -60,31 +61,102 @@ class EpubSongbookConfig():
         """
         self.tixi = tixi
 
+        self.xsd_elements_2_settings_map = {"username": "user",
+                                            "title": "title",
+                                            "max_songs": "maxsongs",
+                                            "section_title": "default_section_title",
+                                            "authors_index_title": "authors_index_title",
+                                            "alphabedical_index_title": "alphabedical_index_title",
+                                            "links_header": "links_header",
+                                            "language": "lang",
+                                            "encoding": "encoding",
+                                            "output_dir": "dir_out",
+                                            "template_dir": "template_dir",
+                                            "lyrics_string": "lyrics_string",
+                                            "music_string": "music_string",
+                                            "unknown_author": "unknown_author",
+                                            "prefered_chord_mode": "chordType",
+                                            "chord_separator": "CS",
+                                            "chord_insertion_character": "CI"}
+
+        xsd_file = os.path.join(os.path.dirname(__file__), "source_schema.xsd")
+        self.xsd = Tixi()
+        self.xsd.open(xsd_file)
+        self.xsd.registerNamespacesFromDocument()
+        self.xsd_spath = '/xs:schema/xs:complexType[@name="settings"]/xs:all/xs:element'
+
         self._setup_defaults()
 
         self._getSettings()
 
     def _setup_defaults(self):
         """Set up defaults"""
-        self.title = "My Songbook"
-        self.alphabedical_index_title = "Alphabetical index of songs"
-        self.authors_index_title = "Index of authors"
-        self.default_section_title = "Section"
-        self.links_header = "See also:"
-        self.lyrics_string = "lyrics by:"
-        self.music_string = "music by:"
-        self.unknown_author = "?"
+
+        # copy the keys of self.xsd_elements_2_settings_map to later make sure that all have been defined in xsd
+        settings = list(self.xsd_elements_2_settings_map.keys())
+
+        for setting in self.xsd.getPathsFromXPathExpression(self.xsd_spath):
+            name = self.xsd.getTextAttribute(setting, "name")
+            # If setting is not in self.xsd_elements_2_settings_map, this will throw an error
+            try:
+                settings.remove(name)
+            except ValueError:
+                xsd_file = self.xsd.getDocumentPath()
+                raise ValueError("EpubSongbookConfig.xsd_elements_2_settings_map "
+                                 "does not have {}, which is present in {}. xsd_elements_2_settings_map must agree with"
+                                 "settings listed in the {}".format(name, xsd_file, xsd_file))
+
+            # Set the default value if it is defined in XSD
+            if self.xsd.checkAttribute(setting, "default"):
+                a = self.xsd.getTextAttribute(setting, "default")
+
+                defvalue = self.type(setting, a)
+            else:
+                defvalue = None
+            setattr(self, self.xsd_elements_2_settings_map[name], defvalue)
+
+        # Check if all settings defined in self.xsd_elements_2_settings_map were found in XSD
+        if settings:
+            raise ValueError("EpubSongbookConfig.xsd_elements_2_settings_map has more settings defined than the XSD:\n"
+                             "\n".join(settings))
+
+        # Special treatment to some variables that could not have their default defined
+        xsd_path = self.xsd.xPathExpressionGetXPath('{}[@name="{}"]'.format(self.xsd_spath, "prefered_chord_mode"), 1)
+        self.chordType = ChordMode.get(self.xsd.getTextAttribute(xsd_path, "default"))
         self.user = getpass.getuser()
-        self.lang = "en"
-        self.maxsongs = 0  # By default, 0 means that all songs should be scanned
-        self.chordType = ChordMode.CHORDS_BESIDE
-        self.encoding = "utf-8"
-        self.dir_out = "output"
-        self.dir_text = None
         self.template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../", "template"))
-        self.CS = "|"  # [C]hord [S]eparator: character that separates the text from chords lists
-        self.CI = "\\"  # [C]hord [I]nsertion point: character indicating the location where the chord should be changed
-        #                                      while performing the song
+        self.dir_text = None
+
+    def type(self, xsd_path: str, value: str) -> Any:
+        """Return the value of an attribute in the appropriate type. List of types is taken from
+            https://www.w3.org/TR/xmlschema-2/
+        """
+        if self.xsd.checkAttribute(xsd_path, "type"):
+            tp = self.xsd.getTextAttribute(xsd_path, "type").lstrip("xs:").lstrip("xsd:")
+        else:
+            # Maybe it is a simple type with some restrictions?
+            paths = self.xsd.getPathsFromXPathExpression('{}/xs:simpleType/xs:restriction[@base]'.format(xsd_path))
+            if len(paths) != 1:
+                return value
+            tp = self.xsd.getTextAttribute(paths[0], "base").lstrip("xs:").lstrip("xsd:")
+
+        # Simple types
+        if tp in ["byte", "int", "integer", "long", "negativeInteger", "nonNegativeInteger", "nonPositiveInteger",
+                  "positiveInteger", "short", "unsignedLong", "unsignedInt", "unsignedShort", "unsignedByte"]:
+            return int(value)
+        elif tp in ["string", "normalizedString", "token", "language", "Name", "NCName", "ID", "IDREF", "IDREFS",
+                    "NMTOKEN",
+                    "NMTOKENS", "ENTITY", "ENTITIES"]:
+            return str(value)
+        elif tp in ["float", "double", "decimal"]:
+            return float(value)
+        elif tp in ["boolean"]:
+            return value == "true"
+
+        # Derived types
+
+        # Didn't recognize the value. Just return it
+        return value
 
     #
     def _getSettings(self):
@@ -93,26 +165,12 @@ class EpubSongbookConfig():
 
         spath = "/songbook/settings"
 
-        elements = {"username": "user",
-                    "title": "title",
-                    "section_title": "default_section_title",
-                    "authors_index_title": "authors_index_title",
-                    "alphabedical_index_title": "alphabedical_index_title",
-                    "links_header": "links_header",
-                    "language": "lang",
-                    "encoding": "encoding",
-                    "output_dir": "dir_out",
-                    "template": "template_dir",
-                    "lyrics_string": "lyrics_string",
-                    "music_string": "music_string",
-                    "unknown_author": "unknown_author",
-                    "chord_separator": "CS",
-                    "chord_insertion_character": "CI"}
-
-        for xmlName, myName in elements.items():
+        for xmlName, myName in self.xsd_elements_2_settings_map.items():
             path = spath + "/" + xmlName
+            xpath = '{}[@name="{}"]'.format(self.xsd_spath, xmlName)
             if self.tixi.checkElement(path):
                 value = self.tixi.getTextElement(path)
+                value = self.type(xpath, value)
                 if xmlName == "encoding" and value == "":
                     value = None
                 setattr(self, myName, value)
