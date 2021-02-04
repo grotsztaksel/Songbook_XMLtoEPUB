@@ -24,7 +24,7 @@ class TestSongBookGenerator(unittest.TestCase):
         self.test_src2 = self.test_song_src + "2"
         self.test_dir = os.path.abspath(os.path.join(os.path.dirname(self.test_song_src), "..", "test_dir"))
         shutil.rmtree(self.test_dir, ignore_errors=True)
-        self.sg = SongBookGenerator(self.test_song_src)
+        self.sg = SongBookGenerator(self.test_song_src, preprocess=False)
         # Overwrite the output directory
         self.sg.settings.dir_out = self.test_dir
 
@@ -37,6 +37,7 @@ class TestSongBookGenerator(unittest.TestCase):
             os.remove(self.test_src2)
 
     def test_init(self):
+        self.sg._preprocess()
         tixi = self.sg.tixi
 
         # One section should be completely ignored
@@ -50,6 +51,7 @@ class TestSongBookGenerator(unittest.TestCase):
         self.assertEqual(15, n)  # The total number of verses and choruses in the songs
 
     def test_preprocess(self):
+        self.sg._preprocess()
         # The getBasicSongInfo has already been called in __init__
         expected = [Song("sng_my_test_song.xhtml", "My Test Song", "/songbook/section[1]/section[1]/song[1]"),
                     Song("sng_song_a.xhtml", "Song A", "/songbook/section[1]/section[1]/song[2]"),
@@ -99,7 +101,36 @@ class TestSongBookGenerator(unittest.TestCase):
             self.assertEqual(item.title, self.sg.tixi.getTextAttribute(item.xml, "title"))
             self.assertEqual(item.file, self.sg.tixi.getTextAttribute(item.xml, "xhtml"))
 
+    def test_removeIgnoredContent(self):
+        titles_to_exclude = {"Song to exclude 1": 1 + 1 + 2 + 1,  # 1 song, 1 link, 2 verse, 1 chorus
+                             "Song to exclude 2": 1 + 1 + 2 + 1,
+                             "Song to exclude 3": 1 + 1 + 2 + 1,
+                             "You'll never see me": 1 + 1 + 1 + 0,
+                             "You'll never see me again": 1 + 1 + 1 + 0}
+
+        section_to_exclude = "/songbook/section[3]"
+        self.assertTrue(self.sg.tixi.checkElement(section_to_exclude))
+
+        for title in titles_to_exclude:
+            xPath = "//song[@title=\"{}\"]".format(title)
+            self.assertEqual(1, self.sg.tixi.xPathEvaluateNodeNumber(xPath))
+
+        self.assertEqual(54, self.sg.tixi.xPathEvaluateNodeNumber("//*"))
+        self.sg._removeIgnoredContent()
+
+        self.assertFalse(self.sg.tixi.checkElement(section_to_exclude))
+
+        for title in titles_to_exclude:
+            xPath = "//song[@title=\"{}\"]".format(title)
+            self.assertEqual([], self.sg.tixi.getPathsFromXPathExpression(xPath))
+
+        self.assertEqual(54 - (sum(titles_to_exclude.values()) + 1), self.sg.tixi.xPathEvaluateNodeNumber("//*"))
+
+    def test_findAmbiguousSongsContent(self):
+        pass
+
     def test_write_indexes(self):
+        self.sg._preprocess()
         self.assertEqual(self.test_dir, self.sg.settings.dir_out)
         expected_files = ["idx_authors.xhtml", "idx_songs.xhtml"]
         for file in expected_files:
@@ -111,6 +142,7 @@ class TestSongBookGenerator(unittest.TestCase):
             self.assertTrue(os.path.isfile(os.path.join(self.test_dir, file)))
 
     def test_write_songs(self):
+        self.sg._preprocess()
         self.assertEqual(os.path.join(self.test_dir, "text"), self.sg.settings.dir_text)
         expected_files = ["sec_section_1.xhtml",
                           "sec_section_1.1.xhtml",
@@ -131,6 +163,7 @@ class TestSongBookGenerator(unittest.TestCase):
             self.assertEqual(file[:3] == "sng", os.path.isfile(os.path.join(self.test_dir, "text", file)))
 
     def test_write_sections(self):
+        self.sg._preprocess()
         self.assertEqual(os.path.join(self.test_dir, "text"), self.sg.settings.dir_text)
         expected_files = ["sec_section_1.xhtml",
                           "sec_section_1.1.xhtml",
@@ -151,6 +184,7 @@ class TestSongBookGenerator(unittest.TestCase):
             self.assertEqual(file[:3] == "sec", os.path.isfile(os.path.join(self.test_dir, "text", file)))
 
     def test_createTwoWayLinks(self):
+        self.sg._preprocess()
         links_start = {"/songbook/section[1]/section[1]/song[2]/link": "Song B",
                        "/songbook/section[1]/section[2]/song[1]/link": None,
                        "/songbook/section[1]/section[2]/song[2]/link": "No Such Title",
@@ -183,6 +217,7 @@ class TestSongBookGenerator(unittest.TestCase):
             run = "end"
 
     def test_write_metadata(self):
+        self.sg._preprocess()
         opf_expected = os.path.join(self.references, "expected_opf.opf")
         opf_created = os.path.join(self.test_dir, "metadata.opf")
         self.assertTrue(os.path.isfile(opf_expected))
@@ -206,6 +241,7 @@ class TestSongBookGenerator(unittest.TestCase):
         os.remove(opf_created)
 
     def test_write_toc(self):
+        self.sg._preprocess()
         # First copy the toc.ncx to the test dir and use it.
         toc_expected = os.path.join(self.references, "expected_toc.ncx")
         toc_created = os.path.join(self.test_dir, "toc.ncx")
@@ -225,6 +261,7 @@ class TestSongBookGenerator(unittest.TestCase):
         os.remove(toc_created)
 
     def test_createNavPoint(self):
+        self.sg._preprocess()
         tixi_ncx = Tixi()
         tixi_ncx.create("root")
 

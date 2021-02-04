@@ -16,11 +16,12 @@ from .utf_simplifier import UtfSimplifier
 
 
 class SongBookGenerator(object):
-    def __init__(self, input_file, xsd_file=None):
+    def __init__(self, input_file, xsd_file=None, preprocess = True):
         """
         Master class aggregating all other tools
         :param input_file: input xml file.
         :param xsd_file: XSD schema file to validate the input_file and take default values.
+        :param preprocess: run the preprocessing. True by default. Set to False in tests
         """
         self.tixi = Tixi()
         self.tixi.open(input_file, recursive=True)
@@ -36,7 +37,8 @@ class SongBookGenerator(object):
         self.N = self.settings.maxsongs  # definitely a shorter notation
 
         self.id = None
-        self._preprocess()
+        if preprocess:
+            self._preprocess()
 
     #
     def _preprocess(self):
