@@ -101,6 +101,51 @@ class TestSongBookGenerator(unittest.TestCase):
             self.assertEqual(item.title, self.sg.tixi.getTextAttribute(item.xml, "title"))
             self.assertEqual(item.file, self.sg.tixi.getTextAttribute(item.xml, "xhtml"))
 
+        # Reset the whole tixi
+        tixi = Tixi()
+        tixi.open(self.test_song_src)
+        self.sg.tixi = tixi
+        # Break it to get the error messages
+        # 1. Content both in source file and in the <song> element itself
+        song = "/songbook/section[1]/section[1]/song[2]"
+        self.sg.tixi.addTextElement(song, "verse", "La la la\n I shouldn't be here!")
+        self.sg.tixi.addTextElement(song, "chorus", "Oh Oh Oh\n I shouldn't be here!")
+        self.sg.tixi.addTextElement(song, "verse", "La la la\n I shouldn't be here!")
+
+        # 2. File exists, but not a valid XML
+        dummyfile = os.path.abspath(os.path.join(self.test_dir, "dummy.xml"))
+        with open(dummyfile, 'w') as f:
+            f.write("This won't make a valid XML file")
+            f.write("Tixi should fail trying to open it")
+        self.assertTrue(os.path.isfile(dummyfile))
+        self.sg.tixi.addTextAttribute("/songbook/section[1]/section[1]/song[1]", "src", dummyfile)
+        # 3. File does not exist
+        self.sg.tixi.addTextAttribute("/songbook/section[1]/section[1]/song[3]", "src", "./non_existent_file")
+
+        # 4. Attributes that are different in the <song> element and in the source file
+        self.sg.tixi.addTextAttribute(song, "title", "This title will not match")
+        self.sg.tixi.addTextAttribute(song, "band", "Another band")
+
+        try:
+            self.sg._preprocess()
+            self.assertFalse(True, "Did not raise error, although one was expected")
+        except ValueError as e:
+            expectedMessage = """The following songs have both content in master XML and source defined:
+- "This title will not match" (/songbook/section/section[1]/song[1])
+- "Song A" (/songbook/section/section[1]/song[2])
+----------------------------------------
+
+The following songs source files not found:
+- ./non_existent_file ("Song A")
+----------------------------------------
+
+The following songs have their attributes defined in both master XML and in source file, and they are not the same:
+- /songbook/section/section[1]/song[1], title: 'My Test Song' vs 'This title will not match'
+- /songbook/section/section[1]/song[1], band: 'The Developers' vs 'Another band'
+----------------------------------------
+"""
+            self.assertEqual(expectedMessage, str(e))
+
     def test_removeIgnoredContent(self):
         titles_to_exclude = {"Song to exclude 1": 1 + 1 + 2 + 1,  # 1 song, 1 link, 2 verse, 1 chorus
                              "Song to exclude 2": 1 + 1 + 2 + 1,
@@ -168,7 +213,7 @@ class TestSongBookGenerator(unittest.TestCase):
 
         # Now check missing and wrong files and non-matching attributes
         wrong_files = {"/songbook/section[1]/section[1]/song[1]": "./non_existent_file",
-                       "/songbook/section[1]/section[1]/song[1]": dummyfile}
+                       "/songbook/section[1]/section[1]/song[3]": dummyfile}
         for path, file in wrong_files.items():
             self.sg.tixi.addTextAttribute(path, "src", file)
         self.sg.tixi.addTextAttribute(song, "title", "This title will not match")
