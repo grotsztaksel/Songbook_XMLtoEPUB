@@ -159,15 +159,17 @@ class SongBookGenerator(object):
         number appended
         """
         usedFileNames = []
-        xPath = "//*[self::song or self::section][@title]"
+        xPath = "//*[self::song or self::section or self::html]"
 
         for xmlPath in self.tixi.getPathsFromXPathExpression(xPath):
             title = self.tixi.getTextAttribute(xmlPath, "title")
 
             if Tixi.elementName(xmlPath) == "song":
                 prefix = "sng_"
-            else:
+            elif Tixi.elementName(xmlPath) == "section":
                 prefix = "sec_"
+            else:
+                prefix = "htm_"
             file_name_base = UtfSimplifier.toAscii(title).replace(" ", "_").lower()
             suffix = ""
             ext = ".xhtml"
@@ -220,6 +222,50 @@ class SongBookGenerator(object):
 
             writer = SongWriter(self.tixi, self.settings, xml)
             writer.write_song_file(file)
+
+    def setHTMLtitle(self, xmlPath):
+        """Get the title of a html document that should also be included in the songbook and place it in the attribute
+        "title" of XML element at xmlPath.
+        If the document is not a HTML,
+        The title is extracted from the /html/header/title of the source document.
+        If the XML element at xmlPath already contains attribute "title", it must be identical as the one in the html.
+
+        :param xmlPath: Path to the XML configuration element "html"
+        :return: error string. If empty, title attribute was set successfully or unchanged
+        """
+
+        if self.tixi.checkAttribute(xmlPath, "title"):
+            title = self.tixi.getTextAttribute(xmlPath, "title")
+        else:
+            title = ""
+
+        src = self.tixi.getTextAttribute(xmlPath, "src")
+        if os.path.isabs(src) and os.path.isfile(os.path.abspath(src)):
+            htmlFile = src
+        elif os.path.isfile(os.path.join(os.path.dirname(self.tixi.getDocumentPath()), src)):
+            htmlFile = os.path.join(os.path.dirname(self.tixi.getDocumentPath()), src)
+        else:
+            return '- {} {} src="{}" - file not found!'.format(xmlPath, title, src)
+
+        htixi = Tixi()
+        try:
+            htixi.open(htmlFile)
+        except TixiException as e:
+            return '- {} {} src="{}" - source is not a valid HTML file!'.format(xmlPath, title, src)
+
+        if htixi.checkElement("/html/head/title"):
+            htitle = htixi.getTextElement("/html/head/title")
+        else:
+            return '- {} - undefined document title in {}!'.format(xmlPath, src)
+
+        if not title:
+            self.tixi.addTextAttribute(xmlPath, "title", htitle)
+            title = htitle
+
+        if htitle != title:
+            return '- {} - title mismatch! ("{}" vs "{}" in {})'.format(xmlPath, title, htitle, src)
+
+        return ''
 
     #
     def write_sections(self):
@@ -322,7 +368,7 @@ class SongBookGenerator(object):
             for key, value in d.items():
                 tixi.addTextAttribute(path, key, value)
 
-        xPath = "//*[self::song or self::section]"
+        xPath = "//*[self::song or self::section or self::html]"
         for i, xml in enumerate(self.tixi.getPathsFromXPathExpression(xPath)):
             fileName = self.tixi.getTextAttribute(xml, "xhtml")
             id_attr = "id{}".format(i + 1)
@@ -399,7 +445,7 @@ class SongBookGenerator(object):
         else:
             my_npPath = npPath
 
-        xPath = "{}/*[self::song or self::section]".format(secsongPath)
+        xPath = "{}/*[self::song or self::section or self::html]".format(secsongPath)
 
         for path in self.tixi.getPathsFromXPathExpression(xPath):
             self._createNavPoint(path, my_npPath, tixi_ncx)

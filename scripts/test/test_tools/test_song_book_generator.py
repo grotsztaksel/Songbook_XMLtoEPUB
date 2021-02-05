@@ -298,6 +298,60 @@ The following songs have their attributes defined in both master XML and in sour
         for file in expected_files:
             self.assertEqual(file[:3] == "sng", os.path.isfile(os.path.join(self.test_dir, "text", file)))
 
+    def test_setHTMLtitle(self):
+        # Prepare some files
+        badfile = os.path.join(self.test_dir, "bad.html")
+        goodfile = os.path.join(self.test_dir, "good.html")
+        with open(badfile, 'w') as h:
+            h.write('<?xml version="1.0"?>')
+            h.write('<html>')
+            h.write('</wrong_html>')
+        tixi = Tixi()
+        tixi.create("html")
+        head = tixi.getNewElementPath("/html", "head")
+        tixi.addTextElement(head, "title", "HTML Title")
+        tixi.saveCompleteDocument(goodfile)
+
+        self.assertTrue(os.path.isfile(badfile))
+        self.assertTrue(os.path.isfile(goodfile))
+
+        html_path = self.sg.tixi.getNewElementPath("/songbook/section[3]", "html")
+
+        # File does not exist
+        self.sg.tixi.addTextAttribute(html_path, "src", "./non_existent_file.html")
+        self.assertEqual(r'- /songbook/section[3]/html  src="./non_existent_file.html" - file not found!',
+                         self.sg.setHTMLtitle(html_path))
+
+        # File as absolute path
+        self.sg.tixi.addTextAttribute(html_path, "src", os.path.abspath(goodfile))
+        # Should be OK
+        self.assertEqual('', self.sg.setHTMLtitle(html_path))
+        self.assertEqual("HTML Title", self.sg.tixi.getTextAttribute(html_path, "title"))
+
+        self.sg.tixi.addTextAttribute(html_path, "title", "Non Matching")
+        self.assertEqual('- /songbook/section[3]/html - title mismatch! '
+                         '("Non Matching" vs "HTML Title" in {})'.format(os.path.abspath(goodfile)),
+                         self.sg.setHTMLtitle(html_path))
+        self.assertEqual("Non Matching", self.sg.tixi.getTextAttribute(html_path, "title"))
+
+        # Break the good html - will have no title
+        tixi.open(goodfile)
+        tixi.removeElement("/html/head/title")
+        tixi.saveCompleteDocument(goodfile)
+
+        self.assertEqual('- /songbook/section[3]/html - undefined document title '
+                         'in {}!'.format(os.path.abspath(goodfile)), self.sg.setHTMLtitle(html_path))
+        self.assertEqual("Non Matching", self.sg.tixi.getTextAttribute(html_path, "title"))
+
+        # Now define the file as relative path
+        rel = os.path.relpath(badfile, self.test_song_src)[3:]
+        self.sg.tixi.addTextAttribute(html_path, "src", rel)
+
+        self.assertEqual(
+            '- /songbook/section[3]/html Non Matching src="{}" - source is not a valid HTML file!'.format(rel),
+            self.sg.setHTMLtitle(html_path))
+        self.assertEqual("Non Matching", self.sg.tixi.getTextAttribute(html_path, "title"))
+
     def test_write_sections(self):
         self.sg._preprocess()
         self.assertEqual(os.path.join(self.test_dir, "text"), self.sg.settings.dir_text)
