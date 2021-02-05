@@ -5,6 +5,7 @@ Created on 20.11.2020 18:35
 @author: piotr
 """
 import os
+import shutil
 
 from config import EpubSongbookConfig
 from tixi import Tixi, TixiException, ReturnCode
@@ -48,6 +49,12 @@ class SongBookGenerator(object):
 
         missingFiles, ambiguousAttributes = self._pullAttributesFromSRCs()
 
+        wrong_htmls = []
+        for path in self.tixi.getPathsFromXPathExpression("//html"):
+            err = self.setHTMLtitle(path)
+            if err:
+                wrong_htmls.append(err)
+
         errorMessage = []
         if ambiguousSongs:
             errorMessage.append("The following songs have both content in master XML and source defined:")
@@ -67,6 +74,10 @@ class SongBookGenerator(object):
             for path, attrs in ambiguousAttributes.items():
                 errorMessage.append("- {}: '{}' vs '{}'".format(path, attrs[0], attrs[1]))
             errorMessage.append(40 * "-" + "\n")
+
+        if wrong_htmls:
+            errorMessage.append("The following subdocument elements were parsed with errors:")
+            errorMessage.extend(wrong_htmls)
 
         if errorMessage:
             raise ValueError("\n".join(errorMessage))
@@ -223,7 +234,7 @@ class SongBookGenerator(object):
             writer = SongWriter(self.tixi, self.settings, xml)
             writer.write_song_file(file)
 
-    def setHTMLtitle(self, xmlPath):
+    def setHTMLtitle(self, xmlPath: str) -> str:
         """Get the title of a html document that should also be included in the songbook and place it in the attribute
         "title" of XML element at xmlPath.
         If the document is not a HTML,
@@ -265,8 +276,47 @@ class SongBookGenerator(object):
         if htitle != title:
             return '- {} - title mismatch! ("{}" vs "{}" in {})'.format(xmlPath, title, htitle, src)
 
-        return ''
+        return self._copyHTML_resources(htmlFile)
 
+    def _copyHTML_resources(self, tixi: Tixi) -> str:
+        """
+        Check if the subdocument HTML file uses some resources and verify their availability. If the resource file is
+        available, copy it to the output directory keeping the relative path
+
+
+        REMARK: Only relative paths are supported, as the HTML files are copied to the output directory, and so will
+        be their resource files
+
+        REMARK: Only images are checked as of now
+        :param tixi: an opened Tixi object containing the html subdocument definition
+        :return:  Empty string if everything is fine. Otherwise string containing the error information
+        """
+        html_path = tixi.getDocumentPath()
+        errors = []
+        for path in tixi.getPathsFromXPathExpression("//img[@src]"):
+            src = tixi.getTextAttribute(path, "src")
+            file = os.path.normpath(os.path.join(os.path.dirname(html_path, src)))
+            filename = os.path.split(file)[1]
+            if not os.path.isfile(file):
+                if not errors:
+                    errors.append("{} requires following resources that are missing:".format(html_path))
+                errors.append(src)
+                continue
+
+            # Seems like the file exists. Copy it to the destination outout directory, keeping the relative location
+            target_dir = os.path.normpath(os.path.join(self.settings.dir_text, src))
+            os.makedirs(target_dir)
+            target_file = os.path.join(target_dir, filename)
+            try:
+                shutil.copy(file, target_file)
+            except shutil.SameFileError:
+                pass
+            except PermissionError:
+                errors.append("Could not copy {} to {} - Permission denied".format(file, target_file))
+            except:
+                errors.append("Could not copy {} to {}".format(file, target_file))
+
+        return "\n".join(errors)
     #
     def write_sections(self):
         """
