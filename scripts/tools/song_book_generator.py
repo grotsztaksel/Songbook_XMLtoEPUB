@@ -50,7 +50,7 @@ class SongBookGenerator(object):
         missingFiles, ambiguousAttributes = self._pullAttributesFromSRCs()
 
         wrong_htmls = []
-        for path in self.tixi.getPathsFromXPathExpression("//html"):
+        for path in self.tixi.xPathExpressionGetAllXPaths("//html"):
             err = self.setHTMLtitle(path)
             if err:
                 wrong_htmls.append(err)
@@ -94,20 +94,20 @@ class SongBookGenerator(object):
         """
         # First remove the songs that have attribute include="false"
         xPathToRemove = "//song[@include='false']"
-        for path in reversed(self.tixi.getPathsFromXPathExpression(xPathToRemove)):
+        for path in reversed(self.tixi.xPathExpressionGetAllXPaths(xPathToRemove)):
             self.tixi.removeElement(path)
         xPath = "//song[@title]"
-        n = self.tixi.tryXPathEvaluateNodeNumber(xPath)
+        n = self.tixi.xPathEvaluateNodeNumber(xPath)
         print("Found {} songs".format(n))
         if self.N > 0 and n < self.N or self.N == 0:
             self.N = n
         # Remove the abundant songs
-        while self.tixi.tryXPathEvaluateNodeNumber(xPath) > self.N:
+        while self.tixi.xPathEvaluateNodeNumber(xPath) > self.N:
             path = self.tixi.xPathExpressionGetXPath(xPath, self.N + 1)
             self.tixi.removeElement(path)
         # Now remove sections that do not have songs inside
         xPath_emptySection = "//section[not(descendant::song)]"
-        for path in reversed(self.tixi.getPathsFromXPathExpression(xPath_emptySection)):
+        for path in reversed(self.tixi.xPathExpressionGetAllXPaths(xPath_emptySection)):
             self.tixi.removeElement(path)
         print("Will process {} songs".format(self.N))
 
@@ -116,7 +116,7 @@ class SongBookGenerator(object):
         are found, raise an error"""
         xPath = "//song[@src]/*"
         wrongPaths = dict()
-        for path in self.tixi.getPathsFromXPathExpression(xPath):
+        for path in self.tixi.xPathExpressionGetAllXPaths(xPath):
             parent = Tixi.parent(path)
             if parent in wrongPaths:
                 # No need to do the same for every verse/chorus/link etc.
@@ -137,7 +137,7 @@ class SongBookGenerator(object):
         spath = "/song"
         missingFiles = dict()
         ambiguousAttributes = dict()
-        for path in self.tixi.getPathsFromXPathExpression(xPath):
+        for path in self.tixi.xPathExpressionGetAllXPaths(xPath):
             src = self.tixi.getTextAttribute(path, "src")
             if os.path.isfile(os.path.abspath(src)):
                 file = src
@@ -172,7 +172,7 @@ class SongBookGenerator(object):
         usedFileNames = []
         xPath = "//*[self::song or self::section or self::html]"
 
-        for xmlPath in self.tixi.getPathsFromXPathExpression(xPath):
+        for xmlPath in self.tixi.xPathExpressionGetAllXPaths(xPath):
             title = self.tixi.getTextAttribute(xmlPath, "title")
 
             if Tixi.elementName(xmlPath) == "song":
@@ -199,7 +199,7 @@ class SongBookGenerator(object):
 
     def _escapeQuoteMarks(self):
         """replace all single and double quotes in attributes with &apos; and &quot; , respectively"""
-        for path in self.tixi.getPathsFromXPathExpression("//*[@*]"):
+        for path in self.tixi.xPathExpressionGetAllXPaths("//*[@*]"):
             # xpath expression means all elements that have any attributes
             for i in range(self.tixi.getNumberOfAttributes(path)):
                 attr = self.tixi.getAttributeName(path, i + 1)
@@ -228,7 +228,7 @@ class SongBookGenerator(object):
         """
 
         xPath = "//song"
-        for xml in self.tixi.getPathsFromXPathExpression(xPath):
+        for xml in self.tixi.xPathExpressionGetAllXPaths(xPath):
             file = self.tixi.getTextAttribute(xml, "xhtml")
 
             writer = SongWriter(self.tixi, self.settings, xml)
@@ -293,7 +293,7 @@ class SongBookGenerator(object):
         """
         html_path = tixi.getDocumentPath()
         errors = []
-        for path in tixi.getPathsFromXPathExpression("//img[@src]"):
+        for path in tixi.xPathExpressionGetAllXPaths("//img[@src]"):
             src = tixi.getTextAttribute(path, "src")
             file = os.path.normpath(os.path.join(os.path.dirname(html_path, src)))
             filename = os.path.split(file)[1]
@@ -325,7 +325,7 @@ class SongBookGenerator(object):
         """
 
         xPath = "//section"
-        for xml in self.tixi.getPathsFromXPathExpression(xPath):
+        for xml in self.tixi.xPathExpressionGetAllXPaths(xPath):
             file = self.tixi.getTextAttribute(xml, "xhtml")
 
             writer = SectionWriter(self.tixi, self.settings, xml)
@@ -354,7 +354,7 @@ class SongBookGenerator(object):
 
         linksToCreate = True
         while linksToCreate:
-            n = self.tixi.tryXPathEvaluateNodeNumber(xPathFrom)
+            n = self.tixi.xPathEvaluateNodeNumber(xPathFrom)
             linksToCreate = list()
             linksToRemove = list()
             for i in range(1, n + 1):
@@ -366,13 +366,13 @@ class SongBookGenerator(object):
 
                 # Find all songs that have title mentioned in the link
                 xPath = "//song[@title=\"{}\"]".format(title_link)
-                m = self.tixi.tryXPathEvaluateNodeNumber(xPath)
+                m = self.tixi.xPathEvaluateNodeNumber(xPath)
                 if m == 0:
                     linksToRemove.append(path_link)
                 for j in range(1, m + 1):
                     target_path = self.tixi.xPathExpressionGetXPath(xPath, j)
                     # Do not create link, if there already is one
-                    if self.tixi.tryXPathEvaluateNodeNumber(target_path + "/link[@title='{}']".format(title_parent)):
+                    if self.tixi.xPathEvaluateNodeNumber(target_path + "/link[@title='{}']".format(title_parent)):
                         continue
                     nlinks = self.tixi.getNamedChildrenCount(target_path, "link")
                     linksToCreate.append((target_path, nlinks + 1, title_parent))
@@ -419,7 +419,7 @@ class SongBookGenerator(object):
                 tixi.addTextAttribute(path, key, value)
 
         xPath = "//*[self::song or self::section or self::html]"
-        for i, xml in enumerate(self.tixi.getPathsFromXPathExpression(xPath)):
+        for i, xml in enumerate(self.tixi.xPathExpressionGetAllXPaths(xPath)):
             fileName = self.tixi.getTextAttribute(xml, "xhtml")
             id_attr = "id{}".format(i + 1)
 
@@ -497,7 +497,7 @@ class SongBookGenerator(object):
 
         xPath = "{}/*[self::song or self::section or self::html]".format(secsongPath)
 
-        for path in self.tixi.getPathsFromXPathExpression(xPath):
+        for path in self.tixi.xPathExpressionGetAllXPaths(xPath):
             self._createNavPoint(path, my_npPath, tixi_ncx)
 
     #
@@ -511,6 +511,6 @@ class SongBookGenerator(object):
         tixi.addTextAttribute("/ncx", "xml:lang", self.settings.lang)
 
         tixi.createElement("/ncx", "head"),
-        tpath = tixi.getNewElementPath("/ncx", "docTitle")
+        tpath = tixi.createElement("/ncx", "docTitle")
         tixi.addTextElement(tpath, "text", self.settings.title)
         return tixi

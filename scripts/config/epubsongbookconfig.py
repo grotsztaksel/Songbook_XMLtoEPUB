@@ -95,7 +95,7 @@ class EpubSongbookConfig():
         # copy the keys of self.xsd_elements_2_settings_map to later make sure that all have been defined in xsd
         settings = list(self.xsd_elements_2_settings_map.keys())
 
-        for setting in self.xsd.getPathsFromXPathExpression(self.xsd_spath):
+        for setting in self.xsd.xPathExpressionGetAllXPaths(self.xsd_spath):
             name = self.xsd.getTextAttribute(setting, "name")
             # If setting is not in self.xsd_elements_2_settings_map, this will throw an error
             try:
@@ -135,7 +135,7 @@ class EpubSongbookConfig():
             tp = self.xsd.getTextAttribute(xsd_path, "type").lstrip("xs:").lstrip("xsd:")
         else:
             # Maybe it is a simple type with some restrictions?
-            paths = self.xsd.getPathsFromXPathExpression('{}/xs:simpleType/xs:restriction[@base]'.format(xsd_path))
+            paths = self.xsd.xPathExpressionGetAllXPaths('{}/xs:simpleType/xs:restriction[@base]'.format(xsd_path))
             if len(paths) != 1:
                 return value
             tp = self.xsd.getTextAttribute(paths[0], "base").lstrip("xs:").lstrip("xsd:")
@@ -233,5 +233,5 @@ class EpubSongbookConfig():
         overriden
         """
         xPath = "/songbook/*[self::section or self::song][not(@chord_mode)]"
-        for path in self.tixi.getPathsFromXPathExpression(xPath):
+        for path in self.tixi.xPathExpressionGetAllXPaths(xPath):
             self.tixi.addTextAttribute(path, "chord_mode", str(self.chordType))

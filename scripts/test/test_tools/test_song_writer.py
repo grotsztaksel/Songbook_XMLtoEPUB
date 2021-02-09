@@ -197,7 +197,7 @@ class TestSongWriter(unittest.TestCase):
         self.assertEqual("authors", self.expectedTixi.getTextAttribute("/x:html/x:body/x:p[1]", "class"))
         self.expectedTixi.removeElement("/x:html/x:body/x:p[1]")
 
-        for path in reversed(self.expectedTixi.getPathsFromXPathExpression('//*[@class="verse"]')):
+        for path in reversed(self.expectedTixi.xPathExpressionGetAllXPaths('//*[@class="verse"]')):
             self.expectedTixi.removeElement(path)
 
         self.assertEqual(1, self.expectedTixi.getNamedChildrenCount("/x:html/x:body", "x:p"))
@@ -265,14 +265,14 @@ class TestSongWriter(unittest.TestCase):
         self.assertEqual(empty_html, writer.tixi.exportDocumentAsString())
 
         # Add links in the investigated song
-        lPath = src_tixi.getNewElementPathAtIndex(songPath, "link", 1)
+        lPath = src_tixi.createElementAtIndex(songPath, "link", 1)
         src_tixi.addTextAttribute(lPath, "title", "Song A")
-        lPath = src_tixi.getNewElementPathAtIndex(songPath, "link", 2)
+        lPath = src_tixi.createElementAtIndex(songPath, "link", 2)
         src_tixi.addTextAttribute(lPath, "title", "Song ABBA")
 
         # Need to add fake xhtml attributes, otherwise the AuthorsWriter will bomb out
         i = 0
-        for path in src_tixi.getPathsFromXPathExpression("//song"):
+        for path in src_tixi.xPathExpressionGetAllXPaths("//song"):
             i += 1
             src_tixi.addTextAttribute(path, "xhtml", "song_file_{}.xhtml".format(i))
 

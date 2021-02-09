@@ -20,7 +20,7 @@ class TestAuthorsWriter(unittest.TestCase):
         self.settings = EpubSongbookConfig(tixi)
         # Need to add fake xhtml attributes, otherwise the AuthorsWriter will bomb out
         i = 0
-        for path in tixi.getPathsFromXPathExpression("//song"):
+        for path in tixi.xPathExpressionGetAllXPaths("//song"):
             i += 1
             tixi.addTextAttribute(path, "xhtml", "song_file_{}.xhtml".format(i))
         # get the authors attributes for the song that is defined in separate file (has attribute "src")

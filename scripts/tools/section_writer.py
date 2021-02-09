@@ -58,7 +58,7 @@ class SectionWriter(HtmlWriter):
         ulPath = "{}/ul[{}]".format(targetPath, nul)
         xPath = sourcePath + "/*[self::section or self::song]"
 
-        for path in self.src_tixi.getPathsFromXPathExpression(xPath):
+        for path in self.src_tixi.xPathExpressionGetAllXPaths(xPath):
             title = self.src_tixi.getTextAttribute(path, "title")
             xhtml = self.src_tixi.getTextAttribute(path, "xhtml")
 

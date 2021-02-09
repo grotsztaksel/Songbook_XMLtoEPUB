@@ -121,7 +121,7 @@ def split_song_xml(input):
 
     usedFileNames = []
     songXPath = "//song[@title]"
-    for song in tixi.getPathsFromXPathExpression(songXPath):
+    for song in tixi.xPathExpressionGetAllXPaths(songXPath):
         title = tixi.getTextAttribute(song, "title")
 
         file_name_base = UtfSimplifier.toAscii(title).replace(" ", "_").lower()

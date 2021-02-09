@@ -100,7 +100,7 @@ class SongWriter(HtmlWriter):
         self.tixi.addTextElement(bpath, "h1", title)
 
         # <p class="authors">lyrics by: [lyrics], music by: [music] (The Developers)</p>
-        pPath = self.tixi.getNewTextElementPath(bpath, "p", text)
+        pPath = self.tixi.addTextElement(bpath, "p", text)
         self.tixi.addTextAttribute(pPath, "class", "authors")
 
     #
@@ -158,7 +158,7 @@ class SongWriter(HtmlWriter):
         if not self.CS in text:
             return False
 
-        pPath = self.tixi.getNewElementPath(targetPath, "p")
+        pPath = self.tixi.createElement(targetPath, "p")
         for line in self._identifyLinesWithChords(text):
             if isinstance(line, list):
                 while line:
@@ -167,7 +167,7 @@ class SongWriter(HtmlWriter):
                     if line:
                         self.tixi.createElement(pPath, "br")
             elif isinstance(line, LineWithChords):
-                tbPath = self.tixi.getNewElementPath(pPath, "table")
+                tbPath = self.tixi.createElement(pPath, "table")
 
                 # with the empty element [''] in front, the chords should have the same length as the textChunks
                 chords = [''] + line.chords[0].split(" ")
@@ -204,9 +204,9 @@ class SongWriter(HtmlWriter):
                     else:
                         self.tixi.createElement(crdPath, "td")
                     if chunk:
-                        lastText_td = self.tixi.getNewTextElementPath(txtPath, "td", chunk)
+                        lastText_td = self.tixi.addTextElement(txtPath, "td", chunk)
                     else:
-                        lastText_td = self.tixi.getNewElementPath(txtPath, "td")
+                        lastText_td = self.tixi.createElement(txtPath, "td")
 
         return True
 
@@ -220,7 +220,7 @@ class SongWriter(HtmlWriter):
         if not self.CS in text:
             return False
 
-        pPath = self.tixi.getNewElementPath(targetPath, "p")
+        pPath = self.tixi.createElement(targetPath, "p")
 
         previousWasTable = False
         for line in self._identifyLinesWithChords(text):
@@ -233,11 +233,11 @@ class SongWriter(HtmlWriter):
                 previousWasTable = False
             elif isinstance(line, LineWithChords):
                 if not previousWasTable:
-                    tbPath = self.tixi.getNewElementPath(pPath, "table")
+                    tbPath = self.tixi.createElement(pPath, "table")
                 previousWasTable = True
                 self.tixi.addTextAttribute(tbPath, "class", "chords_beside")
 
-                trPath = self.tixi.getNewElementPath(tbPath, "tr")
+                trPath = self.tixi.createElement(tbPath, "tr")
                 self.tixi.addTextElement(trPath, "td", line[0].replace(self.CI, ""))
                 try:
                     self.tixi.addTextElement(trPath, "td", line[1][0])
@@ -257,7 +257,7 @@ class SongWriter(HtmlWriter):
 
         text = self.song_tixi.getTextElement(srcPath).strip()
         lines = [line.strip().split(self.CS)[0].replace(self.CI, "") for line in text.split('\n')]
-        pPath = self.tixi.getNewElementPath(self.root + "/body", "p")
+        pPath = self.tixi.createElement(self.root + "/body", "p")
         while lines:
             line = lines.pop(0)
             self.tixi.addTextElement(pPath, "span", line)
@@ -273,8 +273,8 @@ class SongWriter(HtmlWriter):
         xPath = self.src_path + "/link[@title]"
         titles_found = []
         targetPath = "/html/body"
-        linkPcreated = bool(self.tixi.tryXPathEvaluateNodeNumber(targetPath + "/p[@class='links']"))
-        for path in self.src_tixi.getPathsFromXPathExpression(xPath):
+        linkPcreated = bool(self.tixi.xPathEvaluateNodeNumber(targetPath + "/p[@class='links']"))
+        for path in self.src_tixi.xPathExpressionGetAllXPaths(xPath):
             if not linkPcreated:
                 # Create the new paragraph to store the links
 
@@ -282,13 +282,13 @@ class SongWriter(HtmlWriter):
                 self.tixi.addTextElement(targetPath, "h3", self.settings.links_header)
 
                 #  <p class="links/>
-                targetPath = self.tixi.getNewElementPath(targetPath, "p")
+                targetPath = self.tixi.createElement(targetPath, "p")
                 self.tixi.addTextAttribute(targetPath, "class", "links")
 
                 #  <p class="links>
                 #    <ul/>
                 #  </p>
-                targetPath = self.tixi.getNewElementPath(targetPath, "ul")
+                targetPath = self.tixi.createElement(targetPath, "ul")
                 linkPcreated = True
 
             title = self.src_tixi.getTextAttribute(path, "title")
@@ -301,7 +301,7 @@ class SongWriter(HtmlWriter):
             # <li><a href="...xhtml">Title</a><span> (authors)</span></li> item
             #
             xPath = "//song[@title='{}' and @xhtml]".format(title)
-            for songPath in self.src_tixi.getPathsFromXPathExpression(xPath):
+            for songPath in self.src_tixi.xPathExpressionGetAllXPaths(xPath):
                 if songPath == self.src_path:
                     # Don't want to create link for ourselves
                     continue
@@ -321,14 +321,14 @@ class SongWriter(HtmlWriter):
                 #        <li/>
                 #    </ul>
                 #  </p>
-                liPath = self.tixi.getNewElementPath(targetPath, "li")
+                liPath = self.tixi.createElement(targetPath, "li")
 
                 #  <p class="links>
                 #    <ul>
                 #        <li><a href="...xhtml">Linked song title</a>                                  </li>
                 #    </ul>
                 #  </p>
-                aPath = self.tixi.getNewTextElementPath(liPath, "a", title)
+                aPath = self.tixi.addTextElement(liPath, "a", title)
                 self.tixi.addTextAttribute(aPath, "href", file)
 
                 #  <p class="links>
@@ -338,7 +338,7 @@ class SongWriter(HtmlWriter):
                 #  </p>
                 if authors:
                     authors = "({})".format(", ".join(authors))
-                    sPath = self.tixi.getNewTextElementPath(liPath, "span", authors)
+                    sPath = self.tixi.addTextElement(liPath, "span", authors)
                     self.tixi.addTextAttribute(sPath, "style", "font-size:12px")
 
     #

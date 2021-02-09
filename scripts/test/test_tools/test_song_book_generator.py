@@ -47,7 +47,7 @@ class TestSongBookGenerator(unittest.TestCase):
 
         xPath = "//*[self::verse or self::chorus]"
 
-        n = tixi.tryXPathEvaluateNodeNumber(xPath)
+        n = tixi.xPathEvaluateNodeNumber(xPath)
         self.assertEqual(15, n)  # The total number of verses and choruses in the songs
 
     def test_preprocess(self):
@@ -167,7 +167,7 @@ The following songs have their attributes defined in both master XML and in sour
 
         for title in titles_to_exclude:
             xPath = "//song[@title=\"{}\"]".format(title)
-            self.assertEqual([], self.sg.tixi.getPathsFromXPathExpression(xPath))
+            self.assertEqual([], self.sg.tixi.xPathExpressionGetAllXPaths(xPath))
 
         self.assertEqual(54 - (sum(titles_to_exclude.values()) + 1), self.sg.tixi.xPathEvaluateNodeNumber("//*"))
 
@@ -308,14 +308,14 @@ The following songs have their attributes defined in both master XML and in sour
             h.write('</wrong_html>')
         tixi = Tixi()
         tixi.create("html")
-        head = tixi.getNewElementPath("/html", "head")
+        head = tixi.createElement("/html", "head")
         tixi.addTextElement(head, "title", "HTML Title")
         tixi.saveCompleteDocument(goodfile)
 
         self.assertTrue(os.path.isfile(badfile))
         self.assertTrue(os.path.isfile(goodfile))
 
-        html_path = self.sg.tixi.getNewElementPath("/songbook/section[3]", "html")
+        html_path = self.sg.tixi.createElement("/songbook/section[3]", "html")
 
         # File does not exist
         self.sg.tixi.addTextAttribute(html_path, "src", "./non_existent_file.html")

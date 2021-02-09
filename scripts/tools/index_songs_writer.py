@@ -29,13 +29,13 @@ class SongsIndexWriter(HtmlWriter):
             4. Filenames are unique
             5. Filenames are previously built from song titles, so they should be sortable.
         """
-        for path in self.src_tixi.getPathsFromXPathExpression("//song[@title and @xhtml]"):
+        for path in self.src_tixi.xPathExpressionGetAllXPaths("//song[@title and @xhtml]"):
             title = self.src_tixi.getTextAttribute(path, "title")
             file = self.src_tixi.getTextAttribute(path, "xhtml")
             self.songs[file] = title
 
     def write_index(self):
-        bPath = self.tixi.getNewElementPath("/html", "body")
+        bPath = self.tixi.createElement("/html", "body")
         self.tixi.addTextElement(bPath, "h2", self.settings.alphabedical_index_title)
 
         I = ""  # Initial
@@ -45,8 +45,8 @@ class SongsIndexWriter(HtmlWriter):
                 I = title[0]
                 self.tixi.addTextElement(bPath, "h3", I)
 
-            ulPath = self.tixi.getNewElementPath(bPath, "ul")
+            ulPath = self.tixi.createElement(bPath, "ul")
 
-            liPath = self.tixi.getNewElementPath(ulPath, "li")
-            aPath = self.tixi.getNewTextElementPath(liPath, "a", title)
+            liPath = self.tixi.createElement(ulPath, "li")
+            aPath = self.tixi.addTextElement(liPath, "a", title)
             self.tixi.addTextAttribute(aPath, "href", file)

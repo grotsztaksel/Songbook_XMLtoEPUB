@@ -44,10 +44,10 @@ class TestHtmlWriter(unittest.TestCase):
     def test_saveFile(self):
         # First add some stuff that will have to be modified:
         tixi = self.writer.tixi
-        path = tixi.getNewElementPath("/html", "body")
+        path = tixi.createElement("/html", "body")
         tixi.addTextElement(path, "p", "some text<br/>and a new line&nbsp;")
-        path = tixi.getNewElementPath(path, "table")
-        path = tixi.getNewElementPath(path, "tr")
+        path = tixi.createElement(path, "table")
+        path = tixi.createElement(path, "tr")
         tixi.addTextElement(path, "td", "blah")
         tixi.addTextElement(path, "td", "glah")
         tixi.addTextElement(path, "td", "meeh")

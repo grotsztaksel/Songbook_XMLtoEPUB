@@ -60,7 +60,7 @@ class AuthorsWriter(HtmlWriter):
         """For each author name in the dictionary, find the songs associated with that name. Then, find
            the standardized name and create a list (so that it can be sorted) of tuples (title, file)
         """
-        for path in self.src_tixi.getPathsFromXPathExpression("//song[@lyrics or @music or @band]"):
+        for path in self.src_tixi.xPathExpressionGetAllXPaths("//song[@lyrics or @music or @band]"):
             for attr in ["lyrics", "music", "band"]:
                 isBand = attr == "band"
                 # For each of these attributes, if exist and not yet in the dictionary,
@@ -86,7 +86,7 @@ class AuthorsWriter(HtmlWriter):
     #
     def write_index(self):
         """Write the whole block of the index"""
-        bPath = self.tixi.getNewElementPath("/html", "body")
+        bPath = self.tixi.createElement("/html", "body")
         self.tixi.addTextElement(bPath, "h2", self.settings.authors_index_title)
 
         I = ""  # Initial
@@ -99,11 +99,11 @@ class AuthorsWriter(HtmlWriter):
                 self.tixi.addTextElement(bPath, "h3", I)
 
             self.tixi.addTextElement(bPath, "h4", author)
-            ulPath = self.tixi.getNewElementPath(bPath, "ul")
+            ulPath = self.tixi.createElement(bPath, "ul")
 
             for song in sorted(hisOrHerSongs.keys()):
-                liPath = self.tixi.getNewElementPath(ulPath, "li")
+                liPath = self.tixi.createElement(ulPath, "li")
                 file = hisOrHerSongs[song]
 
-                aPath = self.tixi.getNewTextElementPath(liPath, "a", song)
+                aPath = self.tixi.addTextElement(liPath, "a", song)
                 self.tixi.addTextAttribute(aPath, "href", file)
