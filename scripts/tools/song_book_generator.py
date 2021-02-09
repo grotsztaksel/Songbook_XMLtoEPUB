@@ -287,14 +287,21 @@ class SongBookGenerator(object):
         REMARK: Only relative paths are supported, as the HTML files are copied to the output directory, and so will
         be their resource files
 
-        REMARK: Only images are checked as of now
+        REMARK: Only images, html links and stylesheets are checked as of now
         :param tixi: an opened Tixi object containing the html subdocument definition
         :return:  Empty string if everything is fine. Otherwise string containing the error information
         """
         html_path = tixi.getDocumentPath()
         errors = []
-        for path in tixi.xPathExpressionGetAllXPaths("//img[@src]"):
-            src = tixi.getTextAttribute(path, "src")
+        css = tixi.xPathExpressionGetAllXPaths("//link[@rel='stylesheet' and @href]")
+        images = tixi.xPathExpressionGetAllXPaths("//img[@src]")
+        links = tixi.xPathExpressionGetAllXPaths("//a[@href]")
+        for path in css + images + links:
+            if path in css + links:
+                src_attr = "href"
+            elif path in images:
+                src_attr = "src"
+            src = tixi.getTextAttribute(path, src_attr)
             file = os.path.normpath(os.path.join(os.path.dirname(html_path), src))
             filename = os.path.split(file)[1]
             if not os.path.isfile(file):
@@ -313,7 +320,6 @@ class SongBookGenerator(object):
                 errors.append("  - Could not copy {} to {} - Permission denied".format(file, target_file))
             except:
                 errors.append("  - Could not copy {} to {}".format(file, target_file))
-            pass
         if errors:
             errors.insert(0, "Following problems in HTML file {}:".format(html_path))
         return "\n".join(errors)
