@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on 21.11.2020 17:10
- 
+
 @author: piotr
 """
 
@@ -30,11 +30,21 @@ class TestSongBookGenerator(unittest.TestCase):
 
         # The constructor should have created the dir
         self.assertTrue(os.path.isdir(self.test_dir))
+        self.fhandle = None
+        self.newDirs = []
 
     def tearDown(self):
+        for path in self.newDirs:
+            shutil.rmtree(path, ignore_errors=True)
         shutil.rmtree(self.test_dir, ignore_errors=True)
+
         if os.path.isfile(self.test_src2):
             os.remove(self.test_src2)
+        if self.fhandle is not None:
+            try:
+                self.fhandle.close()
+            except:
+                pass
 
     def test_init(self):
         self.sg._preprocess()
@@ -351,6 +361,64 @@ The following songs have their attributes defined in both master XML and in sour
             '- /songbook/section[3]/html Non Matching src="{}" - source is not a valid HTML file!'.format(rel),
             self.sg.setHTMLtitle(html_path))
         self.assertEqual("Non Matching", self.sg.tixi.getTextAttribute(html_path, "title"))
+
+    def test_copyHTML_resources(self):
+        # First prepare some HTML
+        htmlfile = os.path.join(self.test_dir, "good.html")
+        tixi = Tixi()
+        tixi.create("html")
+        head = tixi.createElement("/html", "head")
+        tixi.addTextElement(head, "title", "HTML Title")
+
+        bpath = tixi.createElement("/html", "body")
+        path = tixi.createElement(bpath, "img")
+        tixi.addTextAttribute(path, "src", "./missing.txt")  # txt, because we don't care if these are real pictures
+        path = tixi.createElement(bpath, "img")
+        tixi.addTextAttribute(path, "src", "./res/ok.txt")
+        path = tixi.createElement(bpath, "img")
+        tixi.addTextAttribute(path, "src", "../text/samefile.txt")
+        path = tixi.createElement(bpath, "img")
+        tixi.addTextAttribute(path, "src", "./res/perm_denied.txt")
+        tixi.saveCompleteDocument(htmlfile)
+
+        # Now create the files
+        for path in [
+            ["res"],
+            ["text"],
+            ["..", "text"],
+            ["text", "res"]
+        ]:
+            dirpath = [self.test_dir] + path
+            newPath = os.path.join(*dirpath)
+            os.makedirs(newPath, exist_ok=True)
+            self.newDirs.append(newPath)
+
+        with open(os.path.join(self.test_dir, "res", "ok.txt"), 'w') as f:
+            f.write("Some text that pretends to be a picture")
+        with open(os.path.join(self.test_dir, "..", "text", "samefile.txt"), 'w') as f:
+            f.write("Some text that pretends to be a picture")
+        with open(os.path.join(self.test_dir, "res", "perm_denied.txt"), 'w') as f:
+            f.write("Some text that pretends to be a picture")
+
+        # Open a file so that it cannot be copied to
+        self.fhandle = open(os.path.join(self.test_dir, "text", "res", "perm_denied.txt"), 'w')
+        self.fhandle.write("Writing something!")
+
+        # Tweak the text dir
+        self.sg.settings.dir_text = os.path.join(self.test_dir, "text")
+
+        tixi.open(htmlfile)
+        res = self.sg._copyHTML_resources(tixi)
+
+        denied_from = os.path.normpath(os.path.join(self.test_dir, "res", "perm_denied.txt"))
+        denied_to = os.path.normpath(os.path.join(self.test_dir, "text", "res", "perm_denied.txt"))
+
+        expected = "\n".join([
+            "Following problems in HTML file {}:".format(htmlfile),
+            "  - Resource file ./missing.txt not found",
+            "  - Could not copy {} to {} - Permission denied".format(denied_from, denied_to)
+        ])
+        self.assertEqual(expected, res)
 
     def test_write_sections(self):
         self.sg._preprocess()
