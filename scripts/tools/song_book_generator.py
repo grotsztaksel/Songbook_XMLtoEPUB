@@ -276,7 +276,7 @@ class SongBookGenerator(object):
         if htitle != title:
             return '- {} - title mismatch! ("{}" vs "{}" in {})'.format(xmlPath, title, htitle, src)
 
-        return self._copyHTML_resources(htmlFile)
+        return self._copyHTML_resources(htixi)
 
     def _copyHTML_resources(self, tixi: Tixi) -> str:
         """
@@ -295,28 +295,29 @@ class SongBookGenerator(object):
         errors = []
         for path in tixi.xPathExpressionGetAllXPaths("//img[@src]"):
             src = tixi.getTextAttribute(path, "src")
-            file = os.path.normpath(os.path.join(os.path.dirname(html_path, src)))
+            file = os.path.normpath(os.path.join(os.path.dirname(html_path), src))
             filename = os.path.split(file)[1]
             if not os.path.isfile(file):
-                if not errors:
-                    errors.append("{} requires following resources that are missing:".format(html_path))
-                errors.append(src)
+                errors.append("  - Resource file {} not found".format(src))
                 continue
 
-            # Seems like the file exists. Copy it to the destination outout directory, keeping the relative location
-            target_dir = os.path.normpath(os.path.join(self.settings.dir_text, src))
-            os.makedirs(target_dir)
+            # Seems like the file exists. Copy it to the destination output directory, keeping the relative location
+            target_dir = os.path.normpath(os.path.join(self.settings.dir_text, os.path.dirname(src)))
+            os.makedirs(target_dir, exist_ok=True)
             target_file = os.path.join(target_dir, filename)
             try:
                 shutil.copy(file, target_file)
             except shutil.SameFileError:
                 pass
             except PermissionError:
-                errors.append("Could not copy {} to {} - Permission denied".format(file, target_file))
+                errors.append("  - Could not copy {} to {} - Permission denied".format(file, target_file))
             except:
-                errors.append("Could not copy {} to {}".format(file, target_file))
-
+                errors.append("  - Could not copy {} to {}".format(file, target_file))
+            pass
+        if errors:
+            errors.insert(0, "Following problems in HTML file {}:".format(html_path))
         return "\n".join(errors)
+
     #
     def write_sections(self):
         """
