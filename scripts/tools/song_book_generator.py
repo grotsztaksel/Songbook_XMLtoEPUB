@@ -79,10 +79,14 @@ class SongBookGenerator(object):
             errorMessage.append("The following subdocument elements were parsed with errors:")
             errorMessage.extend(wrong_htmls)
 
+        abused_xhtml_names = self._assignXHTMLattributes()
+
+        if abused_xhtml_names:
+            errorMessage.append("Output file names were used multiple times for different songs/sections:")
+            errorMessage.extend(abused_xhtml_names)
+
         if errorMessage:
             raise ValueError("\n".join(errorMessage))
-
-        self._assignXHTMLattributes()
 
         self._escapeQuoteMarks()
 
@@ -92,9 +96,10 @@ class SongBookGenerator(object):
             -   those that exceed the max number of songs to be processed
             -   sections that are empty after previous operations
         """
-        # First remove the songs that have attribute include="false"
-        xPathToRemove = "//song[@include='false']"
+        # First remove the items that have attribute include="false"
+        xPathToRemove = "//*[@include='false']"
         for path in reversed(self.tixi.xPathExpressionGetAllXPaths(xPathToRemove)):
+            # reversed order, in order to prevent modification of the paths of elements that are not yet deleted
             self.tixi.removeElement(path)
         xPath = "//song[@title]"
         n = self.tixi.xPathEvaluateNodeNumber(xPath)
@@ -112,7 +117,7 @@ class SongBookGenerator(object):
         print("Will process {} songs".format(self.N))
 
     def _findAmbiguousSongsContent(self):
-        """Find song elements that have both "src" attribute and some children in the same tixi. If such elements
+        """Find song elements that have both "src" attribute and some children in the master XML. If such elements
         are found, raise an error"""
         xPath = "//song[@src]/*"
         wrongPaths = dict()
@@ -165,15 +170,36 @@ class SongBookGenerator(object):
 
     def _assignXHTMLattributes(self):
         """For each song and section element, add an attribute that will describe what output xhtml file the given
-        song or section should create. The file names are built by replacing spaces in title with underscores and
+        song or section should create. Apart from that, the html documents will not be renamed, because they may be
+        referenced to in other documents.
+        For the same reason, if the master XML file already has "xhtml" attribute for the given song or section,
+        it will be then used.
+        The file names are built by replacing spaces in title with underscores and
         simplifying the UTF characters to ASCII. If file name is already used, the the new will have an increased
         number appended
         """
         usedFileNames = []
-        xPath = "//*[self::song or self::section or self::html]"
+        XhtmlNamesAbused = False
+        usedXhtmlNames = {}  # If more than one song or section has the same xhtml attribute, collect them and throw an
+        #                      error
+
+        xPath = "//html"
+        for xmlPath in self.tixi.xPathExpressionGetAllXPaths(xPath):
+            # Simply copy the "src" attribute to "xhtml"
+            src = self.tixi.getTextAttribute(xmlPath, "src")
+            self.tixi.addTextAttribute(xmlPath, "xhtml", src)
+
+        xPath = "//*[self::song or self::section]"
 
         for xmlPath in self.tixi.xPathExpressionGetAllXPaths(xPath):
             title = self.tixi.getTextAttribute(xmlPath, "title")
+            if self.tixi.checkAttribute(xmlPath, "xhtml"):
+                xhtml = self.tixi.getTextAttribute(xmlPath, "xhtml")
+                if xhtml not in usedXhtmlNames.keys():
+                    usedXhtmlNames[xhtml] = [xmlPath]
+                else:
+                    usedXhtmlNames[xhtml].append(xmlPath)
+                    XhtmlNamesAbused = True
 
             if Tixi.elementName(xmlPath) == "song":
                 prefix = "sng_"
@@ -181,6 +207,7 @@ class SongBookGenerator(object):
                 prefix = "sec_"
             else:
                 prefix = "htm_"
+
             file_name_base = UtfSimplifier.toAscii(title).replace(" ", "_").lower()
             suffix = ""
             ext = ".xhtml"
@@ -196,6 +223,13 @@ class SongBookGenerator(object):
             usedFileNames.append(fileName)
 
             self.tixi.addTextAttribute(xmlPath, "xhtml", fileName)
+        error = []
+        if XhtmlNamesAbused:
+            for xhtml_name, xmlPaths in usedXhtmlNames.items():
+                error.append(xhtml_name)
+                for xmlPath in xmlPaths:
+                    error.append("  - {}".format(xmlPath))
+        return error
 
     def _escapeQuoteMarks(self):
         """replace all single and double quotes in attributes with &apos; and &quot; , respectively"""
@@ -427,7 +461,7 @@ class SongBookGenerator(object):
 
         xPath = "//*[self::song or self::section or self::html]"
         for i, xml in enumerate(self.tixi.xPathExpressionGetAllXPaths(xPath)):
-            fileName = self.tixi.getTextAttribute(xml, "xhtml")
+            fileName = os.path.normpath(self.tixi.getTextAttribute(xml, "xhtml"))
             id_attr = "id{}".format(i + 1)
 
             tixi.createElement(manifest, "item")
@@ -485,7 +519,7 @@ class SongBookGenerator(object):
         isRoot = secsongPath == "/" + self.tixi.getChildNodeName("/", 1)
         if not isRoot:
             secsongTitle = self.tixi.getTextAttribute(secsongPath, "title")
-            secsongFile = self.tixi.getTextAttribute(secsongPath, "xhtml")
+            secsongFile = os.path.normpath(self.tixi.getTextAttribute(secsongPath, "xhtml"))
             tixi_ncx.createElement(npPath, "navPoint")
             n = tixi_ncx.getNamedChildrenCount(npPath, "navPoint")
             my_npPath = "{}/navPoint[{}]".format(npPath, n)
