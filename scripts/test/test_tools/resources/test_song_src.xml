@@ -115,6 +115,7 @@
                 La La La
             </verse>
         </song>
+        <html src="./test_html.xhtml"/>
         <song title="Song ABBA" lyrics="John Doe" music="John Doe" chord_mode="NO_CHORDS">
             <link title="Song A"/>
             <verse>

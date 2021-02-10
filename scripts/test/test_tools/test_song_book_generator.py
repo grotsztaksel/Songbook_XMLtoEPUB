@@ -170,7 +170,7 @@ The following songs have their attributes defined in both master XML and in sour
             xPath = "//song[@title=\"{}\"]".format(title)
             self.assertEqual(1, self.sg.tixi.xPathEvaluateNodeNumber(xPath))
 
-        self.assertEqual(54, self.sg.tixi.xPathEvaluateNodeNumber("//*"))
+        self.assertEqual(55, self.sg.tixi.xPathEvaluateNodeNumber("//*"))
         self.sg._removeIgnoredContent()
 
         self.assertFalse(self.sg.tixi.checkElement(section_to_exclude))
@@ -179,7 +179,7 @@ The following songs have their attributes defined in both master XML and in sour
             xPath = "//song[@title=\"{}\"]".format(title)
             self.assertEqual([], self.sg.tixi.xPathExpressionGetAllXPaths(xPath))
 
-        self.assertEqual(54 - (sum(titles_to_exclude.values()) + 1), self.sg.tixi.xPathEvaluateNodeNumber("//*"))
+        self.assertEqual(55 - (sum(titles_to_exclude.values()) + 1), self.sg.tixi.xPathEvaluateNodeNumber("//*"))
 
     def test_findAmbiguousSongsContent(self):
 
@@ -532,7 +532,8 @@ The following songs have their attributes defined in both master XML and in sour
         </navPoint>
         <navPoint id="num_372" playOrder="372"><navLabel><text>Section 2</text></navLabel><content src="text/sec_section_2.xhtml"/>
         <navPoint id="num_373" playOrder="373"><navLabel><text>Song A</text></navLabel><content src="text/sng_song_a_1.xhtml"/></navPoint>
-        <navPoint id="num_374" playOrder="374"><navLabel><text>Song ABBA</text></navLabel><content src="text/sng_song_abba.xhtml"/></navPoint>
+        <navPoint id="num_374" playOrder="374"><navLabel><text>HTML Subdocument</text></navLabel><content src="text/test_html.xhtml"/></navPoint>
+        <navPoint id="num_375" playOrder="375"><navLabel><text>Song ABBA</text></navLabel><content src="text/sng_song_abba.xhtml"/></navPoint>
         </navPoint>
         </root>""".strip()
         expected_tixi = Tixi()

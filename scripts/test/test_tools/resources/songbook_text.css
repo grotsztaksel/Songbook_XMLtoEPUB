@@ -1,0 +1,10 @@
+@charset "utf-8";
+body, section, div, table, thead, tbody, tfoot, th, td, p, pre, ul, ol, dl, dt, dd, li, span, nav, header, footer {
+  margin: 0;
+  padding: 0;
+}
+body {
+  width: 768px;
+  margin: 20px;
+  padding: 0;
+}
