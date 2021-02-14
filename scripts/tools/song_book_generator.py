@@ -5,6 +5,7 @@ Created on 20.11.2020 18:35
 @author: piotr
 """
 import os
+import re
 import shutil
 
 from config import EpubSongbookConfig
@@ -298,12 +299,15 @@ class SongBookGenerator(object):
         except TixiException as e:
             return '- {} {} src="{}" - source is not a valid HTML file!'.format(xmlPath, title, src)
 
-        try:
-            titlePath = htixi.getUnknownNSelementPath("/html/head/title")
-            htitle = htixi.getTextElement(titlePath)
-        except TixiException as e:
-            if e.code == ReturnCode.ELEMENT_NOT_FOUND:
-                return '- {} - undefined document title in {}!'.format(xmlPath, src)
+        # get rid of all namespaces defined in the html - but just for tixi needs. Do not save it!
+        html_str = htixi.exportDocumentAsString()
+        htixi.close()
+        htixi.openString(re.sub(r"xmlns(:\S+)?=['\"].+?['\"]", "", html_str))
+
+        if htixi.checkElement("/html/head/title"):
+            htitle = htixi.getTextElement("/html/head/title")
+        else:
+            return '- {} - undefined document title in {}!'.format(xmlPath, src)
 
         if not title:
             self.tixi.addTextAttribute(xmlPath, "title", htitle)
@@ -312,9 +316,9 @@ class SongBookGenerator(object):
         if htitle != title:
             return '- {} - title mismatch! ("{}" vs "{}" in {})'.format(xmlPath, title, htitle, src)
 
-        return self._copyHTML_resources(htixi)
+        return self._copyHTML_resources(htixi, htmlFile)
 
-    def _copyHTML_resources(self, tixi: Tixi) -> str:
+    def _copyHTML_resources(self, tixi: Tixi, html_path=None) -> str:
         """
         Check if the subdocument HTML file uses some resources and verify their availability. If the resource file is
         available, copy it to the output directory keeping the relative path
@@ -325,9 +329,12 @@ class SongBookGenerator(object):
 
         REMARK: Only images, html links and stylesheets are checked as of now
         :param tixi: an opened Tixi object containing the html subdocument definition
+        :param html_path: path to the source file. If None, the method will try getting it from the Tixi object, which
+                          will fail, if the Tixi was created from a string
         :return:  Empty string if everything is fine. Otherwise string containing the error information
         """
-        html_path = tixi.getDocumentPath()
+        if html_path is None:
+            html_path = tixi.getDocumentPath()
         errors = []
         css = tixi.xPathExpressionGetAllXPaths("//link[@rel='stylesheet' and @href]")
         images = tixi.xPathExpressionGetAllXPaths("//img[@src]")
