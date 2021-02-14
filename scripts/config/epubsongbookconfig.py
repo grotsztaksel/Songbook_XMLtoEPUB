@@ -80,6 +80,7 @@ class EpubSongbookConfig():
                                             "chord_insertion_character": "CI"}
 
         xsd_file = os.path.join(os.path.dirname(__file__), "source_schema.xsd")
+        self.xsd_song = os.path.join(os.path.dirname(__file__), "song_schema.xsd")
         self.xsd = Tixi()
         self.xsd.open(xsd_file)
         self.xsd.registerNamespacesFromDocument()
