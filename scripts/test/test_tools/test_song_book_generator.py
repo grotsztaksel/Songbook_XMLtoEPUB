@@ -320,6 +320,7 @@ The following songs have their attributes defined in both master XML and in sour
         tixi.create("html")
         head = tixi.createElement("/html", "head")
         tixi.addTextElement(head, "title", "HTML Title")
+        tixi.setElementNamespace("/html", 'http://www.w3.org/1999/xhtml', None)
         tixi.saveCompleteDocument(goodfile)
 
         self.assertTrue(os.path.isfile(badfile))
@@ -346,7 +347,8 @@ The following songs have their attributes defined in both master XML and in sour
 
         # Break the good html - will have no title
         tixi.open(goodfile)
-        tixi.removeElement("/html/head/title")
+        tixi.registerNamespace("http://www.w3.org/1999/xhtml", "h")
+        tixi.removeElement("/h:html/h:head/h:title")
         tixi.saveCompleteDocument(goodfile)
 
         self.assertEqual('- /songbook/section[3]/html - undefined document title '
@@ -372,7 +374,6 @@ The following songs have their attributes defined in both master XML and in sour
         linkpath = tixi.createElement(head, "link")
         tixi.addTextAttribute(linkpath, "rel", "stylesheet")
         tixi.addTextAttribute(linkpath, "href", "../songbook.css")
-
 
         bpath = tixi.createElement("/html", "body")
         path = tixi.createElement(bpath, "img")
