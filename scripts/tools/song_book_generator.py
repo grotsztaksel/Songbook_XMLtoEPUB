@@ -298,10 +298,12 @@ class SongBookGenerator(object):
         except TixiException as e:
             return '- {} {} src="{}" - source is not a valid HTML file!'.format(xmlPath, title, src)
 
-        if htixi.checkElement("/html/head/title"):
-            htitle = htixi.getTextElement("/html/head/title")
-        else:
-            return '- {} - undefined document title in {}!'.format(xmlPath, src)
+        try:
+            titlePath = htixi.getUnknownNSelementPath("/html/head/title")
+            htitle = htixi.getTextElement(titlePath)
+        except TixiException as e:
+            if e.code == ReturnCode.ELEMENT_NOT_FOUND:
+                return '- {} - undefined document title in {}!'.format(xmlPath, src)
 
         if not title:
             self.tixi.addTextAttribute(xmlPath, "title", htitle)
