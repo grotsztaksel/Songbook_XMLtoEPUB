@@ -2,8 +2,11 @@
 """
 Created on Sat Nov 14 17:56:39 2020
 
-@author: piotr
+@author: Piotr Gradkowski <grotsztaksel@o2.pl>
 """
+
+__authors__ = ['Piotr Gradkowski <grotsztaksel@o2.pl>']
+__date__ = '2020-11-14'
 __all__ = ['LineWithChords', 'SongWriter']
 
 import os
@@ -376,7 +379,7 @@ class SongWriter(HtmlWriter):
 
         return output
 
-    def _compareAttributes(self)->TixiException:
+    def _compareAttributes(self) -> TixiException:
         """
         If the song is written in a separate tixi than the src_tixi, make sure that none of the attributes in the
         source path and song path has different value. If the attributes do not repeat, everything is fine.

@@ -2,8 +2,11 @@
 """
 Created on 20.11.2020 20:42
  
-@author: piotr
+@author: Piotr Gradkowski <grotsztaksel@o2.pl>
 """
+
+__authors__ = ['Piotr Gradkowski <grotsztaksel@o2.pl>']
+__date__ = '2020-11-20'
 
 import os
 import unittest
@@ -61,7 +64,7 @@ class TestSchema(unittest.TestCase):
 
     def test_testXMLschemaCompliant(self):
         test_xml_file = os.path.join(os.path.dirname(__file__),
-                                     "..", "test_tools","resources", "test_song_src.xml")
+                                     "..", "test_tools", "resources", "test_song_src.xml")
         self.assertTrue(os.path.isfile(test_xml_file))
         tixi = Tixi()
         tixi.open(test_xml_file, recursive=True)

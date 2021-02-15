@@ -2,8 +2,11 @@
 """
 Created on 01.12.2020 19:07
  
-@author: piotr
+@author: Piotr Gradkowski <grotsztaksel@o2.pl>
 """
+
+__authors__ = ['Piotr Gradkowski <grotsztaksel@o2.pl>']
+__date__ = '2020-12-01'
 
 import unittest
 from split_song_xml import SourceSplitter

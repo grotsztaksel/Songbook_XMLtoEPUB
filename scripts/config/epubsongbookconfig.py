@@ -2,10 +2,12 @@
 """
 Created on Sat Nov 14 17:32:27 2020
 
-@author: piotr
+@author: Piotr Gradkowski <grotsztaksel@o2.pl>
 """
 
 __all__ = ['ChordMode', 'EpubSongbookConfig']
+__authors__ = ['Piotr Gradkowski <grotsztaksel@o2.pl>']
+__date__ = '2020-11-14'
 
 import getpass
 import os

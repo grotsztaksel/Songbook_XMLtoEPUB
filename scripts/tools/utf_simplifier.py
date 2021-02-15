@@ -2,9 +2,10 @@
 """
 Created on Sat Nov 14 18:03:55 2020
 
-@author: piotr
+@author: Piotr Gradkowski <grotsztaksel@o2.pl>
 """
-
+__authors__ = ['Piotr Gradkowski <grotsztaksel@o2.pl>']
+__date__ = '2020-11-14'
 __all__ = ['UtfSimplifier']
 
 import re

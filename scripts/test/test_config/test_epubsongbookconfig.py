@@ -2,7 +2,7 @@
 """
 Created on 23.01.2021 20:00
  
-@author: piotr
+@author: Piotr Gradkowski <grotsztaksel@o2.pl>
 """
 
 import getpass

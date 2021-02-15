@@ -2,8 +2,12 @@
 """
 Created on 27.11.2020 19:51
  
-@author: piotr
+@author: Piotr Gradkowski <grotsztaksel@o2.pl>
 """
+__authors__ = ['Piotr Gradkowski <grotsztaksel@o2.pl>']
+__date__ = '2020-11-27'
+__all__ = ['AuthorsWriter']
+
 import re
 
 from config import EpubSongbookConfig

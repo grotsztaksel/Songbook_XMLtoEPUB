@@ -2,8 +2,11 @@
 """
 Created on 21.11.2020 17:10
 
-@author: piotr
+@author: Piotr Gradkowski <grotsztaksel@o2.pl>
 """
+
+__authors__ = ['Piotr Gradkowski <grotsztaksel@o2.pl>']
+__date__ = '2020-11-21'
 
 import os
 import shutil

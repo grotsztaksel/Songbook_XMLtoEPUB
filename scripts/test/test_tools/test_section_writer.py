@@ -2,8 +2,11 @@
 """
 Created on 22.11.2020 17:45
  
-@author: piotr
+@author: Piotr Gradkowski <grotsztaksel@o2.pl>
 """
+
+__authors__ = ['Piotr Gradkowski <grotsztaksel@o2.pl>']
+__date__ = '2020-11-22'
 
 import unittest
 from tixi import Tixi

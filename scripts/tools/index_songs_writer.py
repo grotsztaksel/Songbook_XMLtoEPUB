@@ -2,8 +2,12 @@
 """
 Created on 02.12.2020 19:39
  
-@author: piotr
+@author: Piotr Gradkowski <grotsztaksel@o2.pl>
 """
+
+__authors__ = ['Piotr Gradkowski <grotsztaksel@o2.pl>']
+__date__ = '2020-12-02'
+__all__ = ['SongsIndexWriter']
 
 from config import EpubSongbookConfig
 from tixi import Tixi

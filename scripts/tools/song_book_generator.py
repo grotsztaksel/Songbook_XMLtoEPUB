@@ -2,8 +2,13 @@
 """
 Created on 20.11.2020 18:35
 
-@author: piotr
+@author: Piotr Gradkowski <grotsztaksel@o2.pl>
 """
+
+__authors__ = ['Piotr Gradkowski <grotsztaksel@o2.pl>']
+__date__ = '2020-11-20'
+__all__ = ['SongBookGenerator']
+
 import os
 import re
 import shutil

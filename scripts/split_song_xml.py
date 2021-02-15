@@ -2,7 +2,7 @@
 """
 Created on 05.12.2020 17:46
  
-@author: piotr
+@author: Piotr Gradkowski <grotsztaksel@o2.pl>
 """
 
 import os
