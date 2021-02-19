@@ -12,8 +12,8 @@ __all__ = ['LineWithChords', 'SongWriter']
 import os
 from collections import namedtuple
 
-from config import EpubSongbookConfig, ChordMode
-from tixi import Tixi, TixiException, ReturnCode
+from scripts.config import EpubSongbookConfig, ChordMode
+from scripts.tixi import Tixi, TixiException, ReturnCode
 from .html_writer import HtmlWriter
 
 LineWithChords = namedtuple("LineWithChords", ["text", "chords"])

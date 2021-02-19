@@ -11,8 +11,9 @@ __date__ = '2020-11-20'
 import os
 import unittest
 
-from config import epubsongbookconfig
-from tixi import Tixi, TixiException, ReturnCode
+
+from scripts.config import epubsongbookconfig
+from scripts.tixi import Tixi, TixiException, ReturnCode
 
 
 class TestSchema(unittest.TestCase):

@@ -13,8 +13,8 @@ import os
 import re
 import shutil
 
-from config import EpubSongbookConfig
-from tixi import Tixi, TixiException, ReturnCode
+from scripts.config import EpubSongbookConfig
+from scripts.tixi import Tixi, TixiException, ReturnCode
 from .index_authors_writer import AuthorsWriter
 from .index_songs_writer import SongsIndexWriter
 from .section_writer import SectionWriter

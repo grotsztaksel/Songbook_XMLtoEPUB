@@ -11,9 +11,9 @@ __date__ = '2020-11-27'
 import os
 import unittest
 
-from config import EpubSongbookConfig
-from tixi import Tixi
-from tools.index_authors_writer import AuthorsWriter
+from scripts.config import EpubSongbookConfig
+from scripts.tixi import Tixi
+from scripts.tools.index_authors_writer import AuthorsWriter
 
 
 class TestAuthorsWriter(unittest.TestCase):

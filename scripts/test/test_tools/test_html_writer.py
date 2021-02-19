@@ -11,9 +11,9 @@ __date__ = '2020-11-24'
 import os
 import unittest
 
-from config import EpubSongbookConfig
-from tixi import Tixi
-from tools.html_writer import HtmlWriter
+from scripts.config import EpubSongbookConfig
+from scripts.tixi import Tixi
+from scripts.tools.html_writer import HtmlWriter
 
 
 class TestHtmlWriter(unittest.TestCase):

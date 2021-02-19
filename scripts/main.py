@@ -11,7 +11,7 @@ __date__ = '2020-11-14'
 import os
 import sys
 
-from tools.song_book_generator import SongBookGenerator
+from scripts.tools.song_book_generator import SongBookGenerator
 
 
 def main(argv):

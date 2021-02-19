@@ -9,8 +9,8 @@ __authors__ = ['Piotr Gradkowski <grotsztaksel@o2.pl>']
 __date__ = '2020-12-02'
 __all__ = ['SongsIndexWriter']
 
-from config import EpubSongbookConfig
-from tixi import Tixi
+from scripts.config import EpubSongbookConfig
+from scripts.tixi import Tixi
 from .html_writer import HtmlWriter
 
 

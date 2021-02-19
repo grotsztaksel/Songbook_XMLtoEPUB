@@ -12,8 +12,8 @@ __all__ = ['HtmlWriter']
 import os
 import re
 
-from config import EpubSongbookConfig
-from tixi import Tixi
+from scripts.config import EpubSongbookConfig
+from scripts.tixi import Tixi
 
 
 class HtmlWriter(object):

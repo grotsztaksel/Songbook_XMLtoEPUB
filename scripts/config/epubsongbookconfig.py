@@ -15,7 +15,12 @@ import shutil
 from enum import Enum
 from typing import Any
 
-from tixi import Tixi, TixiException, ReturnCode
+try:
+    from scripts.tixi import Tixi, TixiException, ReturnCode
+except Exception:
+    pth = os.environ["PATH"].split(";")
+    print(os.path.isfile(os.path.join(pth[-2], "tixi3.dll")))
+    raise Exception("--\n--".join(pth))
 
 
 class ChordMode(Enum):

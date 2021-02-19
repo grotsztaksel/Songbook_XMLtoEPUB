@@ -13,9 +13,9 @@ import shutil
 import unittest
 from collections import namedtuple
 
-from config import EpubSongbookConfig
-from tixi import Tixi
-from tools.song_book_generator import SongBookGenerator
+from scripts.config import EpubSongbookConfig
+from scripts.tixi import Tixi
+from scripts.tools.song_book_generator import SongBookGenerator
 
 Song = namedtuple("Song", ["file", "title", "xml"])
 
