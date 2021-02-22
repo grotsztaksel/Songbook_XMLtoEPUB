@@ -15,12 +15,12 @@ from tixi import Tixi
 class HtmlWriter(object):
     """A set of common (static) methods allowing to write and save the XHTML files in a similar way"""
 
-    @staticmethod
-    def prepare_html_tixi() -> Tuple[Tixi, str]:
-        tixi = Tixi()
-        tixi.create("html")
-        tixi.addTextAttribute("/html", "xmlns", "http://www.w3.org/1999/xhtml")
-        tixi.createElement("/html", "head")
+    def __init__(self, tixi: Tixi):
+        self.src_tixi = tixi
+        self.tixi = Tixi()
+        self.tixi.create("html")
+        self.tixi.addTextAttribute("/html", "xmlns", "http://www.w3.org/1999/xhtml")
+        self.tixi.createElement("/html", "head")
 
         headPath = "/html/head"
 
@@ -35,18 +35,16 @@ class HtmlWriter(object):
         for a in attrs:
             tixi.addTextAttribute(linkPath, a, attrs[a])
 
-        return tixi, "/html"
+        self.root = "/html"
 
     def saveFile(tixi, fileName):
         """Apply specific formatting and save the content of the self.tixi to a file filename"""
         text = tixi.exportDocumentAsString()
         replaceRules = {
             "&lt;br/&gt;": "<br/>",
-            "&amp;nbsp;": "&nbsp;",
-            "&amp;apos;": "&apos;",
-            "&amp;quot;": "&quot;"
+            "&amp;": "&"
         }
-        for rr in replaceRules.keys():
+        for rr in replaceRules:
             text = text.replace(rr, replaceRules[rr])
         # Now regular expressions
 
