@@ -13,7 +13,7 @@ from tixi import Tixi
 
 
 class HtmlWriter(object):
-    """A set of common (static) methods allowing to write and save the XHTML files in a similar way"""
+    """A generic class used to write the xhtml files."""
 
     def __init__(self, tixi: Tixi):
         self.src_tixi = tixi
@@ -24,8 +24,8 @@ class HtmlWriter(object):
 
         headPath = "/html/head"
 
-        tixi.addTextElement(headPath, "title", "Śpiewnik")
-        tixi.createElement(headPath, "link")
+        self.tixi.addTextElement(headPath, "title", "Śpiewnik")
+        self.tixi.createElement(headPath, "link")
 
         linkPath = headPath + "/link"
 
@@ -33,13 +33,13 @@ class HtmlWriter(object):
                  "type": "text/css",
                  "href": "../songbook.css"}
         for a in attrs:
-            tixi.addTextAttribute(linkPath, a, attrs[a])
+            self.tixi.addTextAttribute(linkPath, a, attrs[a])
 
         self.root = "/html"
 
-    def saveFile(tixi, fileName):
-        """Apply specific formatting and save the content of the self.tixi to a file filename"""
-        text = tixi.exportDocumentAsString()
+    def saveFile(self, fileName):
+        """Apply specific formatting and save the content of the self.self.tixi to a file filename"""
+        text = self.tixi.exportDocumentAsString()
         replaceRules = {
             "&lt;br/&gt;": "<br/>",
             "&amp;": "&"

@@ -14,15 +14,13 @@ from tixi import Tixi
 from .html_writer import HtmlWriter
 
 
-class SectionWriter(object):
+class SectionWriter(HtmlWriter):
     def __init__(self, tixi: Tixi, path: str):
-        super(SectionWriter, self).__init__()
+        super(SectionWriter, self).__init__(tixi)
 
-        self.src_tixi = tixi
-        self.src_path = path
         self.dir = CFG.SONG_HTML_DIR
+        self.src_path = path
 
-        self.tixi, self.root = HtmlWriter.prepare_html_tixi()
 
     def write_section_file(self, fileName):
         """
@@ -33,7 +31,7 @@ class SectionWriter(object):
 
         self.write_toc()
 
-        HtmlWriter.saveFile(self.tixi, os.path.join(CFG.SONG_HTML_DIR, fileName))
+        self.saveFile(os.path.join(CFG.SONG_HTML_DIR, fileName))
 
     def write_toc(self):
         # <body/>

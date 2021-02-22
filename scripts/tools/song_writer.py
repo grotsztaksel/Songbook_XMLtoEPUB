@@ -16,14 +16,14 @@ from .html_writer import HtmlWriter
 LineWithChords = namedtuple("LineWithChords", ["text", "chords"])
 
 
-class SongWriter():
+class SongWriter(HtmlWriter):
     def __init__(self, tixi: Tixi, path: str):
-        super(SongWriter, self).__init__()
-        self.src_tixi = tixi
+        super(SongWriter, self).__init__(tixi)
+
         self.src_path = path
         self.dir = CFG.SONG_HTML_DIR
 
-        self.tixi, self.root = HtmlWriter.prepare_html_tixi()
+
 
     def write_song_file(self, fileName) -> bool:
         """
@@ -42,7 +42,7 @@ class SongWriter():
 
         self.write_links()
 
-        HtmlWriter.saveFile(self.tixi, os.path.join(CFG.SONG_HTML_DIR, fileName))
+        self.saveFile(os.path.join(CFG.SONG_HTML_DIR, fileName))
 
     def write_song_header(self, title):
         if self.src_tixi.checkAttribute(self.src_path, "music"):
