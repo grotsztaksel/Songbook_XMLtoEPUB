@@ -1,0 +1,3 @@
+[submodule "scripts/tixi"]
+	path = scripts/tixi
+	url = git@github.com:grotsztaksel/XTixi.git

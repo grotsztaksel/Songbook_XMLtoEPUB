@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://www.idpf.org/2007/opf">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
+    <dc:title>${title}</dc:title>
+    <dc:creator opf:file-as="Unknown" opf:role="aut">${user}</dc:creator>
+    <dc:language>${language}</dc:language>
+  </metadata>
+  <guide/>
+</package>
