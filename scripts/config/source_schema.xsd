@@ -15,7 +15,12 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element name="settings" type="settings" minOccurs="0" maxOccurs="1"/>
-                <xs:element name="section" type="section" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                    <xs:element name="section" type="section" minOccurs="0" maxOccurs="unbounded"/>
+                    <xs:element name="index_of_authors" type="songs_index" minOccurs="0" maxOccurs="unbounded"/>
+                    <xs:element name="index_of_songs" type="authors_index" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:choice>
+
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -213,42 +218,8 @@
                         </xs:attribute>
                     </xs:complexType>
                 </xs:element>
-                <xs:element name="index_of_songs">
-                    <xs:annotation>
-                        <xs:documentation>
-                            Use this element to insert the alphabetical index of songs from the whole songbook. Usually
-                            used in the beginning or at the end of the document, although you can insert any number of
-                            indexes, anywhere
-                        </xs:documentation>
-                    </xs:annotation>
-                    <xs:complexType>
-                        <xs:attribute name="title" type="xs:string">
-                            <xs:annotation>
-                                <xs:documentation>
-                                    Title of the index
-                                </xs:documentation>
-                            </xs:annotation>
-                        </xs:attribute>
-                    </xs:complexType>
-                </xs:element>
-                <xs:element name="index_of_authors">
-                    <xs:annotation>
-                        <xs:documentation>
-                            Use this element to insert the alphabetical index of authors and their songs appearing in
-                            the songbook. Usually used in the beginning or at the end of the document, although you can
-                            insert any number of indexes, anywhere
-                        </xs:documentation>
-                    </xs:annotation>
-                    <xs:complexType>
-                        <xs:attribute name="title" type="xs:string">
-                            <xs:annotation>
-                                <xs:documentation>
-                                    Title of the index
-                                </xs:documentation>
-                            </xs:annotation>
-                        </xs:attribute>
-                    </xs:complexType>
-                </xs:element>
+                <xs:element name="index_of_authors" type="songs_index" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element name="index_of_songs" type="authors_index" minOccurs="0" maxOccurs="unbounded"/>
             </xs:choice>
         </xs:choice>
         <xs:attribute name="title" type="xs:string" use="required"/>
@@ -266,4 +237,36 @@
         </xs:attribute>
     </xs:complexType>
 
+    <xs:complexType name="songs_index">
+        <xs:annotation>
+            <xs:documentation>
+                Use this element to insert the alphabetical index of songs from the whole songbook. Usually
+                used in the beginning or at the end of the document, although you can insert any number of
+                indexes, anywhere
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="title" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Title of the index
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+    <xs:complexType name="authors_index">
+        <xs:annotation>
+            <xs:documentation>
+                Use this element to insert the alphabetical index of authors and their songs appearing in
+                the songbook. Usually used in the beginning or at the end of the document, although you can
+                insert any number of indexes, anywhere
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="title" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Title of the index
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
 </xs:schema>
