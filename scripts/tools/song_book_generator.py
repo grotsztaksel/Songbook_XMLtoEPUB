@@ -498,11 +498,15 @@ class SongBookGenerator(object):
         """Cleanup and rewrite the toc.ncx"""
         tixi = Tixi()
         toc = os.path.join(self.settings.dir_out, "toc.ncx")
-        try:
-            tixi.open(toc)
-        except TixiException as e:
-            if e.code != ReturnCode.OPEN_FAILED:
-                raise e
+        toc_exists = os.path.isfile(toc)
+        if toc_exists:
+            try:
+                tixi.open(toc)
+            except TixiException as e:
+                if e.code != ReturnCode.OPEN_FAILED:
+                    raise e
+                toc_exists = False
+        if not toc_exists:
             tixi = self._createEmptyToC()
         tixi.registerNamespacesFromDocument()
         uri = "http://www.daisy.org/z3986/2005/ncx/"
