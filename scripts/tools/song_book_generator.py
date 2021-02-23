@@ -94,7 +94,7 @@ class SongBookGenerator(object):
         if errorMessage:
             raise ValueError("\n".join(errorMessage))
 
-        self._escapeQuoteMarks()
+        # self._escapeQuoteMarks()
 
     def _removeIgnoredContent(self):
         """Remove elements that should not be taken into account while processing the data:
