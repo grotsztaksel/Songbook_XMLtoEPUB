@@ -592,3 +592,18 @@ class SongBookGenerator(object):
         tpath = tixi.createElement("/ncx", "docTitle")
         tixi.addTextElement(tpath, "text", self.settings.title)
         return tixi
+
+    def _getDefaultSongAttributes(self):
+        """ Return a dictionary of default values of attributes of <song>
+        Create an empty song Tixi and validate it with defaults so that the default attributes are created.
+        Then collect the attributes"""
+
+        song = Tixi()
+        song.create("song")
+        # This is a required attribute
+        song.addTextAttribute("/song", "title", "dummy")
+
+        song.schemaValidateWithDefaultsFromFile(self.settings.xsd_song)
+        defaultAttributes = song.getAttributes("/song")
+        defaultAttributes.pop("title")
+        return defaultAttributes
