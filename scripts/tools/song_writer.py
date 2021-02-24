@@ -31,7 +31,7 @@ class SongWriter(HtmlWriter):
             self.song_tixi = Tixi()
             self.song_tixi.open(songFilePath)
             self.song_path = "/song"
-            self.song_tixi.schemaValidateFromFile(self.settings.xsd_song)
+            self.song_tixi.schemaValidateWithDefaultsFromFile(self.settings.xsd_song)
         else:
             self.song_tixi = self.src_tixi
             self.song_path = self.src_path
