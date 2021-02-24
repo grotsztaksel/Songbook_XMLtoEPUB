@@ -26,9 +26,9 @@ def main(argv):
     sg = SongBookGenerator(argv[1], xsd_file)
     sg.write_songs()
     sg.write_sections()
-    sg.write_metadata()
-    sg.write_toc()
     sg.write_indexes()
+    sg.write_toc()
+    sg.write_metadata()
 
 
 def print_exceptions(etype, value, tb):

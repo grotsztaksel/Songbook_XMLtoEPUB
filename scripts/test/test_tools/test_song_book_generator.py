@@ -288,7 +288,7 @@ The following songs have their attributes defined in both master XML and in sour
         self.sg.write_indexes()
 
         for file in expected_files:
-            self.assertTrue(os.path.isfile(os.path.join(self.test_dir, file)))
+            self.assertTrue(os.path.isfile(os.path.join(self.test_dir+"/text", file)))
 
     def test_write_songs(self):
         self.sg._preprocess()

@@ -44,6 +44,10 @@ class SongBookGenerator(object):
         self.N = self.settings.maxsongs  # definitely a shorter notation
 
         self.id = None
+
+        # Hardwired names of index files.
+        self.indexes = {"index_of_authors": "idx_authors.xhtml",
+                        "index_of_songs": "idx_songs.xhtml"}
         if preprocess:
             self._preprocess()
 
@@ -189,6 +193,12 @@ class SongBookGenerator(object):
         usedXhtmlNames = {}  # If more than one song or section has the same xhtml attribute, collect them and throw an
         #                      error
 
+        xPath = "//*[self::index_of_songs or self::index_of_authors]"
+
+        for xmlPath in self.tixi.xPathExpressionGetAllXPaths(xPath):
+            name = Tixi.elementName(xmlPath)
+            self.tixi.addTextAttribute(xmlPath, "xhtml", self.indexes[name])
+
         xPath = "//html"
         for xmlPath in self.tixi.xPathExpressionGetAllXPaths(xPath):
             # Simply copy the "src" attribute to "xhtml"
@@ -254,11 +264,11 @@ class SongBookGenerator(object):
     def write_indexes(self):
         writer = AuthorsWriter(self.tixi, self.settings)
         writer.write_index()
-        writer.saveFile(os.path.join(self.settings.dir_out, "idx_authors.xhtml"))
+        writer.saveFile(os.path.join(self.settings.dir_text, "idx_authors.xhtml"))
 
         writer = SongsIndexWriter(self.tixi, self.settings)
         writer.write_index()
-        writer.saveFile(os.path.join(self.settings.dir_out, "idx_songs.xhtml"))
+        writer.saveFile(os.path.join(self.settings.dir_text, "idx_songs.xhtml"))
 
     #
     def write_songs(self):
@@ -473,7 +483,12 @@ class SongBookGenerator(object):
             for key, value in d.items():
                 tixi.addTextAttribute(path, key, value)
 
-        xPath = "//*[self::song or self::section or self::html]"
+        xPath = "//*[self::song " \
+                "or self::section " \
+                "or self::html " \
+                "or self::index_of_authors " \
+                "or self::index_of_songs]"
+
         for i, xml in enumerate(self.tixi.xPathExpressionGetAllXPaths(xPath)):
             fileName = os.path.normpath(self.tixi.getTextAttribute(xml, "xhtml"))
             id_attr = "id{}".format(i + 1)
@@ -554,7 +569,11 @@ class SongBookGenerator(object):
         else:
             my_npPath = npPath
 
-        xPath = "{}/*[self::song or self::section or self::html]".format(secsongPath)
+        xPath = "{}/*[self::song " \
+                "or self::section " \
+                "or self::html " \
+                "or self::index_of_authors " \
+                "or self::index_of_songs]".format(secsongPath)
 
         for path in self.tixi.xPathExpressionGetAllXPaths(xPath):
             self._createNavPoint(path, my_npPath, tixi_ncx)
