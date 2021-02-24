@@ -100,31 +100,33 @@ class SongBookGenerator(object):
 
         # self._escapeQuoteMarks()
 
-    def _removeIgnoredContent(self):
+    def _removeIgnoredContent(self, tixi: Tixi = None):
         """Remove elements that should not be taken into account while processing the data:
             -   those with attribute ignore="true"
             -   those that exceed the max number of songs to be processed
             -   sections that are empty after previous operations
         """
+        if tixi is None:
+            tixi = self.tixi
+
         # First remove the items that have attribute include="false"
         xPathToRemove = "//*[@include='false']"
-        for path in reversed(self.tixi.xPathExpressionGetAllXPaths(xPathToRemove)):
+        for path in reversed(tixi.xPathExpressionGetAllXPaths(xPathToRemove)):
             # reversed order, in order to prevent modification of the paths of elements that are not yet deleted
-            self.tixi.removeElement(path)
+            tixi.removeElement(path)
         xPath = "//song[@title]"
-        n = self.tixi.xPathEvaluateNodeNumber(xPath)
+        n = tixi.xPathEvaluateNodeNumber(xPath)
         print("Found {} songs".format(n))
         if self.N > 0 and n < self.N or self.N == 0:
             self.N = n
         # Remove the abundant songs
-        while self.tixi.xPathEvaluateNodeNumber(xPath) > self.N:
-            path = self.tixi.xPathExpressionGetXPath(xPath, self.N + 1)
-            self.tixi.removeElement(path)
+        while tixi.xPathEvaluateNodeNumber(xPath) > self.N:
+            path = tixi.xPathExpressionGetXPath(xPath, self.N + 1)
+            tixi.removeElement(path)
         # Now remove sections that do not have songs inside
         xPath_emptySection = "//section[not(descendant::song)]"
-        for path in reversed(self.tixi.xPathExpressionGetAllXPaths(xPath_emptySection)):
-            self.tixi.removeElement(path)
-        print("Will process {} songs".format(self.N))
+        for path in reversed(tixi.xPathExpressionGetAllXPaths(xPath_emptySection)):
+            tixi.removeElement(path)
 
     def _findAmbiguousSongsContent(self):
         """Find song elements that have both "src" attribute and some children in the master XML. If such elements
@@ -152,6 +154,14 @@ class SongBookGenerator(object):
         spath = "/song"
         missingFiles = dict()
         ambiguousAttributes = dict()
+        defaultAttributes = self._getDefaultSongAttributes()
+
+        unv_tixi = Tixi()  # since the main tixi has been validated with defaults, a raw copy without default attribute
+        # values is needed...
+        unv_tixi.open(self.tixi.getDocumentPath())
+        # Raw, but without ignored content, to avoid non-unique paths while resolving xPath Expressions
+        self._removeIgnoredContent(unv_tixi)
+
         for path in self.tixi.xPathExpressionGetAllXPaths(xPath):
             src = self.tixi.getTextAttribute(path, "src")
             if os.path.isfile(os.path.abspath(src)):
@@ -173,8 +183,13 @@ class SongBookGenerator(object):
                     self.tixi.addTextAttribute(path, attrName, attrValue)
                 else:
                     myValue = self.tixi.getTextAttribute(path, attrName)
+
                     if attrValue != myValue:
-                        ambiguousAttributes["{}, {}".format(path, attrName)] = [attrValue, myValue]
+                        if attrName in defaultAttributes.keys() and not unv_tixi.checkAttribute(path, attrName):
+                            # This was a default value added while schema validating
+                            self.tixi.addTextAttribute(path, attrName, attrValue)
+                        else:
+                            ambiguousAttributes["{}, {}".format(path, attrName)] = [attrValue, myValue]
 
         return (missingFiles, ambiguousAttributes)
 
