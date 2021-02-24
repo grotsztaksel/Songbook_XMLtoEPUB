@@ -112,6 +112,14 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
+            <xs:element name="toc_title" type="xs:string" default="Table of Contents"
+                        minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Title of the Table of Contents
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
             <xs:element name="links_header" type="xs:string" minOccurs="0" maxOccurs="1" default="See also:">
                 <xs:annotation>
                     <xs:documentation>

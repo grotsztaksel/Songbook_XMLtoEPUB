@@ -74,6 +74,7 @@ class EpubSongbookConfig():
                                             "section_title": "default_section_title",
                                             "authors_index_title": "authors_index_title",
                                             "alphabetical_index_title": "alphabetical_index_title",
+                                            "toc_title": "toc_title",
                                             "links_header": "links_header",
                                             "language": "lang",
                                             "encoding": "encoding",
