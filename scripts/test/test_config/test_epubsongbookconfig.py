@@ -58,7 +58,7 @@ class TestEpubSongbookConfig(unittest.TestCase):
         cfg = EpubSongbookConfig(self.tixi)
 
         self.assertEqual("My Songbook", cfg.title)
-        self.assertEqual("Alphabetical index of songs", cfg.alphabedical_index_title)
+        self.assertEqual("Alphabetical index of songs", cfg.alphabetical_index_title)
         self.assertEqual("Index of authors", cfg.authors_index_title)
         self.assertEqual("Section", cfg.default_section_title)
         self.assertEqual("See also:", cfg.links_header)
@@ -82,7 +82,7 @@ class TestEpubSongbookConfig(unittest.TestCase):
 
         cfg = EpubSongbookConfig(self.tixi)
         self.assertEqual("My Songbook", cfg.title)
-        self.assertEqual("Alphabetical index of songs", cfg.alphabedical_index_title)
+        self.assertEqual("Alphabetical index of songs", cfg.alphabetical_index_title)
         self.assertEqual("Index of authors", cfg.authors_index_title)
         self.assertEqual("Section", cfg.default_section_title)
         self.assertEqual("See also:", cfg.links_header)

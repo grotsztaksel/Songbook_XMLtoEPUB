@@ -40,7 +40,7 @@ class SongsIndexWriter(HtmlWriter):
 
     def write_index(self):
         bPath = self.tixi.createElement("/html", "body")
-        self.tixi.addTextElement(bPath, "h2", self.settings.alphabedical_index_title)
+        self.tixi.addTextElement(bPath, "h2", self.settings.alphabetical_index_title)
 
         I = ""  # Initial
         for file in sorted(self.songs.keys()):

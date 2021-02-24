@@ -104,7 +104,7 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="alphabedical_index_title" type="xs:string" default="Alphabetical index of songs"
+            <xs:element name="alphabetical_index_title" type="xs:string" default="Alphabetical index of songs"
                         minOccurs="0" maxOccurs="1">
                 <xs:annotation>
                     <xs:documentation>
