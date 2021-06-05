@@ -67,20 +67,16 @@ class SongWriter(HtmlWriter):
 
     #
     def write_song_header(self, title):
-
-        if self.src_tixi.checkAttribute(self.src_path, "band"):
-            band = self.src_tixi.getTextAttribute(self.src_path, "band")
-        else:
-            band = ""
-        if self.src_tixi.checkAttribute(self.src_path, "lyrics"):
-            lyrics = self.src_tixi.getTextAttribute(self.src_path, "lyrics")
-        else:
-            lyrics = ""
-
-        if self.src_tixi.checkAttribute(self.src_path, "music"):
-            music = self.src_tixi.getTextAttribute(self.src_path, "music")
-        else:
-            music = ""
+        band = ""
+        lyrics = ""
+        music = ""
+        for tixi , path in zip([self.src_tixi, self.song_tixi], [self.src_path, self.song_path]):
+            if band == "" and tixi.checkAttribute(path, "band"):
+                band = tixi.getTextAttribute(path, "band")
+            if lyrics == "" and tixi.checkAttribute(path, "lyrics"):
+                lyrics = tixi.getTextAttribute(path, "lyrics")
+            if music == "" and tixi.checkAttribute(path, "music"):
+                music = tixi.getTextAttribute(path, "music")
 
         if band and not lyrics and not music:
             text = band
