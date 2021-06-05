@@ -438,19 +438,19 @@ The following songs have their attributes defined in both master XML and in sour
 
     def test_createTwoWayLinks(self):
         self.sg._preprocess()
-        links_start = {"/songbook/section[1]/section[1]/song[2]/link": "Song B",
-                       "/songbook/section[1]/section[2]/song[1]/link": None,
-                       "/songbook/section[1]/section[2]/song[2]/link": "No Such Title",
-                       "/songbook/section[2]/song[1]/link": None,
-                       "/songbook/section[2]/song[2]/link": "Song A"}
+        links_start = {"/songbook/section[1]/section[1]/song[2 and @title='Song A']/link": "Song B",
+                       "/songbook/section[1]/section[2]/song[1 and @title='Song B']/link": None,
+                       "/songbook/section[1]/section[2]/song[2 and @title='Song C']/link": "No Such Title",
+                       "/songbook/section[2]/song[1 and @title='Song A']/link": None,
+                       "/songbook/section[2]/song[2 and @title='Song ABBA']/link": "Song A"}
 
-        links_end = {"/songbook/section[1]/section[1]/song[2]/link[1]": "Song B",
-                     "/songbook/section[1]/section[1]/song[2]/link[2]": "Song ABBA",
-                     "/songbook/section[1]/section[2]/song[1]/link": "Song A",
-                     "/songbook/section[1]/section[2]/song[2]/link": None,
-                     "/songbook/section[2]/song[1]/link[1]": "Song ABBA",
-                     "/songbook/section[2]/song[1]/link[2]": "Song B",
-                     "/songbook/section[2]/song[2]/link": "Song A"}
+        links_end = {"/songbook/section[1]/section[1]/song[2 and @title='Song A']/link[1]": "Song B",
+                     "/songbook/section[1]/section[1]/song[2 and @title='Song A']/link[2]": "Song ABBA",
+                     "/songbook/section[1]/section[2]/song[1 and @title='Song B']/link": "Song A",
+                     "/songbook/section[1]/section[2]/song[2 and @title='Song C']/link": None,
+                     "/songbook/section[2]/song[1 and @title='Song A']/link[1]": "Song ABBA",
+                     "/songbook/section[2]/song[1 and @title='Song A']/link[2]": "Song B",
+                     "/songbook/section[2]/song[2 and @title='Song ABBA']/link": "Song A"}
 
         tixi = self.sg.tixi
         run = "start"
