@@ -447,22 +447,33 @@ The following songs have their attributes defined in both master XML and in sour
             self.assertEqual(file[:3] == "sec", os.path.isfile(os.path.join(self.test_dir, "text", file)))
 
     def test_createTwoWayLinks(self):
+
+        tixi = self.sg.tixi
+        # Add a song that will have dead links:
+        new_song = tixi.createElement("/songbook/section[1]/section[2]", "song")
+        tixi.addTextAttribute(new_song, "title", "Song D")
+        new_link = tixi.createElement(new_song, "link")
+        tixi.addTextAttribute(new_link, "title", "No Such Title")
         self.sg._preprocess()
-        links_start = {"/songbook/section[1]/section[1]/song[2 and @title='Song A']/link": "Song B",
+        links_start = {"/songbook/section[1]/section[1]/song[1 and @title='My Test Song']/link": None,
+                       "/songbook/section[1]/section[1]/song[2 and @title='Song A']/link": "Song B",
                        "/songbook/section[1]/section[2]/song[1 and @title='Song B']/link": None,
                        "/songbook/section[1]/section[2]/song[2 and @title='Song C']/link": "No Such Title",
+                       "/songbook/section[1]/section[2]/song[2 and @title='Song D']/link": "No Such Title",
                        "/songbook/section[2]/song[1 and @title='Song A']/link": None,
                        "/songbook/section[2]/song[2 and @title='Song ABBA']/link": "Song A"}
 
-        links_end = {"/songbook/section[1]/section[1]/song[2 and @title='Song A']/link[1]": "Song B",
+        links_end = {"/songbook/section[1]/section[1]/song[1 and @title='My Test Song']/link": "Song C",
+                     "/songbook/section[1]/section[1]/song[2 and @title='Song A']/link[1]": "Song B",
                      "/songbook/section[1]/section[1]/song[2 and @title='Song A']/link[2]": "Song ABBA",
                      "/songbook/section[1]/section[2]/song[1 and @title='Song B']/link": "Song A",
-                     "/songbook/section[1]/section[2]/song[2 and @title='Song C']/link": None,
+                     "/songbook/section[1]/section[2]/song[2 and @title='Song C']/link": "My Test Song",
+                     "/songbook/section[1]/section[2]/song[2 and @title='Song D']/link": None,
                      "/songbook/section[2]/song[1 and @title='Song A']/link[1]": "Song ABBA",
                      "/songbook/section[2]/song[1 and @title='Song A']/link[2]": "Song B",
                      "/songbook/section[2]/song[2 and @title='Song ABBA']/link": "Song A"}
 
-        tixi = self.sg.tixi
+
         run = "start"
         for links_dict in [links_start, links_end]:
             for i, path in enumerate(links_dict.keys()):
