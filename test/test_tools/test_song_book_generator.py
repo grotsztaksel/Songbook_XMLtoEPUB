@@ -274,8 +274,6 @@ The following songs have their attributes defined in both master XML and in sour
             self.assertEqual(item.title, self.sg.tixi.getTextAttribute(item.xml, "title"))
             self.assertEqual(item.file, self.sg.tixi.getTextAttribute(item.xml, "xhtml"))
 
-
-
     def test_write_indexes(self):
         self.sg._preprocess()
         self.assertEqual(self.test_dir, self.sg.settings.dir_out)
@@ -442,7 +440,7 @@ The following songs have their attributes defined in both master XML and in sour
         tixi.addTextAttribute(new_song, "title", "Song D")
         new_link = tixi.createElement(new_song, "link")
         tixi.addTextAttribute(new_link, "title", "No Such Title")
-        self.sg._preprocess()
+
         links_start = {"/songbook/section[1]/section[1]/song[1 and @title='My Test Song']/link": None,
                        "/songbook/section[1]/section[1]/song[2 and @title='Song A']/link": "Song B",
                        "/songbook/section[1]/section[2]/song[1 and @title='Song B']/link": None,
@@ -461,7 +459,6 @@ The following songs have their attributes defined in both master XML and in sour
                      "/songbook/section[2]/song[1 and @title='Song A']/link[2]": "Song B",
                      "/songbook/section[2]/song[2 and @title='Song ABBA']/link": "Song A"}
 
-
         run = "start"
         for links_dict in [links_start, links_end]:
             for i, path in enumerate(links_dict.keys()):
@@ -470,12 +467,13 @@ The following songs have their attributes defined in both master XML and in sour
                 if link_exists:
                     title = links_dict[path]
                     try:
-                        self.assertEqual(title, tixi.getTextAttribute(path, "title"))
+                        self.assertEqual(title, tixi.getTextAttribute(path, "title"),
+                                         "Run: {}, path {}: {}".format(run, i + 1, path))
                     except AssertionError as e:
                         uu = tixi.exportDocumentAsString()
                         pass
                         raise e
-            self.sg.createTwoWayLinks()
+            self.sg._preprocess()
             run = "end"
 
     def test_write_metadata(self):
