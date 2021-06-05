@@ -135,7 +135,7 @@ class SongBookGenerator(object):
     def _findAmbiguousSongsContent(self):
         """Find song elements that have both "src" attribute and some children in the master XML. If such elements
         are found, raise an error"""
-        xPath = "//song[@src]/*"
+        xPath = "//song[@src]/*[not (self::link)]"
         wrongPaths = dict()
         for path in self.tixi.xPathExpressionGetAllXPaths(xPath):
             parent = Tixi.parent(path)
