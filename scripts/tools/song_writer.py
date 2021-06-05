@@ -15,6 +15,7 @@ from collections import namedtuple
 from scripts.config import EpubSongbookConfig, ChordMode
 from scripts.tixi import Tixi, TixiException, ReturnCode
 from .html_writer import HtmlWriter
+from .general import escapeQuoteMarks
 
 LineWithChords = namedtuple("LineWithChords", ["text", "chords"])
 
@@ -30,6 +31,7 @@ class SongWriter(HtmlWriter):
             assert os.path.isfile(songFilePath)
             self.song_tixi = Tixi()
             self.song_tixi.open(songFilePath)
+            escapeQuoteMarks(self.song_tixi)
             self.song_path = "/song"
             try:
                 self.song_tixi.schemaValidateWithDefaultsFromFile(self.settings.xsd_song)
