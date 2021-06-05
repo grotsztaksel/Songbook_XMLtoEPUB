@@ -36,6 +36,12 @@ class TestSongBookGenerator(unittest.TestCase):
         self.fhandle = None
         self.newDirs = []
 
+        # Copy the test_song.xml to a backup file
+        self.test_song = os.path.join(self.references, "test_song.xml")
+        self.test_song_bak = os.path.join(self.references, "test_song.xml.bak")
+
+        shutil.copy(self.test_song, self.test_song_bak)
+
     def tearDown(self):
         for path in self.newDirs:
             shutil.rmtree(path, ignore_errors=True)
@@ -48,6 +54,10 @@ class TestSongBookGenerator(unittest.TestCase):
                 self.fhandle.close()
             except:
                 pass
+
+        # If the test file has been changed, bring back the old version
+        shutil.copy(self.test_song_bak, self.test_song)
+        os.remove(self.test_song_bak)
 
     def test_init(self):
         self.sg._preprocess()
