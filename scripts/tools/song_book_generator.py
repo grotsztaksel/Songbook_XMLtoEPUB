@@ -20,7 +20,7 @@ from .index_songs_writer import SongsIndexWriter
 from .section_writer import SectionWriter
 from .song_writer import SongWriter
 from .utf_simplifier import UtfSimplifier
-
+from .general import escapeQuoteMarks
 
 class SongBookGenerator(object):
     def __init__(self, input_file, xsd_file=None, preprocess=True):
@@ -98,9 +98,9 @@ class SongBookGenerator(object):
         if errorMessage:
             raise ValueError("\n".join(errorMessage))
 
-        # self._escapeQuoteMarks()
-
         self._exposeLinks()
+
+        escapeQuoteMarks(self.tixi)
 
     def _removeIgnoredContent(self, tixi: Tixi = None):
         """Remove elements that should not be taken into account while processing the data:
@@ -263,19 +263,6 @@ class SongBookGenerator(object):
                 for xmlPath in xmlPaths:
                     error.append("  - {}".format(xmlPath))
         return error
-
-    def _escapeQuoteMarks(self):
-        """replace all single and double quotes in attributes with &apos; and &quot; , respectively"""
-        for path in self.tixi.xPathExpressionGetAllXPaths("//*[@*]"):
-            # xpath expression means all elements that have any attributes
-            for i in range(self.tixi.getNumberOfAttributes(path)):
-                attr = self.tixi.getAttributeName(path, i + 1)
-                value = self.tixi.getTextAttribute(path, attr)
-                value1 = value.replace("'", "&apos;")
-                value1 = value1.replace('"', "&quot;")
-                if value == value1:
-                    continue
-                self.tixi.addTextAttribute(path, attr, value1)
 
     def _exposeLinks(self):
         """
