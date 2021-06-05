@@ -70,7 +70,7 @@ class SongWriter(HtmlWriter):
         band = ""
         lyrics = ""
         music = ""
-        for tixi , path in zip([self.src_tixi, self.song_tixi], [self.src_path, self.song_path]):
+        for tixi, path in zip([self.src_tixi, self.song_tixi], [self.src_path, self.song_path]):
             if band == "" and tixi.checkAttribute(path, "band"):
                 band = tixi.getTextAttribute(path, "band")
             if lyrics == "" and tixi.checkAttribute(path, "lyrics"):
