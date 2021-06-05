@@ -67,6 +67,14 @@
                 <xs:element name="verse" type="lyrics_part"/>
                 <xs:element name="chorus" type="lyrics_part"/>
             </xs:choice>
+            <xs:element name="note" minOccurs="0" maxOccurs="1" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        Optional note that can follow the song (e.g. some anecdote or history of the song or its
+                        subject)
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
         </xs:sequence>
         <xs:attribute name="title" type="xs:string" use="required">
             <xs:annotation>
