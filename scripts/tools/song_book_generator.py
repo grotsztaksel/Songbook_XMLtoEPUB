@@ -430,6 +430,20 @@ class SongBookGenerator(object):
             </song>
         """
 
+        # First, check if the songs written in separate files have links
+        xPathSrc = "//song[@src]"
+        for i in range(1, self.tixi.xPathEvaluateNodeNumber(xPathSrc) + 1):
+            song_path = self.tixi.xPathExpressionGetXPath(xPathSrc, i)
+            source_file = self.tixi.getTextAttribute(song_path, "src")
+
+            song_tixi = Tixi()
+            song_tixi.open(os.path.join(os.path.dirname(self.tixi.getDocumentPath()), source_file))
+
+            for link in range(1, song_tixi.xPathEvaluateNodeNumber("/song/link") + 1):
+                link_title = song_tixi.xPathExpressionGetTextByIndex("/song/link/@title", i)
+                new_link = self.tixi.createElement(song_path, "link")
+                self.tixi.addTextAttribute(new_link, "title", link_title)
+
         xPathFrom = "//song/link[@title]"
 
         linksToCreate = True
@@ -448,7 +462,13 @@ class SongBookGenerator(object):
                 xPath = "//song[@title=\"{}\"]".format(title_link)
                 m = self.tixi.xPathEvaluateNodeNumber(xPath)
                 if m == 0:
-                    linksToRemove.append(path_link)
+                    # The indexing in the path_link may change after the new links are created.
+                    # It is safer to replace the element index
+                    # (e.g. [3]) with linked title (e.g. [@title='Dead link song']
+                    # Using regex, because there may be no index at the end
+                    path_link = re.sub('\[\d+\]$', '', path_link)
+                    linksToRemove.append("{}[@title='{}']".format(path_link, title_link))
+
                 for j in range(1, m + 1):
                     target_path = self.tixi.xPathExpressionGetXPath(xPath, j)
                     # Do not create link, if there already is one
