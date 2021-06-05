@@ -102,6 +102,8 @@ class SongBookGenerator(object):
 
         escapeQuoteMarks(self.tixi)
 
+        self.createTwoWayLinks()
+
     def _removeIgnoredContent(self, tixi: Tixi = None):
         """Remove elements that should not be taken into account while processing the data:
             -   those with attribute ignore="true"
