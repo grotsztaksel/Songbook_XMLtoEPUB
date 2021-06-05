@@ -8,7 +8,6 @@ Created on 16.11.2020 22:14
 __authors__ = ['Piotr Gradkowski <grotsztaksel@o2.pl>']
 __date__ = '2020-11-16'
 
-
 import unittest
 import os
 
@@ -46,6 +45,18 @@ class TestSongWriter(unittest.TestCase):
             os.remove(self.testFile)
 
     def test_write_song_file(self):
+        #
+        src_tixi = Tixi()
+        src_tixi.open(self.src_all_songs, recursive=True)
+        # Write a link at song C:
+        link_path = src_tixi.createElement("//song[@title='Song C']", "link")
+        src_tixi.addTextAttribute("//song[@title='Song C']", "xhtml", "song_song_c.xhtml")
+        src_tixi.addTextAttribute(link_path, "title", "My Test Song")
+        link_path = src_tixi.createElement("//song[@title='My Test Song']", "link")
+        src_tixi.addTextAttribute(link_path, "title", "Song C")
+        songPath = "/songbook/section[1]/section[1]/song[2]"
+        self.writer = SongWriter(src_tixi, self.settings, songPath)
+
         self.writer.settings.encoding = None  # Otherwise the HtmlWriter.saveFile() will append an " encoding='utf-8'"
         self.writer.write_song_file(self.testFile)
 
@@ -53,6 +64,25 @@ class TestSongWriter(unittest.TestCase):
 
         actualTixi = Tixi()
         actualTixi.open(self.testFile)
+
+        # Add the link section in the expectedTixi:
+        #     <p class="links">
+        #       <ul>
+        #         <li>
+        #           <a href="song_file_3.xhtml">Song C</a>
+        #           <span style="font-size:12px">(John Doe)</span>
+        #         </li>
+        #       </ul>
+        #     </p>
+        h3 = self.expectedTixi.addTextElement("/x:html/x:body", "h3", "See also:")
+        p = self.expectedTixi.createElement("/x:html/x:body", "p")
+        self.expectedTixi.addTextAttribute(p, "class", "links")
+        ul = self.expectedTixi.createElement(p, "ul")
+        li = self.expectedTixi.createElement(ul, "li")
+        a = self.expectedTixi.addTextElement(li, "a", "Song C")
+        self.expectedTixi.addTextAttribute(a, "href", "song_song_c.xhtml")
+        span = self.expectedTixi.addTextElement(li, "span", "(Mike Moo, John Doe)")
+        self.expectedTixi.addTextAttribute(span, "style", "font-size:12px")
 
         self.assertEqual(self.expectedTixi.exportDocumentAsString(),
                          actualTixi.exportDocumentAsString())
