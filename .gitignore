@@ -4,3 +4,5 @@ output
 /scripts/config/__pycache__
 /*.azw3
 /*.epub
+.idea/
+scripts/__pycache__/
