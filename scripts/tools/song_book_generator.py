@@ -100,6 +100,8 @@ class SongBookGenerator(object):
 
         # self._escapeQuoteMarks()
 
+        self._exposeLinks()
+
     def _removeIgnoredContent(self, tixi: Tixi = None):
         """Remove elements that should not be taken into account while processing the data:
             -   those with attribute ignore="true"
@@ -275,6 +277,37 @@ class SongBookGenerator(object):
                     continue
                 self.tixi.addTextAttribute(path, attr, value1)
 
+    def _exposeLinks(self):
+        """
+        For all songs defined in separate files, copy their <link> children to the master XML so that it is
+        visible to all song writers
+        """
+        # First, check if the songs written in separate files have links
+        xPathSrc = "//song[@src]"
+
+        for song_path in self.tixi.xPathExpressionGetAllXPaths(xPathSrc):
+            source_file = self.tixi.getTextAttribute(song_path, "src")
+
+            song_tixi = Tixi()
+            song_tixi.open(os.path.join(os.path.dirname(self.tixi.getDocumentPath()), source_file))
+            song_title = song_tixi.getTextAttribute("/song", "title")
+            for link_path in song_tixi.xPathExpressionGetAllXPaths("/song/link"):
+                try:
+                    link_title = song_tixi.getTextAttribute(link_path, "title")
+                except TixiException as e:
+                    e.error += " at path {}".format(song_path)
+                    raise e
+                if not self.tixi.checkElement('{}/link[@title="{}"]'.format(song_path, link_title)):
+                    new_link = self.tixi.createElement(song_path, "link")
+                    self.tixi.addTextAttribute(new_link, "title", link_title)
+
+                # Make sure, that the paired song also has a link to myself
+                for paired_link in self.tixi.xPathExpressionGetAllXPaths(
+                        '//song[@title="{}"]'.format(link_title)):
+                    if not self.tixi.checkElement('{}/link[@title="{}"]'.format(paired_link, song_title)):
+                        new_olink = self.tixi.createElement(paired_link, "link")
+                        self.tixi.addTextAttribute(new_olink, "title", song_title)
+
     #
     def write_indexes(self):
         writer = AuthorsWriter(self.tixi, self.settings)
@@ -429,20 +462,6 @@ class SongBookGenerator(object):
                 <link title="A">
             </song>
         """
-
-        # First, check if the songs written in separate files have links
-        xPathSrc = "//song[@src]"
-        for i in range(1, self.tixi.xPathEvaluateNodeNumber(xPathSrc) + 1):
-            song_path = self.tixi.xPathExpressionGetXPath(xPathSrc, i)
-            source_file = self.tixi.getTextAttribute(song_path, "src")
-
-            song_tixi = Tixi()
-            song_tixi.open(os.path.join(os.path.dirname(self.tixi.getDocumentPath()), source_file))
-
-            for link in range(1, song_tixi.xPathEvaluateNodeNumber("/song/link") + 1):
-                link_title = song_tixi.xPathExpressionGetTextByIndex("/song/link/@title", i)
-                new_link = self.tixi.createElement(song_path, "link")
-                self.tixi.addTextAttribute(new_link, "title", link_title)
 
         xPathFrom = "//song/link[@title]"
 
