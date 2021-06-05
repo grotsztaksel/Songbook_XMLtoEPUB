@@ -274,19 +274,7 @@ The following songs have their attributes defined in both master XML and in sour
             self.assertEqual(item.title, self.sg.tixi.getTextAttribute(item.xml, "title"))
             self.assertEqual(item.file, self.sg.tixi.getTextAttribute(item.xml, "xhtml"))
 
-    def test_escapeQuoteMarks(self):
 
-        self.assertEqual("You'll never see me", self.sg.tixi.getTextAttribute("/songbook/section[3]/song[1]", "title"))
-        self.assertEqual("You'll never see me again",
-                         self.sg.tixi.getTextAttribute("/songbook/section[3]/song[2]", "title"))
-
-        self.sg.tixi.addTextAttribute("/songbook/section[3]/song[1]", "title", "You\"ll never see me")
-
-        self.sg._escapeQuoteMarks()
-        self.assertEqual("You&quot;ll never see me",
-                         self.sg.tixi.getTextAttribute("/songbook/section[3]/song[1]", "title"))
-        self.assertEqual("You&apos;ll never see me again",
-                         self.sg.tixi.getTextAttribute("/songbook/section[3]/song[2]", "title"))
 
     def test_write_indexes(self):
         self.sg._preprocess()
