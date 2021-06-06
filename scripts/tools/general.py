@@ -29,3 +29,19 @@ def escapeQuoteMarks(tixi: Tixi):
             if value == value1:
                 continue
             tixi.addTextAttribute(path, attr, value1)
+
+
+def getDefaultSongAttributes(xsd):
+    """ Return a dictionary of default values of attributes of <song>
+    Create an empty song Tixi and validate it with defaults so that the default attributes are created.
+    Then collect the attributes"""
+
+    song = Tixi()
+    song.create("song")
+    # This is a required attribute
+    song.addTextAttribute("/song", "title", "dummy")
+
+    song.schemaValidateWithDefaultsFromFile(xsd)
+    defaultAttributes = song.getAttributes("/song")
+    defaultAttributes.pop("title")
+    return defaultAttributes

@@ -567,9 +567,6 @@ The following songs have their attributes defined in both master XML and in sour
         self.assertEqual(etixi.exportDocumentAsString(),
                          output.exportDocumentAsString())
 
-    def test_getDefaultSongAttributes(self):
-        self.assertEqual({"include": "true", "lyrics": "trad.", "music": "trad."}, self.sg._getDefaultSongAttributes())
-
 
 if __name__ == '__main__':
     unittest.main()

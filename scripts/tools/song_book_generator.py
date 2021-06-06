@@ -20,7 +20,8 @@ from .index_songs_writer import SongsIndexWriter
 from .section_writer import SectionWriter
 from .song_writer import SongWriter
 from .utf_simplifier import UtfSimplifier
-from .general import escapeQuoteMarks
+from .general import escapeQuoteMarks, getDefaultSongAttributes
+
 
 class SongBookGenerator(object):
     def __init__(self, input_file, xsd_file=None, preprocess=True):
@@ -158,7 +159,7 @@ class SongBookGenerator(object):
         spath = "/song"
         missingFiles = dict()
         ambiguousAttributes = dict()
-        defaultAttributes = self._getDefaultSongAttributes()
+        defaultAttributes = getDefaultSongAttributes(self.settings.xsd_song)
 
         unv_tixi = Tixi()  # since the main tixi has been validated with defaults, a raw copy without default attribute
         # values is needed...
@@ -635,18 +636,3 @@ class SongBookGenerator(object):
         tpath = tixi.createElement("/ncx", "docTitle")
         tixi.addTextElement(tpath, "text", self.settings.title)
         return tixi
-
-    def _getDefaultSongAttributes(self):
-        """ Return a dictionary of default values of attributes of <song>
-        Create an empty song Tixi and validate it with defaults so that the default attributes are created.
-        Then collect the attributes"""
-
-        song = Tixi()
-        song.create("song")
-        # This is a required attribute
-        song.addTextAttribute("/song", "title", "dummy")
-
-        song.schemaValidateWithDefaultsFromFile(self.settings.xsd_song)
-        defaultAttributes = song.getAttributes("/song")
-        defaultAttributes.pop("title")
-        return defaultAttributes
