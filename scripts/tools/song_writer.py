@@ -15,7 +15,7 @@ from collections import namedtuple
 from scripts.config import EpubSongbookConfig, ChordMode
 from scripts.tixi import Tixi, TixiException, ReturnCode
 from .html_writer import HtmlWriter
-from .general import escapeQuoteMarks
+from .general import escapeQuoteMarks, getDefaultSongAttributes
 
 LineWithChords = namedtuple("LineWithChords", ["text", "chords"])
 
@@ -84,19 +84,27 @@ class SongWriter(HtmlWriter):
                 lyrics = tixi.getTextAttribute(path, "lyrics")
             if music == "" and tixi.checkAttribute(path, "music"):
                 music = tixi.getTextAttribute(path, "music")
+        defaultValues = getDefaultSongAttributes(self.settings.xsd_song)
 
-        if band and not lyrics and not music:
+        definedBand = (bool(band) and band != defaultValues["band"]) \
+            if "band" in defaultValues else bool(band)
+        definedLyrics = (bool(lyrics) and lyrics != defaultValues["lyrics"]) \
+            if "lyrics" in defaultValues else bool(lyrics)
+        definedMusic = (bool(music) and music != defaultValues["music"]) \
+            if "music" in defaultValues else bool(music)
+
+        if definedBand and not definedLyrics and not definedMusic:
             text = band
         else:
-            if not lyrics:
+            if not definedLyrics:
                 lyrics = self.settings.unknown_author
-            if not music:
+            if not definedMusic:
                 music = self.settings.unknown_author
 
             text = "{} {}, {} {}".format(self.settings.lyrics_string, lyrics,
                                          self.settings.music_string, music)
 
-            if band:
+            if definedBand:
                 text += " ({})".format(band)
 
         # <body/>
