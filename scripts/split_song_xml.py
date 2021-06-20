@@ -10,7 +10,7 @@ import re
 import sys
 
 from scripts.tixi import Tixi, TixiException
-from scripts.tools import UtfSimplifier
+from scripts.tools import UtfUtils
 
 
 def main(argv):
@@ -60,7 +60,7 @@ class SourceSplitter(object):
         root = "/" + tixi.getChildNodeName("/", 1)
         title = tixi.getTextAttribute(root, "title")
 
-        file_name_base = UtfSimplifier.toAscii(title).replace(" ", "_").lower()
+        file_name_base = UtfUtils.toAscii(title).replace(" ", "_").lower()
 
         suffix = ""
         ext = ".xml"
@@ -124,7 +124,7 @@ def split_song_xml(input):
     for song in tixi.xPathExpressionGetAllXPaths(songXPath):
         title = tixi.getTextAttribute(song, "title")
 
-        file_name_base = UtfSimplifier.toAscii(title).replace(" ", "_").lower()
+        file_name_base = UtfUtils.toAscii(title).replace(" ", "_").lower()
         suffix = ""
         ext = ".xml"
         fileNameTaken = True

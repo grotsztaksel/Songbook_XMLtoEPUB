@@ -19,7 +19,7 @@ from .index_authors_writer import AuthorsWriter
 from .index_songs_writer import SongsIndexWriter
 from .section_writer import SectionWriter
 from .song_writer import SongWriter
-from .utf_simplifier import UtfSimplifier
+from .utf_utils import UtfUtils
 from .general import escapeQuoteMarks, getDefaultSongAttributes
 
 
@@ -244,7 +244,7 @@ class SongBookGenerator(object):
             else:
                 prefix = "htm_"
 
-            file_name_base = UtfSimplifier.toAscii(title).replace(" ", "_").lower()
+            file_name_base = UtfUtils.toAscii(title).replace(" ", "_").lower()
             suffix = ""
             ext = ".xhtml"
             fileNameTaken = True
