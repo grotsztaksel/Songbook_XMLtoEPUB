@@ -125,15 +125,14 @@ class SongWriter(HtmlWriter):
         voc = srcPath.split("/")[-1]  # Extract the last element in path
         voc = voc.split("[")[0]  # Get rid of the index, if there is one
 
-        mode = ChordMode.get(self.song_tixi.getInheritedTextAttribute(srcPath, "chord_mode"))
         path = self.root + "/body"
-        self.format_song_part(srcPath, path, mode)
+        self.format_song_part(srcPath, path)
         n = self.tixi.getNamedChildrenCount(self.root + "/body", "p")
         path = "{}/p[{}]".format(path, n)
         self.tixi.addTextAttribute(path, "class", voc)
 
     #
-    def format_song_part(self, srcPath, targetPath, mode=None):
+    def format_song_part(self, srcPath, targetPath):
         """
         Basing on the global settings, read the content of the verse/chorus 
         from the source and apply a format according to the mode:
@@ -146,20 +145,18 @@ class SongWriter(HtmlWriter):
             
         """
 
-        if mode is None:
-            mode = ChordMode.CHORDS_ABOVE
 
-        if mode == ChordMode.CHORDS_ABOVE:
+        if self.mode == ChordMode.CHORDS_ABOVE:
             if not self.write_chords_above(srcPath, targetPath):
                 # Input data was invalid for chords-above formatting
-                mode = ChordMode.CHORDS_BESIDE
+                self.mode = ChordMode.CHORDS_BESIDE
 
-        if mode == ChordMode.CHORDS_BESIDE:
+        if self.mode == ChordMode.CHORDS_BESIDE:
             if not self.write_chords_beside(srcPath, targetPath):
                 # Input data was invalid for chords-beside formatting
-                mode = ChordMode.NO_CHORDS
+                self.mode = ChordMode.NO_CHORDS
 
-        if mode == ChordMode.NO_CHORDS:
+        if self.mode == ChordMode.NO_CHORDS:
             self.write_without_chords(srcPath, targetPath)
 
     #
