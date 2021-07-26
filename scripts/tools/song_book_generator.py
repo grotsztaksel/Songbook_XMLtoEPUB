@@ -76,7 +76,7 @@ class SongBookGenerator(object):
         if missingFiles:
             errorMessage.append("The following songs source files not found:")
             for path, src in missingFiles.items():
-                errorMessage.append("- {} (\"{}\")".format(src, title))
+                errorMessage.append("- {} (\"{}\")".format(src, self.tixi.getTextAttribute(path, "title")))
             errorMessage.append(40 * "-" + "\n")
 
         if ambiguousAttributes:
