@@ -197,38 +197,40 @@
         <xs:choice>
             <xs:sequence>
                 <xs:element name="section" type="section" minOccurs="0" maxOccurs="unbounded"/>
-            </xs:sequence>
-            <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:element name="song" type="song"/>
-                <xs:element name="html">
-                    <xs:annotation>
-                        <xs:documentation>
-                            HTML Subdocuments may be placed in the songbook without any modification In such case they
-                            are considered a chapter of the book. They may have virtually any content. In an extreme
-                            case, the &quot;songbook&quot; may contain no songs at all, only documents - this way it is
-                            possible to write just any book!
-                        </xs:documentation>
-                    </xs:annotation>
-                    <xs:complexType>
-                        <xs:attribute name="src" type="xs:string" use="required">
-                            <xs:annotation>
-                                <xs:documentation>
-                                    Path (relative) &amp; name of the source file
-                                </xs:documentation>
-                            </xs:annotation>
-                        </xs:attribute>
-                        <xs:attribute name="include" type="xs:boolean" default="true">
-                            <xs:annotation>
-                                <xs:documentation>
-                                    If set to false, the subdocument will not be included in the songbook
-                                </xs:documentation>
-                            </xs:annotation>
-                        </xs:attribute>
-                    </xs:complexType>
-                </xs:element>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                    <xs:element name="song" type="song"/>
+                    <xs:element name="html">
+                        <xs:annotation>
+                            <xs:documentation>
+                                HTML Subdocuments may be placed in the songbook without any modification In such case
+                                they
+                                are considered a chapter of the book. They may have virtually any content. In an extreme
+                                case, the &quot;songbook&quot; may contain no songs at all, only documents - this way it
+                                is
+                                possible to write just any book!
+                            </xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                            <xs:attribute name="src" type="xs:string" use="required">
+                                <xs:annotation>
+                                    <xs:documentation>
+                                        Path (relative) &amp; name of the source file
+                                    </xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                            <xs:attribute name="include" type="xs:boolean" default="true">
+                                <xs:annotation>
+                                    <xs:documentation>
+                                        If set to false, the subdocument will not be included in the songbook
+                                    </xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:choice>
                 <xs:element name="index_of_authors" type="songs_index" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element name="index_of_songs" type="authors_index" minOccurs="0" maxOccurs="unbounded"/>
-            </xs:choice>
+            </xs:sequence>
         </xs:choice>
         <xs:attribute name="title" type="xs:string" use="required"/>
         <xs:attribute name="chord_mode" type="chord_mode" use="optional">
