@@ -40,3 +40,7 @@ def print_exceptions(etype, value, tb):
 
 if __name__ == '__main__':
     main(sys.argv)
+    from subprocess import Popen
+
+    p = Popen("html2kindle.bat", cwd=r"C:\Users\piotr\Documents\Songbook")
+    stdout, stderr = p.communicate()
