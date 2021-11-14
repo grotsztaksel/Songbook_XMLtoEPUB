@@ -361,7 +361,7 @@ class TestSongBookGenerator(unittest.TestCase):
         self.sg.tixi.addTextAttribute(html_path, "src", "./non_existent_file.html")
         with self.assertLogs() as cm:
             self.assertFalse(self.sg.setHTMLtitle(html_path))
-        self.assertEqual(['ERROR:root:- /songbook/section[3]/html  src="./non_existent_file.html" - file not found!'],
+        self.assertEqual(['ERROR:root:/songbook/section[3]/html  src="./non_existent_file.html" - file not found!'],
                          cm.output)
 
         # File as absolute path
@@ -373,7 +373,7 @@ class TestSongBookGenerator(unittest.TestCase):
         self.sg.tixi.addTextAttribute(html_path, "title", "Non Matching")
         with self.assertLogs() as cm:
             self.assertFalse(self.sg.setHTMLtitle(html_path))
-        expected = ['ERROR:root:- /songbook/section[3]/html - title mismatch! '
+        expected = ['ERROR:root:/songbook/section[3]/html - title mismatch! '
                     '("Non Matching" vs "HTML Title" in {})'.format(goodfile)
                     ]
         self.assertEqual(expected, cm.output)
@@ -445,7 +445,14 @@ class TestSongBookGenerator(unittest.TestCase):
             self.assertFalse(self.sg._copyHTML_resources(tixi))
 
         expected = ['ERROR:root:Resource file ../songbook.css not found',
-                    'ERROR:root:Resource file ./missing.txt not found']
+                    'ERROR:root:Resource file ./missing.txt not found',
+                    'INFO:root:Copying {} to {}'.format(
+                        os.path.join(self.test_dir, "res", "ok.txt"),
+                        os.path.join(self.test_dir, "text", "res", "ok.txt")),
+                    'INFO:root:Copying {} to {}'.format(
+                        os.path.normpath(os.path.join(self.test_dir, "..", "text", "samefile.txt")),
+                        os.path.join(self.test_dir, "text", "samefile.txt"))
+                    ]
         self.assertEqual(expected, cm.output)
 
     def test_write_sections(self):
@@ -580,7 +587,7 @@ class TestSongBookGenerator(unittest.TestCase):
         </navPoint>
         <navPoint id="num_372" playOrder="372"><navLabel><text>Section 2</text></navLabel><content src="text/sec_section_2.xhtml"/>
         <navPoint id="num_373" playOrder="373"><navLabel><text>Song A</text></navLabel><content src="text/sng_song_a_1.xhtml"/></navPoint>
-        <navPoint id="num_374" playOrder="374"><navLabel><text>HTML Subdocument</text></navLabel><content src="text/test_html.xhtml"/></navPoint>
+        <navPoint id="num_374" playOrder="374"><navLabel><text>HTML Subdocument</text></navLabel><content src="text/htm_test_html.xhtml"/></navPoint>
         <navPoint id="num_375" playOrder="375"><navLabel><text>Song ABBA</text></navLabel><content src="text/sng_song_abba.xhtml"/></navPoint>
         </navPoint>
         </root>""".strip()
