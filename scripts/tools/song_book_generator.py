@@ -169,7 +169,7 @@ class SongBookGenerator(object):
                             self.tixi.addTextAttribute(path, attrName, attrValue)
                         else:
                             logging.error(
-                                f"Ambiguous attribute values for {path}/@{attrName}: '{attrValue}' vs {myValue}")
+                                f"Ambiguous attribute values for {path}/@{attrName}: '{attrValue}' vs '{myValue}'")
                             success = False
 
         return success
