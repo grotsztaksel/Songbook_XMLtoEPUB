@@ -203,11 +203,9 @@
                         <xs:annotation>
                             <xs:documentation>
                                 HTML Subdocuments may be placed in the songbook without any modification In such case
-                                they
-                                are considered a chapter of the book. They may have virtually any content. In an extreme
-                                case, the &quot;songbook&quot; may contain no songs at all, only documents - this way it
-                                is
-                                possible to write just any book!
+                                they are considered a chapter of the book. They may have virtually any content. In an
+                                extreme case, the &quot;songbook&quot; may contain no songs at all, only documents
+                                - this way it is possible to write just any book!
                             </xs:documentation>
                         </xs:annotation>
                         <xs:complexType>
@@ -215,6 +213,14 @@
                                 <xs:annotation>
                                     <xs:documentation>
                                         Path (relative) &amp; name of the source file
+                                    </xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                            <xs:attribute name="title" type="xs:string">
+                                <xs:annotation>
+                                    <xs:documentation>
+                                        Title of the document page. Should be identical to the title of the HTML in the
+                                        header of the source file
                                     </xs:documentation>
                                 </xs:annotation>
                             </xs:attribute>
