@@ -14,7 +14,7 @@ import os
 from scripts.config.epubsongbookconfig import EpubSongbookConfig
 from scripts.tixi import Tixi
 from .html_writer import HtmlWriter
-
+import logging
 
 class SectionWriter(HtmlWriter):
     def __init__(self, tixi: Tixi, settings: EpubSongbookConfig, path: str):
@@ -28,7 +28,7 @@ class SectionWriter(HtmlWriter):
         Read the xml node for the section in and write a valid HTML file out of it in the desired location
         """
         title = self.src_tixi.getTextAttribute(self.src_path, "title")
-        print("Saving section: {}\n  -- to file {}".format(title, fileName))
+        logging.info("Saving section: \"{}\" to file \"{}\"".format(title, fileName))
 
         self.write_toc()
 

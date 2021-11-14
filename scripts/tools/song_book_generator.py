@@ -12,6 +12,7 @@ __all__ = ['SongBookGenerator']
 import os
 import re
 import shutil
+import logging
 
 from scripts.config import EpubSongbookConfig
 from scripts.tixi import Tixi, TixiException, ReturnCode
@@ -55,49 +56,17 @@ class SongBookGenerator(object):
     #
     def _preprocess(self):
         self._removeIgnoredContent()
+        success = True
+        success &= self._findAmbiguousSongsContent()
+        success &= self._pullAttributesFromSRCs()
 
-        ambiguousSongs = self._findAmbiguousSongsContent()
-
-        missingFiles, ambiguousAttributes = self._pullAttributesFromSRCs()
-
-        wrong_htmls = []
         for path in self.tixi.xPathExpressionGetAllXPaths("//html"):
-            err = self.setHTMLtitle(path)
-            if err:
-                wrong_htmls.append(err)
+            success &= self.setHTMLtitle(path)
 
-        errorMessage = []
-        if ambiguousSongs:
-            errorMessage.append("The following songs have both content in master XML and source defined:")
-            for path, title in ambiguousSongs.items():
-                errorMessage.append("- \"{}\" ({})".format(title, path))
-            errorMessage.append(40 * "-" + "\n")
+        success &= self._assignXHTMLattributes()
 
-        if missingFiles:
-            errorMessage.append("The following songs source files not found:")
-            for path, src in missingFiles.items():
-                errorMessage.append("- {} (\"{}\")".format(src, self.tixi.getTextAttribute(path, "title")))
-            errorMessage.append(40 * "-" + "\n")
-
-        if ambiguousAttributes:
-            errorMessage.append("The following songs have their attributes defined in both master XML and in source "
-                                "file, and they are not the same:")
-            for path, attrs in ambiguousAttributes.items():
-                errorMessage.append("- {}: '{}' vs '{}'".format(path, attrs[0], attrs[1]))
-            errorMessage.append(40 * "-" + "\n")
-
-        if wrong_htmls:
-            errorMessage.append("The following subdocument elements were parsed with errors:")
-            errorMessage.extend(wrong_htmls)
-
-        abused_xhtml_names = self._assignXHTMLattributes()
-
-        if abused_xhtml_names:
-            errorMessage.append("Output file names were used multiple times for different songs/sections:")
-            errorMessage.extend(abused_xhtml_names)
-
-        if errorMessage:
-            raise ValueError("\n".join(errorMessage))
+        if not success:
+            raise RuntimeError
 
         self._exposeLinks()
 
@@ -121,16 +90,18 @@ class SongBookGenerator(object):
             tixi.removeElement(path)
         xPath = "//song[@title]"
         n = tixi.xPathEvaluateNodeNumber(xPath)
-        print("Found {} songs".format(n))
+        logging.info("Found {} songs".format(n))
         if self.N > 0 and n < self.N or self.N == 0:
             self.N = n
         # Remove the abundant songs
         while tixi.xPathEvaluateNodeNumber(xPath) > self.N:
             path = tixi.xPathExpressionGetXPath(xPath, self.N + 1)
+            logging.info("Max song number set to {}. Ignoring {}".format(self.N, path))
             tixi.removeElement(path)
         # Now remove sections that do not have songs inside
         xPath_emptySection = "//section[not(descendant::song)]"
         for path in reversed(tixi.xPathExpressionGetAllXPaths(xPath_emptySection)):
+            logging.info(f"Ignoring empty section {path}")
             tixi.removeElement(path)
 
     def _findAmbiguousSongsContent(self):
@@ -143,9 +114,10 @@ class SongBookGenerator(object):
             if parent in wrongPaths:
                 # No need to do the same for every verse/chorus/link etc.
                 continue
-
-            wrongPaths[parent] = self.tixi.getTextAttribute(parent, "title")
-        return wrongPaths
+            title = self.tixi.getTextAttribute(parent, "title")
+            logging.error("{} is defined in both master XML and a source file ({})".format(title, path))
+            wrongPaths[parent] = title
+        return not wrongPaths
 
     def _pullAttributesFromSRCs(self):
         """
@@ -166,6 +138,7 @@ class SongBookGenerator(object):
         unv_tixi.open(self.tixi.getDocumentPath())
         # Raw, but without ignored content, to avoid non-unique paths while resolving xPath Expressions
         self._removeIgnoredContent(unv_tixi)
+        success = True
 
         for path in self.tixi.xPathExpressionGetAllXPaths(xPath):
             src = self.tixi.getTextAttribute(path, "src")
@@ -174,7 +147,8 @@ class SongBookGenerator(object):
             else:
                 file = os.path.join(os.path.dirname(self.tixi.getDocumentPath()), src)
             if not os.path.isfile(file):
-                missingFiles[path] = src
+                logging.error(f"Source file {src} not found ({path})")
+                success = False
                 continue
             tmp_tixi = Tixi()
             try:
@@ -194,9 +168,11 @@ class SongBookGenerator(object):
                             # This was a default value added while schema validating
                             self.tixi.addTextAttribute(path, attrName, attrValue)
                         else:
-                            ambiguousAttributes["{}, {}".format(path, attrName)] = [attrValue, myValue]
+                            logging.error(
+                                f"Ambiguous attribute values for {path}/@{attrName}: '{attrValue}' vs {myValue}")
+                            success = False
 
-        return (missingFiles, ambiguousAttributes)
+        return success
 
     def _assignXHTMLattributes(self):
         """For each song and section element, add an attribute that will describe what output xhtml file the given
@@ -209,6 +185,8 @@ class SongBookGenerator(object):
         number appended
         """
         usedFileNames = []
+        success = True
+
         XhtmlNamesAbused = False
         usedXhtmlNames = {}  # If more than one song or section has the same xhtml attribute, collect them and throw an
         #                      error
@@ -235,7 +213,7 @@ class SongBookGenerator(object):
                     usedXhtmlNames[xhtml] = [xmlPath]
                 else:
                     usedXhtmlNames[xhtml].append(xmlPath)
-                    XhtmlNamesAbused = True
+                    success = False
 
             if Tixi.elementName(xmlPath) == "song":
                 prefix = "sng_"
@@ -259,13 +237,13 @@ class SongBookGenerator(object):
             usedFileNames.append(fileName)
 
             self.tixi.addTextAttribute(xmlPath, "xhtml", fileName)
-        error = []
-        if XhtmlNamesAbused:
+        if not success:
             for xhtml_name, xmlPaths in usedXhtmlNames.items():
-                error.append(xhtml_name)
-                for xmlPath in xmlPaths:
-                    error.append("  - {}".format(xmlPath))
-        return error
+                if len(xmlPaths) > 1:
+                    for xmlPath in xmlPaths:
+                        logging.error(f"Output HTML name {xhtml_name} used more than once: f{xmlPath}")
+
+        return success
 
     def _exposeLinks(self):
         """
@@ -344,13 +322,15 @@ class SongBookGenerator(object):
         elif os.path.isfile(os.path.join(os.path.dirname(self.tixi.getDocumentPath()), src)):
             htmlFile = os.path.join(os.path.dirname(self.tixi.getDocumentPath()), src)
         else:
-            return '- {} {} src="{}" - file not found!'.format(xmlPath, title, src)
+            logging.error('- {} {} src="{}" - file not found!'.format(xmlPath, title, src))
+            return False
 
         htixi = Tixi()
         try:
             htixi.open(htmlFile)
         except TixiException as e:
-            return '- {} {} src="{}" - source is not a valid HTML file!'.format(xmlPath, title, src)
+            logging.error('- {} {} src="{}" - source is not a valid HTML file!'.format(xmlPath, title, src))
+            return False
 
         # get rid of all namespaces defined in the html - but just for tixi needs. Do not save it!
         html_str = htixi.exportDocumentAsString()
@@ -360,14 +340,16 @@ class SongBookGenerator(object):
         if htixi.checkElement("/html/head/title"):
             htitle = htixi.getTextElement("/html/head/title")
         else:
-            return '- {} - undefined document title in {}!'.format(xmlPath, src)
+            logging.error('- {} - undefined document title in {}!'.format(xmlPath, src))
+            return False
 
         if not title:
             self.tixi.addTextAttribute(xmlPath, "title", htitle)
             title = htitle
 
         if htitle != title:
-            return '- {} - title mismatch! ("{}" vs "{}" in {})'.format(xmlPath, title, htitle, src)
+            logging.error('- {} - title mismatch! ("{}" vs "{}" in {})'.format(xmlPath, title, htitle, src))
+            return False
 
         return self._copyHTML_resources(htixi, htmlFile)
 
@@ -386,9 +368,9 @@ class SongBookGenerator(object):
                           will fail, if the Tixi was created from a string
         :return:  Empty string if everything is fine. Otherwise string containing the error information
         """
+        success = True
         if html_path is None:
             html_path = tixi.getDocumentPath()
-        errors = []
         css = tixi.xPathExpressionGetAllXPaths("//link[@rel='stylesheet' and @href]")
         images = tixi.xPathExpressionGetAllXPaths("//img[@src]")
         links = tixi.xPathExpressionGetAllXPaths("//a[@href]")
@@ -401,7 +383,8 @@ class SongBookGenerator(object):
             file = os.path.normpath(os.path.join(os.path.dirname(html_path), src))
             filename = os.path.split(file)[1]
             if not os.path.isfile(file):
-                errors.append("  - Resource file {} not found".format(src))
+                logging.error("Resource file {} not found".format(src))
+                success = False
                 continue
 
             # Seems like the file exists. Copy it to the destination output directory, keeping the relative location
@@ -413,12 +396,12 @@ class SongBookGenerator(object):
             except shutil.SameFileError:
                 pass
             except PermissionError:
-                errors.append("  - Could not copy {} to {} - Permission denied".format(file, target_file))
+                logging.error("Could not copy {} to {} - Permission denied".format(file, target_file))
+                success = False
             except:
-                errors.append("  - Could not copy {} to {}".format(file, target_file))
-        if errors:
-            errors.insert(0, "Following problems in HTML file {}:".format(html_path))
-        return "\n".join(errors)
+                logging.error("Could not copy {} to {}".format(file, target_file))
+                success = False
+        return success
 
     #
     def write_sections(self):

@@ -9,6 +9,7 @@ __authors__ = ['Piotr Gradkowski <grotsztaksel@o2.pl>']
 __date__ = '2020-11-14'
 __all__ = ['LineWithChords', 'SongWriter']
 
+import logging
 import os
 from collections import namedtuple
 
@@ -58,7 +59,7 @@ class SongWriter(HtmlWriter):
         Read the xml node in song_path and write a valid HTML file out of it in the desired location
         """
         title = self.src_tixi.getTextAttribute(self.src_path, "title")
-        print("Saving song: {}\n  -- to file {}".format(title, fileName))
+        logging.info("Saving song: \"{}\" to \"{}\"".format(title, fileName))
 
         self.write_song_header(title)
 
