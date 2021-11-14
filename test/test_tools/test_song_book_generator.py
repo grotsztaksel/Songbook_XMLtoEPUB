@@ -8,8 +8,10 @@ Created on 21.11.2020 17:10
 __authors__ = ['Piotr Gradkowski <grotsztaksel@o2.pl>']
 __date__ = '2020-11-21'
 
+import logging
 import os
 import shutil
+import sys
 import unittest
 from collections import namedtuple
 
@@ -148,26 +150,34 @@ class TestSongBookGenerator(unittest.TestCase):
         # 4. Attributes that are different in the <song> element and in the source file
         self.sg.tixi.addTextAttribute(song, "title", "This title will not match")
         self.sg.tixi.addTextAttribute(song, "band", "Another band")
-
-        try:
-            self.sg._preprocess()
-            self.assertFalse(True, "Did not raise error, although one was expected")
-        except ValueError as e:
-            expectedMessage = """The following songs have both content in master XML and source defined:
-- "This title will not match" (/songbook/section/section[1]/song[1])
-- "Song A" (/songbook/section/section[1]/song[2])
-----------------------------------------
-
-The following songs source files not found:
-- ./non_existent_file ("Song A")
-----------------------------------------
-
-The following songs have their attributes defined in both master XML and in source file, and they are not the same:
-- /songbook/section/section[1]/song[1], title: 'My Test Song' vs 'This title will not match'
-- /songbook/section/section[1]/song[1], band: 'The Developers' vs 'Another band'
-----------------------------------------
-"""
-            self.assertEqual(expectedMessage, str(e))
+        logging.getLogger().handlers[0].flush()
+        with self.assertLogs(logging.getLogger()) as cm:
+            with self.assertRaises(RuntimeError) as e:
+                self.sg._preprocess()
+        expected = ['INFO:root:Found 6 songs',
+                    'INFO:root:Max song number set to 3. Ignoring /songbook/section[1]/section[2]/song[2]',
+                    'INFO:root:Max song number set to 3. Ignoring /songbook/section[2]/song[1]',
+                    'INFO:root:Max song number set to 3. Ignoring /songbook/section[2]/song',
+                    'INFO:root:Ignoring empty section /songbook/section[3]',
+                    'INFO:root:Ignoring empty section /songbook/section[2]',
+                    'ERROR:root:This title will not match is defined in both master XML and a source file '
+                    '(/songbook/section/section[1]/song[1]/verse[1])',
+                    'ERROR:root:Song A is defined in both master XML and a source file '
+                    '(/songbook/section/section[1]/song[2]/verse[1])',
+                    'INFO:root:Found 6 songs',
+                    'INFO:root:Max song number set to 3. Ignoring /songbook/section[1]/section[2]/song[2]',
+                    'INFO:root:Max song number set to 3. Ignoring /songbook/section[2]/song[1]',
+                    'INFO:root:Max song number set to 3. Ignoring /songbook/section[2]/song',
+                    'INFO:root:Ignoring empty section /songbook/section[3]',
+                    'INFO:root:Ignoring empty section /songbook/section[2]',
+                    'ERROR:root:Ambiguous attribute values for '
+                    "/songbook/section/section[1]/song[1]/@title: 'My Test Song' vs This title "
+                    'will not match',
+                    'ERROR:root:Ambiguous attribute values for '
+                    "/songbook/section/section[1]/song[1]/@band: 'The Developers' vs Another band",
+                    'ERROR:root:Source file ./non_existent_file not found '
+                    '(/songbook/section/section[1]/song[2])']
+        self.assertEqual(expected, cm.output)
 
     def test_removeIgnoredContent(self):
         titles_to_exclude = {"Song to exclude 1": 1 + 1 + 2 + 1,  # 1 song, 1 link, 2 verse, 1 chorus
@@ -196,14 +206,19 @@ The following songs have their attributes defined in both master XML and in sour
 
     def test_findAmbiguousSongsContent(self):
 
-        self.assertEqual({}, self.sg._findAmbiguousSongsContent())
+        self.assertTrue(self.sg._findAmbiguousSongsContent())
 
         # Now break the test data
         song = "/songbook/section[1]/section[1]/song[2]"
         self.sg.tixi.addTextElement(song, "verse", "La la la\n I shouldn't be here!")
         self.sg.tixi.addTextElement(song, "chorus", "Oh Oh Oh\n I shouldn't be here!")
         self.sg.tixi.addTextElement(song, "verse", "La la la\n I shouldn't be here!")
-        self.assertEqual({song: "My Test Song"}, self.sg._findAmbiguousSongsContent())
+        with self.assertLogs() as cm:
+            self.assertFalse(self.sg._findAmbiguousSongsContent())
+
+        expected = ['ERROR:root:My Test Song is defined in both master XML and a source file '
+                    '(/songbook/section[1]/section[1]/song[2]/verse[1])']
+        self.assertEqual(expected, cm.output)
 
     def test_pullAttributesFromSRCs(self):
         song = "/songbook/section[1]/section[1]/song[2]"
@@ -212,6 +227,13 @@ The following songs have their attributes defined in both master XML and in sour
                       "src": "./test_song.xml"}
         for attr, value in attributes.items():
             self.assertEqual(value, self.sg.tixi.getTextAttribute(song, attr), attr)
+        # Check the current content
+        n = self.sg.tixi.getNumberOfAttributes(song)
+        attrs = {}
+        for i in range(1, n + 1):
+            name = self.sg.tixi.getAttributeName(song, i)
+            attrs[name] = self.sg.tixi.getTextAttribute(song, name)
+
         self.assertEqual(len(attributes), self.sg.tixi.getNumberOfAttributes(song))
 
         self.assertEqual(({}, {}), self.sg._pullAttributesFromSRCs())
@@ -400,16 +422,13 @@ The following songs have their attributes defined in both master XML and in sour
         with open(os.path.join(self.test_dir, "..", "text", "samefile.txt"), 'w') as f:
             f.write("Some text that pretends to be a picture")
 
-        tixi.open(htmlfile)
         # ToDo: Find a way to trigger the other shutil.copy errors inside the function
-        res = self.sg._copyHTML_resources(tixi)
+        with self.assertLogs(logging.getLogger()) as cm:
+            self.assertFalse(self.sg._copyHTML_resources(tixi))
 
-        expected = "\n".join([
-            "Following problems in HTML file {}:".format(htmlfile),
-            "  - Resource file ../songbook.css not found",
-            "  - Resource file ./missing.txt not found"
-        ])
-        self.assertEqual(expected, res)
+        expected = ['ERROR:root:Resource file ../songbook.css not found',
+                    'ERROR:root:Resource file ./missing.txt not found']
+        self.assertEqual(expected, cm.output)
 
     def test_write_sections(self):
         self.sg._preprocess()
