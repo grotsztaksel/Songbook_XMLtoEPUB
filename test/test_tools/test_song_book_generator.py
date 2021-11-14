@@ -171,10 +171,10 @@ class TestSongBookGenerator(unittest.TestCase):
                     'INFO:root:Ignoring empty section /songbook/section[3]',
                     'INFO:root:Ignoring empty section /songbook/section[2]',
                     'ERROR:root:Ambiguous attribute values for '
-                    "/songbook/section/section[1]/song[1]/@title: 'My Test Song' vs This title "
-                    'will not match',
+                    "/songbook/section/section[1]/song[1]/@title: 'My Test Song' vs 'This title "
+                    "will not match'",
                     'ERROR:root:Ambiguous attribute values for '
-                    "/songbook/section/section[1]/song[1]/@band: 'The Developers' vs Another band",
+                    "/songbook/section/section[1]/song[1]/@band: 'The Developers' vs 'Another band'",
                     'ERROR:root:Source file ./non_existent_file not found '
                     '(/songbook/section/section[1]/song[2])']
         self.assertEqual(expected, cm.output)
@@ -236,7 +236,7 @@ class TestSongBookGenerator(unittest.TestCase):
 
         self.assertEqual(len(attributes), self.sg.tixi.getNumberOfAttributes(song))
 
-        self.assertEqual(({}, {}), self.sg._pullAttributesFromSRCs())
+        self.assertTrue(self.sg._pullAttributesFromSRCs())
 
         newAttributes = {"lyrics": "P. Gradkowski",
                          "music": "Sam Composer",
@@ -267,9 +267,17 @@ class TestSongBookGenerator(unittest.TestCase):
         wrong_attributes = {song + ", title": ["My Test Song", "This title will not match"],
                             song + ", band": ["The Developers", "Another band"]}
 
-        output = self.sg._pullAttributesFromSRCs()
-
-        self.assertEqual((wrong_files, wrong_attributes), output)
+        with self.assertLogs() as cm:
+            self.assertFalse(self.sg._pullAttributesFromSRCs())
+        expected = ['INFO:root:Found 6 songs',
+                    'INFO:root:Ignoring empty section /songbook/section[3]',
+                    'ERROR:root:Source file ./non_existent_file not found '
+                    '(/songbook/section[1]/section[1]/song[1])',
+                    'ERROR:root:Ambiguous attribute values for '
+                    "/songbook/section[1]/section[1]/song[2]/@title: 'My Test Song' vs 'This title will not match'",
+                    'ERROR:root:Ambiguous attribute values for '
+                    "/songbook/section[1]/section[1]/song[2]/@band: 'The Developers' vs 'Another band'"]
+        self.assertEqual(expected, cm.output)
 
     def test_assignXHTMLattributes(self):
         expected = [
@@ -351,19 +359,24 @@ class TestSongBookGenerator(unittest.TestCase):
 
         # File does not exist
         self.sg.tixi.addTextAttribute(html_path, "src", "./non_existent_file.html")
-        self.assertEqual(r'- /songbook/section[3]/html  src="./non_existent_file.html" - file not found!',
-                         self.sg.setHTMLtitle(html_path))
+        with self.assertLogs() as cm:
+            self.assertFalse(self.sg.setHTMLtitle(html_path))
+        self.assertEqual(['ERROR:root:- /songbook/section[3]/html  src="./non_existent_file.html" - file not found!'],
+                         cm.output)
 
         # File as absolute path
         self.sg.tixi.addTextAttribute(html_path, "src", os.path.abspath(goodfile))
         # Should be OK
-        self.assertEqual('', self.sg.setHTMLtitle(html_path))
+        self.assertTrue(self.sg.setHTMLtitle(html_path))
         self.assertEqual("HTML Title", self.sg.tixi.getTextAttribute(html_path, "title"))
 
         self.sg.tixi.addTextAttribute(html_path, "title", "Non Matching")
-        self.assertEqual('- /songbook/section[3]/html - title mismatch! '
-                         '("Non Matching" vs "HTML Title" in {})'.format(os.path.abspath(goodfile)),
-                         self.sg.setHTMLtitle(html_path))
+        with self.assertLogs() as cm:
+            self.assertFalse(self.sg.setHTMLtitle(html_path))
+        expected = ['ERROR:root:- /songbook/section[3]/html - title mismatch! '
+                    '("Non Matching" vs "HTML Title" in {})'.format(goodfile)
+                    ]
+        self.assertEqual(expected, cm.output)
         self.assertEqual("Non Matching", self.sg.tixi.getTextAttribute(html_path, "title"))
 
         # Break the good html - will have no title
@@ -372,17 +385,22 @@ class TestSongBookGenerator(unittest.TestCase):
         tixi.removeElement("/h:html/h:head/h:title")
         tixi.saveCompleteDocument(goodfile)
 
-        self.assertEqual('- /songbook/section[3]/html - undefined document title '
-                         'in {}!'.format(os.path.abspath(goodfile)), self.sg.setHTMLtitle(html_path))
+        with self.assertLogs() as cm:
+            self.assertFalse(self.sg.setHTMLtitle(html_path))
+        expected = ['ERROR:root:- /songbook/section[3]/html - undefined document title in {}!'.format(goodfile)]
+        self.assertEqual(expected, cm.output)
         self.assertEqual("Non Matching", self.sg.tixi.getTextAttribute(html_path, "title"))
 
         # Now define the file as relative path
         rel = os.path.relpath(badfile, self.test_song_src)[3:]
         self.sg.tixi.addTextAttribute(html_path, "src", rel)
 
-        self.assertEqual(
-            '- /songbook/section[3]/html Non Matching src="{}" - source is not a valid HTML file!'.format(rel),
-            self.sg.setHTMLtitle(html_path))
+        with self.assertLogs() as cm:
+            self.assertFalse(self.sg.setHTMLtitle(html_path))
+        expected = ['ERROR:root:- /songbook/section[3]/html Non Matching src="{}" '
+                    '- source is not a valid HTML file!'.format(rel)]
+        self.assertEqual(expected, cm.output)
+
         self.assertEqual("Non Matching", self.sg.tixi.getTextAttribute(html_path, "title"))
 
     def test_copyHTML_resources(self):
