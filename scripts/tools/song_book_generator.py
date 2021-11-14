@@ -130,7 +130,6 @@ class SongBookGenerator(object):
         xPath = "//song[@src]"
         spath = "/song"
         missingFiles = dict()
-        ambiguousAttributes = dict()
         defaultAttributes = getDefaultSongAttributes(self.settings.xsd_song)
 
         unv_tixi = Tixi()  # since the main tixi has been validated with defaults, a raw copy without default attribute
@@ -187,7 +186,6 @@ class SongBookGenerator(object):
         usedFileNames = []
         success = True
 
-        XhtmlNamesAbused = False
         usedXhtmlNames = {}  # If more than one song or section has the same xhtml attribute, collect them and throw an
         #                      error
 
@@ -199,11 +197,13 @@ class SongBookGenerator(object):
 
         xPath = "//html"
         for xmlPath in self.tixi.xPathExpressionGetAllXPaths(xPath):
-            # Simply copy the "src" attribute to "xhtml"
+            # Prepend the file name with "htm_"
             src = self.tixi.getTextAttribute(xmlPath, "src")
-            self.tixi.addTextAttribute(xmlPath, "xhtml", src)
+            dir = os.path.dirname(src)
+            base = "htm_" + os.path.basename(src)
+            self.tixi.addTextAttribute(xmlPath, "xhtml", os.path.join(dir, base))
 
-        xPath = "//*[self::song or self::section]"
+        xPath = "//*[self::song or self::section or self::html]"
 
         for xmlPath in self.tixi.xPathExpressionGetAllXPaths(xPath):
             title = self.tixi.getTextAttribute(xmlPath, "title")
@@ -215,16 +215,21 @@ class SongBookGenerator(object):
                     usedXhtmlNames[xhtml].append(xmlPath)
                     success = False
 
+            ext = ".xhtml"
             if Tixi.elementName(xmlPath) == "song":
                 prefix = "sng_"
             elif Tixi.elementName(xmlPath) == "section":
                 prefix = "sec_"
             else:
-                prefix = "htm_"
-
-            file_name_base = UtfUtils.toAscii(title).replace(" ", "_").lower()
+                # the "htm_" has been prepended before
+                prefix = ""
+                ext = ""
+            if self.tixi.elementName(xmlPath) == "html":
+                file_name_base = xhtml
+            else:
+                file_name_base = UtfUtils.toAscii(title).replace(" ", "_").lower()
             suffix = ""
-            ext = ".xhtml"
+
             fileNameTaken = True
             number = ""
             while fileNameTaken:
@@ -322,7 +327,7 @@ class SongBookGenerator(object):
         elif os.path.isfile(os.path.join(os.path.dirname(self.tixi.getDocumentPath()), src)):
             htmlFile = os.path.join(os.path.dirname(self.tixi.getDocumentPath()), src)
         else:
-            logging.error('- {} {} src="{}" - file not found!'.format(xmlPath, title, src))
+            logging.error('{} {} src="{}" - file not found!'.format(xmlPath, title, src))
             return False
 
         htixi = Tixi()
@@ -348,10 +353,27 @@ class SongBookGenerator(object):
             title = htitle
 
         if htitle != title:
-            logging.error('- {} - title mismatch! ("{}" vs "{}" in {})'.format(xmlPath, title, htitle, src))
+            logging.error('{} - title mismatch! ("{}" vs "{}" in {})'.format(xmlPath, title, htitle, src))
             return False
-
-        return self._copyHTML_resources(htixi, htmlFile)
+        # copy the html file
+        target = os.path.join(self.settings.dir_text, "htm_" + os.path.basename(htmlFile))
+        logging.info(f"Copying {htmlFile} to {target}...")
+        try:
+            if os.path.isfile(target):
+                try:
+                    os.remove(target)
+                except:
+                    logging.error("File exists. Failed to overwrite")
+            shutil.copy(htmlFile, target, )
+            logging.info("OK.")
+            success = True
+        except PermissionError:
+            logging.error("FAILED - Permission denied!")
+            success = False
+        except:
+            logging.error("FAILED")
+            success = False
+        return success and self._copyHTML_resources(htixi, htmlFile)
 
     def _copyHTML_resources(self, tixi: Tixi, html_path=None) -> str:
         """
@@ -392,6 +414,7 @@ class SongBookGenerator(object):
             os.makedirs(target_dir, exist_ok=True)
             target_file = os.path.join(target_dir, filename)
             try:
+                logging.info("Copying {} to {}".format(file, target_file))
                 shutil.copy(file, target_file)
             except shutil.SameFileError:
                 pass

@@ -58,7 +58,7 @@ class SectionWriter(HtmlWriter):
         self.tixi.createElement(targetPath, "ul")
         nul = self.tixi.getNamedChildrenCount(targetPath, "ul")
         ulPath = "{}/ul[{}]".format(targetPath, nul)
-        xPath = sourcePath + "/*[self::section or self::song]"
+        xPath = sourcePath + "/*[self::section or self::song or self::html]"
 
         for path in self.src_tixi.xPathExpressionGetAllXPaths(xPath):
             title = self.src_tixi.getTextAttribute(path, "title")
