@@ -101,9 +101,6 @@ class EpubSongbookConfig():
     def _setup_defaults(self):
         """Set up defaults"""
 
-        # Validate with default values
-        self.tixi.schemaValidateWithDefaultsFromFile(self.xsd.getDocumentPath())
-
         # copy the keys of self.xsd_elements_2_settings_map to later make sure that all have been defined in xsd
         settings = list(self.xsd_elements_2_settings_map.keys())
 
