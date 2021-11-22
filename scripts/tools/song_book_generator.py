@@ -99,7 +99,7 @@ class SongBookGenerator(object):
             logging.info("Max song number set to {}. Ignoring {}".format(self.N, path))
             tixi.removeElement(path)
         # Now remove sections that do not have songs inside
-        xPath_emptySection = "//section[not(descendant::song)]"
+        xPath_emptySection = "//section[not(descendant::song or descendant::html)]"
         for path in reversed(tixi.xPathExpressionGetAllXPaths(xPath_emptySection)):
             logging.info(f"Ignoring empty section {path}")
             tixi.removeElement(path)
