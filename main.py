@@ -12,6 +12,12 @@ import os
 import sys
 import logging
 
+try:
+    # Enable importing modules from PATH environmental variable (Python 3.8+ on Windows)
+    _dllDirs = [os.add_dll_directory(d) for d in os.environ["PATH"].split(";") if os.path.isdir(d)]
+except AttributeError:
+    pass
+
 from scripts.tools.song_book_generator import SongBookGenerator
 
 logfile = "ebook_generator.log"
