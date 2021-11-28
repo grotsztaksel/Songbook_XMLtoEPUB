@@ -373,9 +373,11 @@ class SongBookGenerator(object):
         except:
             logging.error("FAILED")
             success = False
-        return success and self._copyHTML_resources(htixi, htmlFile)
 
-    def _copyHTML_resources(self, tixi: Tixi, html_path=None) -> str:
+        allRequired = self.tixi.getInheritedTextAttribute(xmlPath, "allRequired") != 'false'
+        return success and self._copyHTML_resources(htixi, htmlFile, allRequired)
+
+    def _copyHTML_resources(self, tixi: Tixi, html_path=None, all_required=True) -> str:
         """
         Check if the subdocument HTML file uses some resources and verify their availability. If the resource file is
         available, copy it to the output directory keeping the relative path
@@ -388,6 +390,8 @@ class SongBookGenerator(object):
         :param tixi: an opened Tixi object containing the html subdocument definition
         :param html_path: path to the source file. If None, the method will try getting it from the Tixi object, which
                           will fail, if the Tixi was created from a string
+        :param all_required: if True, the any missing resource file will cause an error. Otherwise a a warning will be
+                            thrown
         :return:  Empty string if everything is fine. Otherwise string containing the error information
         """
         success = True
@@ -405,8 +409,11 @@ class SongBookGenerator(object):
             file = os.path.normpath(os.path.join(os.path.dirname(html_path), src))
             filename = os.path.split(file)[1]
             if not os.path.isfile(file):
-                logging.error("Resource file {} not found".format(src))
-                success = False
+                if all_required:
+                    logging.error("Resource file {} not found".format(src))
+                    success = False
+                else:
+                    logging.warning("Resource file {} not found".format(src))
                 continue
 
             # Seems like the file exists. Copy it to the destination output directory, keeping the relative location

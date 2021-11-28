@@ -231,6 +231,17 @@
                                     </xs:documentation>
                                 </xs:annotation>
                             </xs:attribute>
+                            <xs:attribute name="allRequired" type="xs:boolean" default="true">
+                                <xs:annotation>
+                                    <xs:documentation>
+                                        If set to true, the all resource files (links, images etc.) in the HTML
+                                        documents in this section
+                                        will be required. When some resource files are missing, the HMTL parser will
+                                        throw an error.
+                                        Otherwise a warning will be logged
+                                    </xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
                         </xs:complexType>
                     </xs:element>
                 </xs:choice>
@@ -248,6 +259,15 @@
             <xs:annotation>
                 <xs:documentation>
                     If set to false, the section will not be included in the songbook
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="allRequired" type="xs:boolean" default="true">
+            <xs:annotation>
+                <xs:documentation>
+                    If set to true, the all resource files (links, images etc.) in the HTML documents in this section
+                    will be required. When some resource files are missing, the HMTL parser will throw an error.
+                    Otherwise a warning will be logged
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
