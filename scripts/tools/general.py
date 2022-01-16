@@ -12,6 +12,8 @@ __all__ = ['escapeQuoteMarks']
 __date__ = '2021-06-05'
 __authors__ = ["Piotr Gradkowski <grotsztaksel@o2.pl>"]
 
+import re
+
 from scripts.tixi import Tixi
 
 
@@ -45,3 +47,18 @@ def getDefaultSongAttributes(xsd):
     defaultAttributes = song.getAttributes("/song")
     defaultAttributes.pop("title")
     return defaultAttributes
+
+
+def tixi_noXMLNS(xmlFile):
+    """
+    Returns a Tixi object with removed xmlns root attribute.
+    """
+    htixi = Tixi()
+    htixi.open(xmlFile)
+
+    # get rid of all namespaces defined in the html - but just for tixi needs. Do not save it!
+    html_str = htixi.exportDocumentAsString()
+    htixi.close()
+    htixi.openString(re.sub(r"xmlns(:\S+)?=['\"].+?['\"]", "", html_str))
+
+    return htixi

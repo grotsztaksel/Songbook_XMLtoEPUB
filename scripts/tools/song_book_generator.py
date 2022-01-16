@@ -21,7 +21,7 @@ from .index_songs_writer import SongsIndexWriter
 from .section_writer import SectionWriter
 from .song_writer import SongWriter
 from .utf_utils import UtfUtils
-from .general import escapeQuoteMarks, getDefaultSongAttributes
+from .general import escapeQuoteMarks, getDefaultSongAttributes, tixi_noXMLNS
 
 
 class SongBookGenerator(object):
@@ -46,6 +46,9 @@ class SongBookGenerator(object):
         self.N = self.settings.maxsongs  # definitely a shorter notation
 
         self.id = None
+
+        # HTML files that have been checked with regard to their resources and the resources have been copied for them
+        self.htmlsWithResourcesCopied = set()
 
         # Hardwired names of index files.
         self.indexes = {"index_of_authors": "idx_authors.xhtml",
@@ -330,17 +333,11 @@ class SongBookGenerator(object):
             logging.error('{} {} src="{}" - file not found!'.format(xmlPath, title, src))
             return False
 
-        htixi = Tixi()
         try:
-            htixi.open(htmlFile)
+            htixi = tixi_noXMLNS(htmlFile)
         except TixiException as e:
             logging.error('- {} {} src="{}" - source is not a valid HTML file!'.format(xmlPath, title, src))
             return False
-
-        # get rid of all namespaces defined in the html - but just for tixi needs. Do not save it!
-        html_str = htixi.exportDocumentAsString()
-        htixi.close()
-        htixi.openString(re.sub(r"xmlns(:\S+)?=['\"].+?['\"]", "", html_str))
 
         if htixi.checkElement("/html/head/title"):
             htitle = htixi.getTextElement("/html/head/title")
@@ -397,6 +394,9 @@ class SongBookGenerator(object):
         success = True
         if html_path is None:
             html_path = tixi.getDocumentPath()
+        html_path = os.path.abspath(html_path)
+        if html_path in self.htmlsWithResourcesCopied:
+            return True
         css = tixi.xPathExpressionGetAllXPaths("//link[@rel='stylesheet' and @href]")
         images = tixi.xPathExpressionGetAllXPaths("//img[@src]")
         links = tixi.xPathExpressionGetAllXPaths("//a[@href]")
@@ -406,6 +406,19 @@ class SongBookGenerator(object):
             elif path in images:
                 src_attr = "src"
             src = tixi.getTextAttribute(path, src_attr)
+            if path in links:
+                subhtml = os.path.abspath(os.path.join(os.path.dirname(html_path), src))
+                if subhtml == html_path:
+                    # Avoid infinite loops if the file has a link to itself
+                    continue
+                try:
+                    htixi = tixi_noXMLNS(subhtml)
+                except TixiException as e:
+                    logging.error(f'- {html_path} {src_attr}="{subhtml}" - source is not a valid HTML file!')
+                    return False
+                self.htmlsWithResourcesCopied.add(html_path)
+                self._copyHTML_resources(htixi, subhtml, all_required)
+
             file = os.path.normpath(os.path.join(os.path.dirname(html_path), src))
             filename = os.path.split(file)[1]
             if not os.path.isfile(file):
