@@ -1,4 +1,4 @@
-cd "C:\Users\piotr\Documents\Songs XML\SeparateFiles"
+cd "C:\Users\piotr\Documents\Songs XML"
 @echo off
 set PY="C:\Users\piotr\AppData\Local\Programs\Python\Python39"
 set PATH="%PY%;%PATH%"
@@ -9,5 +9,6 @@ set PATH="C:\Users\piotr\Documents\ChordPainter;%PATH%"
 set PATH="C:\Users\piotr\Documents\ChordPainter\Instruments;%PATH%"
 %PY%\python.exe "C:\Users\piotr\Documents\ChordPainter\generate_htmls.py"
 @echo on
-move "C:\Users\piotr\Documents\ChordPainter\*.xhtml" "C:\Users\piotr\Documents\Songs XML\SeparateFiles"
-move "C:\Users\piotr\Documents\ChordPainter\img\*.png" "C:\Users\piotr\Documents\Songs XML\SeparateFiles\img"
+move "C:\Users\piotr\Documents\ChordPainter\*.xhtml" "C:\Users\piotr\Documents\Songs XML"
+copy "C:\Users\piotr\Documents\ChordPainter\HTML\*.css" "C:\Users\piotr\Documents\Songs XML"
+move "C:\Users\piotr\Documents\ChordPainter\img\*.png" "C:\Users\piotr\Documents\Songs XML\img"
