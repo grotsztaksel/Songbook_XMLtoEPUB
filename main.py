@@ -23,6 +23,24 @@ except AttributeError:
 from scripts.tools.song_book_generator import SongBookGenerator
 
 
+def pre(argparser: argparse.ArgumentParser):
+    """
+    Execute the preprocessing procedures
+    """
+    args = argparser.parse_args()
+    if args.preproc is None:
+        return
+
+    bat = args.preproc
+    cwd = args.prewd
+
+    from subprocess import Popen
+
+    logging.info("-- PREPROCESSING...")
+    logging.info(f"Executing {bat} in {cwd}")
+    p = Popen(bat, cwd=cwd)
+    stdout, stderr = p.communicate()
+
 def main(argparser: argparse.ArgumentParser):
     sys.excepthook = print_exceptions
     args = argparser.parse_args()
@@ -53,6 +71,26 @@ def main(argparser: argparse.ArgumentParser):
     logging.info("DONE!")
 
 
+def post(argparser: argparse.ArgumentParser):
+    """
+    Execute the postprocessing procedures
+    """
+
+    args = argparser.parse_args()
+    if args.postproc is None:
+        return
+
+    bat = args.postproc
+    cwd = args.postwd
+
+    from subprocess import Popen
+
+    logging.info("-- POSTPROCESSING...")
+    logging.info(f"Executing {bat} in {cwd}")
+    p = Popen(bat, cwd=cwd)
+    stdout, stderr = p.communicate()
+
+
 def print_exceptions(etype, value, tb):
     import traceback
     text = "\n".join(traceback.format_exception(etype, value, tb))
@@ -64,22 +102,24 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Generate a songbook e-Book from XML files")
     parser.add_argument('input', type=argparse.FileType('r'),
                         help="Name of the input XML file")
+
     parser.add_argument('--logfile', type=argparse.FileType('w'), default="ebook_generator.log",
                         help="Name of the log file")
     parser.add_argument('--loglevel', type=str, choices=['critical', 'error', 'warning', 'info', 'debug'],
                         default='info',
                         help="Level of logged information")
 
+    parser.add_argument('--preproc', type=str,
+                        help="Name of the preprocessing script. For example one that will produce and copy some "
+                             "additional files requird to generate the songbook")
+    parser.add_argument('--prewd', type=str, default=os.getcwd(),
+                        help="Working directory where the preprocessing script should be launched")
     parser.add_argument('--postproc', type=str,
                         help="Name of the postprocessing script. For example a script that will automatically zip the "
                              "output directory (this tool does not do that by itself)")
     parser.add_argument('--postwd', type=str, default=os.getcwd(),
                         help="Working directory where the postprocessing script should be launched")
-    main(parser)
-    from subprocess import Popen
 
-    bat = "html2kindle.bat"
-    cwd = r"C:\Users\piotr\Documents\Songbook"
-    logging.info(f"Executing {bat} in {cwd}")
-    p = Popen(bat, cwd=cwd)
-    stdout, stderr = p.communicate()
+    pre(parser)
+    main(parser)
+    post(parser)
