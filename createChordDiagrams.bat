@@ -12,3 +12,7 @@ set PATH="C:\Users\piotr\Documents\ChordPainter\Instruments;%PATH%"
 move "C:\Users\piotr\Documents\ChordPainter\*.xhtml" "C:\Users\piotr\Documents\Songs XML"
 copy "C:\Users\piotr\Documents\ChordPainter\HTML\*.css" "C:\Users\piotr\Documents\Songs XML"
 move "C:\Users\piotr\Documents\ChordPainter\img\*.png" "C:\Users\piotr\Documents\Songs XML\img"
+
+cd "C:\Users\piotr\Documents\Songs XML"
+powershell -Command "(gc guitar_C_major.xhtml) -replace '<title>C</title>', '<title>Akordy na gitarze i ukulele</title>' | Out-File guitar_C_major.xhtml"
+powershell -Command "(gc banjo_C_major.xhtml) -replace '<title>C</title>', '<title>Akordy na banjo</title>' | Out-File banjo_C_major.xhtml"
