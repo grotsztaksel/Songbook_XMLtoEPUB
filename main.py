@@ -114,7 +114,7 @@ if __name__ == '__main__':
                 'info': logging.INFO,
                 'debug': logging.DEBUG}[args.loglevel]
     logging.basicConfig(level=loglevel,
-                        format="%(asctime)s [%(levelname)s] %(message)s",
+                        format="GENERATE SONGBOOK: %(asctime)s [%(levelname)s] %(message)s",
                         handlers=[
                             logging.FileHandler(logfile, 'w', 'utf-8'),
                             logging.StreamHandler(sys.stdout)
