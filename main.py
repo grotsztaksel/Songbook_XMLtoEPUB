@@ -44,20 +44,6 @@ def pre(argparser: argparse.ArgumentParser):
 def main(argparser: argparse.ArgumentParser):
     sys.excepthook = print_exceptions
     args = argparser.parse_args()
-    logfile = args.logfile.buffer.raw.name
-    loglevel = {'critical': logging.CRITICAL,
-                'error': logging.ERROR,
-                'warning': logging.WARNING,
-                'info': logging.INFO,
-                'debug': logging.DEBUG}[args.loglevel]
-    logging.basicConfig(level=loglevel,
-                        format="%(asctime)s [%(levelname)s] %(message)s",
-                        handlers=[
-                            logging.FileHandler(logfile, 'w', 'utf-8'),
-                            logging.StreamHandler(sys.stdout)
-                        ]
-                        )
-    print("Logging information to {}".format(os.path.abspath(os.path.join(os.getcwd(), logfile))))
 
     xsd_file = os.path.join(os.path.dirname(__file__), "config", "source_schema.xsd")
     if not os.path.isfile(xsd_file):
@@ -119,6 +105,22 @@ if __name__ == '__main__':
                              "output directory (this tool does not do that by itself)")
     parser.add_argument('--postwd', type=str, default=os.getcwd(),
                         help="Working directory where the postprocessing script should be launched")
+
+    args = parser.parse_args()
+    logfile = args.logfile.buffer.raw.name
+    loglevel = {'critical': logging.CRITICAL,
+                'error': logging.ERROR,
+                'warning': logging.WARNING,
+                'info': logging.INFO,
+                'debug': logging.DEBUG}[args.loglevel]
+    logging.basicConfig(level=loglevel,
+                        format="%(asctime)s [%(levelname)s] %(message)s",
+                        handlers=[
+                            logging.FileHandler(logfile, 'w', 'utf-8'),
+                            logging.StreamHandler(sys.stdout)
+                        ]
+                        )
+    print("Logging information to {}".format(os.path.abspath(os.path.join(os.getcwd(), logfile))))
 
     pre(parser)
     main(parser)
