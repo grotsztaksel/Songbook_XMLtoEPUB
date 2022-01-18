@@ -9,6 +9,7 @@ __authors__ = ['Piotr Gradkowski <grotsztaksel@o2.pl>']
 __date__ = '2020-11-27'
 __all__ = ['HtmlWriter']
 
+import logging
 import os
 import re
 
@@ -62,6 +63,8 @@ class HtmlWriter(object):
         # repeat to catch also the overlapping tokens: possible if td is empty (<td/>)
         text = re.sub(r"(<\/?t[dr].*?>)\s+(<\/?t[dr])", r"\1\2", text)
 
+        logging.debug("Writing HTML file: {}".format(os.path.abspath(fileName)))
         file = open(os.path.join(fileName), "w", encoding='utf8')
         file.write(text)
         file.close()
+        logging.debug("   -- OK")
