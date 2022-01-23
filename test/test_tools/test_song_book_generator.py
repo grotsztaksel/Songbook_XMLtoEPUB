@@ -89,7 +89,7 @@ class TestSongBookGenerator(unittest.TestCase):
             self.assertEqual(item.title, self.sg.tixi.getTextAttribute(item.xml, "title"))
             self.assertEqual(item.file, self.sg.tixi.getTextAttribute(item.xml, "xhtml"))
 
-        # Now make some empty sections (by adding new and removing songs from exisiting). Rerun the function
+        # Now make some empty sections (by adding new and removing songs from existing). Rerun the function
         # and see if these sections are removed.
         # Use a modified input file
         preparing_tixi = Tixi()
