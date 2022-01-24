@@ -185,9 +185,9 @@ class TestSongWriter(unittest.TestCase):
         # Need to trim it a little - don't want things we're not checking
         self.expectedTixi.removeElement("/x:html/x:body/x:h1")
         self.expectedTixi.removeElement("/x:html/x:body/x:p[1]")
-        self.expectedTixi.removeAttribute("/x:html/x:body/x:p[1]", "class")
-        self.expectedTixi.removeAttribute("/x:html/x:body/x:p[2]", "class")
-        self.expectedTixi.removeAttribute("/x:html/x:body/x:p[3]", "class")
+        self.expectedTixi.removeAttribute("/x:html/x:body/x:div[1]", "class")
+        self.expectedTixi.removeAttribute("/x:html/x:body/x:div[2]", "class")
+        self.expectedTixi.removeAttribute("/x:html/x:body/x:div[3]", "class")
 
         writer.format_song_part("/song/verse[1]", "/html/body")
         writer.format_song_part("/song/verse[2]", "/html/body")
@@ -208,19 +208,19 @@ class TestSongWriter(unittest.TestCase):
         self.expectedTixi.removeElement("/x:html/x:body/x:p[1]")
 
         self.assertIn("Now a verse without any chords",
-                      self.expectedTixi.getTextElement("/x:html/x:body/x:p[2]/x:span[1]"))
-        self.expectedTixi.removeElement("/x:html/x:body/x:p[2]")
+                      self.expectedTixi.getTextElement("/x:html/x:body/x:div[2]/x:span[1]"))
+        self.expectedTixi.removeElement("/x:html/x:body/x:div[2]")
         # Now removing the last <p/> without checking!
-        self.expectedTixi.removeElement("/x:html/x:body/x:p[2]")
-        self.assertEqual(1, self.expectedTixi.getNamedChildrenCount("/x:html/x:body", "x:p"))
+        self.expectedTixi.removeElement("/x:html/x:body/x:div[2]")
+        self.assertEqual(1, self.expectedTixi.getNamedChildrenCount("/x:html/x:body", "x:div"))
         # The class="chorus" attribute is assigned by another function. So, remove it from the expected
-        self.expectedTixi.removeAttribute("/x:html/x:body/x:p", "class")
+        self.expectedTixi.removeAttribute("/x:html/x:body/x:div", "class")
 
         # If we're still here, the expectedTixi has been properly formed.
         self.assertEqual(self.expectedTixi.exportDocumentAsString(),
                          self.writer.tixi.exportDocumentAsString().replace("&amp;", "&"))
 
-    def test_write_chors_beside(self):
+    def test_write_chords_beside(self):
         self.writer.tixi.createElement("/html", "body")
         # "/html" is ok, because the function doesn't really check where the target is
         self.writer.write_chords_beside("/song/chorus", "/html/body")
@@ -234,10 +234,10 @@ class TestSongWriter(unittest.TestCase):
         for path in reversed(self.expectedTixi.xPathExpressionGetAllXPaths('//*[@class="verse"]')):
             self.expectedTixi.removeElement(path)
 
-        self.assertEqual(1, self.expectedTixi.getNamedChildrenCount("/x:html/x:body", "x:p"))
+        self.assertEqual(1, self.expectedTixi.getNamedChildrenCount("/x:html/x:body", "x:div"))
 
         # The class="chorus" attribute is assigned by another function. So, remove it from the expected
-        self.expectedTixi.removeAttribute("/x:html/x:body/x:p", "class")
+        self.expectedTixi.removeAttribute("/x:html/x:body/x:div", "class")
 
         # If we're still here, the expectedTixi has been properly formed.
         self.assertEqual(self.expectedTixi.exportDocumentAsString(),
@@ -255,12 +255,12 @@ class TestSongWriter(unittest.TestCase):
 
         # After the following removals, only the, what used to be p[3] should remain
         self.expectedTixi.removeElement("/x:html/x:body/x:p[1]")  # authors
-        self.expectedTixi.removeElement("/x:html/x:body/x:p[1]")  # verse 1
-        self.expectedTixi.removeElement("/x:html/x:body/x:p[2]")  # chorus
-        self.assertEqual(1, self.expectedTixi.getNamedChildrenCount("/x:html/x:body", "x:p"))
+        self.expectedTixi.removeElement("/x:html/x:body/x:div[1]")  # verse 1
+        self.expectedTixi.removeElement("/x:html/x:body/x:div[2]")  # chorus
+        self.assertEqual(1, self.expectedTixi.getNamedChildrenCount("/x:html/x:body", "x:div"))
 
         # The class="chorus" attribute is assigned by another function. So, remove it from the expected
-        self.expectedTixi.removeAttribute("/x:html/x:body/x:p", "class")
+        self.expectedTixi.removeAttribute("/x:html/x:body/x:div", "class")
 
         # If we're still here, the expectedTixi has been properly formed.
         self.assertEqual(self.expectedTixi.exportDocumentAsString(),
