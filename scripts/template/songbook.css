@@ -49,10 +49,12 @@ table, tr, td {
 }
 .verse {
   margin-left: 0;
+  padding-bottom: 20px;
 }
 .chorus {
   font-style: italic;
   margin-left: 20px;
+  padding-bottom: 20px;
 }
 .authors {
   font-size: 12px;
