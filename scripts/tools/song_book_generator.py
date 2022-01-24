@@ -326,9 +326,9 @@ class SongBookGenerator(object):
 
         src = self.tixi.getTextAttribute(xmlPath, "src")
         if os.path.isabs(src) and os.path.isfile(os.path.abspath(src)):
-            htmlFile = src
+            htmlFile = os.path.abspath(src)
         elif os.path.isfile(os.path.join(os.path.dirname(self.tixi.getDocumentPath()), src)):
-            htmlFile = os.path.join(os.path.dirname(self.tixi.getDocumentPath()), src)
+            htmlFile = os.path.abspath(os.path.join(os.path.dirname(self.tixi.getDocumentPath()), src))
         else:
             logging.error('{} {} src="{}" - file not found!'.format(xmlPath, title, src))
             return False
@@ -361,7 +361,7 @@ class SongBookGenerator(object):
                     os.remove(target)
                 except:
                     logging.error("File exists. Failed to overwrite")
-            shutil.copy(htmlFile, target, )
+            shutil.copy(htmlFile, target)
             logging.info("OK.")
             success = True
         except PermissionError:
