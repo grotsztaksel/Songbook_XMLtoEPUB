@@ -129,8 +129,8 @@ class SongWriter(HtmlWriter):
         mode = ChordMode.get(self.song_tixi.getInheritedTextAttribute(srcPath, "chord_mode"))
         path = self.root + "/body"
         self.format_song_part(srcPath, path, mode)
-        n = self.tixi.getNamedChildrenCount(self.root + "/body", "p")
-        path = "{}/p[{}]".format(path, n)
+        n = self.tixi.getNamedChildrenCount(self.root + "/body", "div")
+        path = "{}/div[{}]".format(path, n)
         self.tixi.addTextAttribute(path, "class", voc)
 
     #
@@ -169,7 +169,7 @@ class SongWriter(HtmlWriter):
     #
     def write_chords_above(self, srcPath, targetPath):
         """
-        In this format, the <p/> element contains N <table/> elements, where
+        In this format, the <div/> element contains N <table/> elements, where
         N is the number of lines. Every table has two rows: one for the chords above,
         one for the line of text
         """
@@ -177,16 +177,16 @@ class SongWriter(HtmlWriter):
         if not self.CS in text:
             return False
 
-        pPath = self.tixi.createElement(targetPath, "p")
+        dPath = self.tixi.createElement(targetPath, "div")
         for line in self._identifyLinesWithChords(text):
             if isinstance(line, list):
                 while line:
                     l = line.pop(0)
-                    self.tixi.addTextElement(pPath, "span", l)
+                    self.tixi.addTextElement(dPath, "span", l)
                     if line:
-                        self.tixi.createElement(pPath, "br")
+                        self.tixi.createElement(dPath, "br")
             elif isinstance(line, LineWithChords):
-                tbPath = self.tixi.createElement(pPath, "table")
+                tbPath = self.tixi.createElement(dPath, "table")
 
                 # with the empty element [''] in front, the chords should have the same length as the textChunks
                 chords = [''] + line.chords[0].split(" ")
@@ -232,27 +232,27 @@ class SongWriter(HtmlWriter):
     #
     def write_chords_beside(self, srcPath, targetPath):
         """
-        In this format, the <p/> element contains one <table/> element, where
+        In this format, the <div/> element contains one <table/> element, where
         every row has two columns: one for the line of text, the other for chords
         """
         text = self.song_tixi.getTextElement(srcPath).strip()
         if not self.CS in text:
             return False
 
-        pPath = self.tixi.createElement(targetPath, "p")
+        dPath = self.tixi.createElement(targetPath, "div")
 
         previousWasTable = False
         for line in self._identifyLinesWithChords(text):
             if isinstance(line, list):
                 while line:
                     l = line.pop(0)
-                    self.tixi.addTextElement(pPath, "span", l)
+                    self.tixi.addTextElement(dPath, "span", l)
                     if line:
-                        self.tixi.createElement(pPath, "br")
+                        self.tixi.createElement(dPath, "br")
                 previousWasTable = False
             elif isinstance(line, LineWithChords):
                 if not previousWasTable:
-                    tbPath = self.tixi.createElement(pPath, "table")
+                    tbPath = self.tixi.createElement(dPath, "table")
                 previousWasTable = True
                 self.tixi.addTextAttribute(tbPath, "class", "chords_beside")
 
@@ -276,12 +276,12 @@ class SongWriter(HtmlWriter):
 
         text = self.song_tixi.getTextElement(srcPath).strip()
         lines = [line.strip().split(self.CS)[0].replace(self.CI, "") for line in text.split('\n')]
-        pPath = self.tixi.createElement(self.root + "/body", "p")
+        dPath = self.tixi.createElement(self.root + "/body", "div")
         while lines:
             line = lines.pop(0)
-            self.tixi.addTextElement(pPath, "span", line)
+            self.tixi.addTextElement(dPath, "span", line)
             if lines:
-                self.tixi.createElement(pPath, "br")
+                self.tixi.createElement(dPath, "br")
         return True
 
     #
