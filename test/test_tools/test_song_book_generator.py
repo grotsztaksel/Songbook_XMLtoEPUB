@@ -107,7 +107,7 @@ class TestSongBookGenerator(unittest.TestCase):
             self.assertEqual(item.title, self.sg.tixi.getTextAttribute(item.xml, "title"))
             self.assertEqual(item.file, self.sg.tixi.getTextAttribute(item.xml, "xhtml"))
 
-        self.assertFalse(self.sg.tixi.checkElement("/songbook/section[2]"))
+        self.assertTrue(self.sg.tixi.checkElement("/songbook/section[2]"))
 
         # Add some cascade of sections that should eventually be removed - check if tixi removes them
         # in the right order without bombing out
@@ -121,7 +121,7 @@ class TestSongBookGenerator(unittest.TestCase):
         self.sg.tixi.createElement("/songbook/section[2]/section[1]/section[2]", "section")
 
         self.sg._preprocess()
-        self.assertFalse(self.sg.tixi.checkElement("/songbook/section[2]"))
+        self.assertTrue(self.sg.tixi.checkElement("/songbook/section[2]"))
         for item in expected:
             self.assertEqual(item.title, self.sg.tixi.getTextAttribute(item.xml, "title"))
             self.assertEqual(item.file, self.sg.tixi.getTextAttribute(item.xml, "xhtml"))
@@ -154,29 +154,45 @@ class TestSongBookGenerator(unittest.TestCase):
         with self.assertLogs(logging.getLogger()) as cm:
             with self.assertRaises(RuntimeError) as e:
                 self.sg._preprocess()
+
+        test_html_src = os.path.join(self.references, "test_html.xhtml")
+        test_html_trg = os.path.join(self.test_dir, "text", "htm_test_html.xhtml")
+        test_css_src = os.path.join(self.references, "songbook_text.css")
+        test_css_trg = os.path.join(self.test_dir, "text", "songbook_text.css")
         expected = ['INFO:root:Found 6 songs',
-                    'INFO:root:Max song number set to 3. Ignoring /songbook/section[1]/section[2]/song[2]',
+                    'INFO:root:Max song number set to 3. Ignoring '
+                    '/songbook/section[1]/section[2]/song[2]',
                     'INFO:root:Max song number set to 3. Ignoring /songbook/section[2]/song[1]',
                     'INFO:root:Max song number set to 3. Ignoring /songbook/section[2]/song',
                     'INFO:root:Ignoring empty section /songbook/section[3]',
-                    'INFO:root:Ignoring empty section /songbook/section[2]',
-                    'ERROR:root:This title will not match is defined in both master XML and a source file '
-                    '(/songbook/section/section[1]/song[1]/verse[1])',
+                    'ERROR:root:This title will not match is defined in both master XML and a '
+                    'source file (/songbook/section[1]/section[1]/song[1]/verse[1])',
                     'ERROR:root:Song A is defined in both master XML and a source file '
-                    '(/songbook/section/section[1]/song[2]/verse[1])',
+                    '(/songbook/section[1]/section[1]/song[2]/verse[1])',
                     'INFO:root:Found 6 songs',
-                    'INFO:root:Max song number set to 3. Ignoring /songbook/section[1]/section[2]/song[2]',
+                    'INFO:root:Max song number set to 3. Ignoring '
+                    '/songbook/section[1]/section[2]/song[2]',
                     'INFO:root:Max song number set to 3. Ignoring /songbook/section[2]/song[1]',
                     'INFO:root:Max song number set to 3. Ignoring /songbook/section[2]/song',
                     'INFO:root:Ignoring empty section /songbook/section[3]',
-                    'INFO:root:Ignoring empty section /songbook/section[2]',
                     'ERROR:root:Ambiguous attribute values for '
-                    "/songbook/section/section[1]/song[1]/@title: 'My Test Song' vs 'This title "
-                    "will not match'",
+                    "/songbook/section[1]/section[1]/song[1]/@title: 'My Test Song' vs 'This "
+                    "title will not match'",
                     'ERROR:root:Ambiguous attribute values for '
-                    "/songbook/section/section[1]/song[1]/@band: 'The Developers' vs 'Another band'",
+                    "/songbook/section[1]/section[1]/song[1]/@band: 'The Developers' vs 'Another "
+                    "band'",
                     'ERROR:root:Source file ./non_existent_file not found '
-                    '(/songbook/section/section[1]/song[2])']
+                    '(/songbook/section[1]/section[1]/song[2])',
+                    'INFO:root:Copying ' + \
+                    test_html_src + ' ' + \
+                    'to ' + \
+                    test_html_trg + '...',
+                    'INFO:root:OK.',
+                    'INFO:root:Copying ' + \
+                    test_css_src + \
+                    ' to ' + \
+                    test_css_trg
+                    ]
         self.assertEqual(expected, cm.output)
 
     def test_removeIgnoredContent(self):
