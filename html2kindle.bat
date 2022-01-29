@@ -3,4 +3,3 @@ move songbook.zip songbook.epub
 ebook-convert songbook.epub songbook.azw3  --duplicate-links-in-toc  --max-toc-links=0
 
 ebook-viewer songbook.azw3
-@pause
