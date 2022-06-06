@@ -559,13 +559,14 @@ class SongBookGenerator(object):
                 "or self::index_of_authors " \
                 "or self::index_of_songs]"
 
-        for i, xml in enumerate(self.tixi.xPathExpressionGetAllXPaths(xPath)):
+        items = self.tixi.xPathExpressionGetAllXPaths(xPath)
+        for i, xml in enumerate(items):
             fileName = os.path.normpath(self.tixi.getTextAttribute(xml, "xhtml"))
-            id_attr = "id{}".format(i + 1)
+            id_attr = f'id{i+1}'
 
             tixi.createElement(manifest, "item")
             n = tixi.getNamedChildrenCount(manifest, "item")
-            path = manifest + "/item[{}]".format(n)
+            path = manifest + f'/item[{n}]'
 
             file = os.path.join(os.path.basename(self.settings.dir_text), fileName).replace("\\", "/")
             tixi.addTextAttribute(path, "href", file)
@@ -576,6 +577,26 @@ class SongBookGenerator(object):
             n = tixi.getNamedChildrenCount(spine, "opf:itemref")
             path = spine + "/opf:itemref[{}]".format(n)
             tixi.addTextAttribute(path, "idref", id_attr)
+
+        # Add the acknowledgements
+        tixi.createElement(manifest, "item")
+        n = tixi.getNamedChildrenCount(manifest, "item")
+        path = manifest + f'/item[{n}]'
+        assert os.path.join(self.settings.dir_text, 'acknowledgements.xhtml',
+                            f'acknowledgements.xhtml not available in {self.settings.template_dir}')
+        file = os.path.normpath(
+            os.path.join(os.path.basename(self.settings.dir_text), '..', 'acknowledgements.xhtml')).replace("\\", "/")
+
+        tixi.addTextAttribute(path, "href", file)
+        id_attr = f'id{len(items) + 1}'
+        tixi.addTextAttribute(path, "id", id_attr)
+        tixi.addTextAttribute(path, "media-type", "application/xhtml+xml")
+        # We don't ned to add this page to the TOC
+        # tixi.createElementNS(spine, "itemref", opfuri)
+        # n = tixi.getNamedChildrenCount(spine, "opf:itemref")
+        # path = spine + "/opf:itemref[{}]".format(n)
+        # tixi.addTextAttribute(path, "idref", id_attr)
+
         tixi.saveDocument(opf)
 
     #
