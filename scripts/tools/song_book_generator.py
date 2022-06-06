@@ -204,12 +204,13 @@ class SongBookGenerator(object):
             src = self.tixi.getTextAttribute(xmlPath, "src")
             dir = os.path.dirname(src)
             base = "htm_" + os.path.basename(src)
-            self.tixi.addTextAttribute(xmlPath, "xhtml", os.path.join(dir, base))
+            self.tixi.addTextAttribute(xmlPath, "xhtml", os.path.join(dir, base).replace("\\", "/"))
 
-        xPath = "//*[self::song or self::section or self::html]"
+        xPath = "//*[self::song or self::section or self::html or self::next]"
 
         for xmlPath in self.tixi.xPathExpressionGetAllXPaths(xPath):
-            title = self.tixi.getTextAttribute(xmlPath, "title")
+            if self.tixi.elementName(xmlPath) != "next":
+                title = self.tixi.getTextAttribute(xmlPath, "title")
             if self.tixi.checkAttribute(xmlPath, "xhtml"):
                 xhtml = self.tixi.getTextAttribute(xmlPath, "xhtml")
                 if xhtml not in usedXhtmlNames.keys():
@@ -229,6 +230,8 @@ class SongBookGenerator(object):
                 ext = ""
             if self.tixi.elementName(xmlPath) == "html":
                 file_name_base = xhtml
+            elif self.tixi.elementName(xmlPath) == "next":
+                file_name_base = self.tixi.getTextAttribute(xmlPath, "src")
             else:
                 file_name_base = UtfUtils.toAscii(title).replace(" ", "_").lower()
             suffix = ""
@@ -556,13 +559,14 @@ class SongBookGenerator(object):
         xPath = "//*[self::song " \
                 "or self::section " \
                 "or self::html " \
+                "or self::next " \
                 "or self::index_of_authors " \
                 "or self::index_of_songs]"
 
         items = self.tixi.xPathExpressionGetAllXPaths(xPath)
         for i, xml in enumerate(items):
             fileName = os.path.normpath(self.tixi.getTextAttribute(xml, "xhtml"))
-            id_attr = f'id{i+1}'
+            id_attr = f'id{i + 1}'
 
             tixi.createElement(manifest, "item")
             n = tixi.getNamedChildrenCount(manifest, "item")
@@ -591,11 +595,11 @@ class SongBookGenerator(object):
         id_attr = f'id{len(items) + 1}'
         tixi.addTextAttribute(path, "id", id_attr)
         tixi.addTextAttribute(path, "media-type", "application/xhtml+xml")
-        # We don't ned to add this page to the TOC
-        # tixi.createElementNS(spine, "itemref", opfuri)
-        # n = tixi.getNamedChildrenCount(spine, "opf:itemref")
-        # path = spine + "/opf:itemref[{}]".format(n)
-        # tixi.addTextAttribute(path, "idref", id_attr)
+
+        tixi.createElementNS(spine, "itemref", opfuri)
+        n = tixi.getNamedChildrenCount(spine, "opf:itemref")
+        path = spine + "/opf:itemref[{}]".format(n)
+        tixi.addTextAttribute(path, "idref", id_attr)
 
         tixi.saveDocument(opf)
 

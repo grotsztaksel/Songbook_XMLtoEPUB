@@ -209,6 +209,26 @@
                             </xs:documentation>
                         </xs:annotation>
                         <xs:complexType>
+                            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                                <xs:element name="next">
+                                    <xs:annotation>
+                                        <xs:documentation>
+                                            If there are some html pages that should not be mentioned in the TOC, but
+                                            the should follow this HTML page, they should be listed in this optional
+                                            child element
+                                        </xs:documentation>
+                                    </xs:annotation>
+                                    <xs:complexType>
+                                        <xs:attribute name="src" type="xs:string" use="required">
+                                            <xs:annotation>
+                                                <xs:documentation>
+                                                    Path (relative) &amp; name of the source file
+                                                </xs:documentation>
+                                            </xs:annotation>
+                                        </xs:attribute>
+                                    </xs:complexType>
+                                </xs:element>
+                            </xs:sequence>
                             <xs:attribute name="src" type="xs:string" use="required">
                                 <xs:annotation>
                                     <xs:documentation>
