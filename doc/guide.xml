@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<songbook xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <settings>
+    <title>SongEBook - User Guide</title>
+    <username>P. Grądkowski</username>
+    <language>en</language>
+    <lyrics_string>sł.</lyrics_string>
+    <music_string>muz.</music_string>
+    <prefered_chord_mode>CHORDS_BESIDE</prefered_chord_mode>
+    <output_dir>../Songbook/output</output_dir>
+    <authors_index_title>Spis autorów</authors_index_title>
+    <alphabetical_index_title>Alfabetyczny spis piosenek</alphabetical_index_title>
+    <toc_title>Spis treści</toc_title>
+    <links_header>Zobacz też</links_header>
+  </settings>
+  <section title="Introduction">
+    <html title="SongEBook - what is it?" src="./intro0.xhtml"/>
+    <html title="Features" src="./features.xhtml"/>
+    <html title="Workflow" src="./workflow.xhtml"/>
+  </section>
+  <section title="Master file">
+
+  </section>
+</songbook>

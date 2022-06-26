@@ -30,7 +30,7 @@
             <xs:enumeration value="CHORDS_BESIDE">
                 <xs:annotation>
                     <xs:documentation>
-                        The chords will be written next the line
+                        The chords will be written next to the line
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -93,12 +93,12 @@
         </xs:attribute>
         <xs:attribute name="music" type="xs:string" default="trad.">
             <xs:annotation>
-                <xs:documentation>Name of the author(s) of the lyrics</xs:documentation>
+                <xs:documentation>Name of the author(s) of the music</xs:documentation>
             </xs:annotation>
         </xs:attribute>
         <xs:attribute name="band" type="xs:string" use="optional">
             <xs:annotation>
-                <xs:documentation>Name of the band, of there is one</xs:documentation>
+                <xs:documentation>Name of the band, if there is one</xs:documentation>
             </xs:annotation>
         </xs:attribute>
         <xs:attribute name="chord_mode" type="chord_mode" use="optional">
@@ -112,7 +112,7 @@
                     Relative path to an xml file, where the song is defined separately. For large song collections it is
                     recommended to split the XML. Otherwise processing of such single file may be sluggish (depending on
                     the editor used). Besides, it is easier to organize the content of the songbook (move songs up/down,
-                    adn to/from sections)
+                    and to/from sections)
 
                     WARNING: If this attribute is present, then the host element &lt;song/&gt; cannot contain any child
                     elements!
