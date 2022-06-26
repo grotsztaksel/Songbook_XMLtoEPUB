@@ -10,6 +10,7 @@ __authors__ = ['Piotr Gradkowski <grotsztaksel@o2.pl>']
 __date__ = '2020-11-14'
 
 import getpass
+import logging
 import os
 import shutil
 from enum import Enum
@@ -216,7 +217,9 @@ class EpubSongbookConfig():
     def placeEssentialFiles(self):
 
         # Do not check for template existence. If it does not, an error will be thrown
+        logging.debug(f"Copying essential files from {self.template_dir} to {self.dir_out}")
         shutil.copytree(self.template_dir, self.dir_out)
+        logging.debug(f"Creating directory {self.dir_text}")
         os.makedirs(self.dir_text, exist_ok=True)
 
         # Write the mimetype from scratch. It's not too long after all...
