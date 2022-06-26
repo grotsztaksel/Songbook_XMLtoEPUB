@@ -1,28 +1,37 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import argparse
+import glob
+import logging
+import os
+
+# Have to use argparser to figure out the src directory. Using __file__ is not possible here!
+parser = argparse.ArgumentParser()
+parser.add_argument('input', type=argparse.FileType('r'))
+args = parser.parse_args()
+src = os.path.dirname(args.input.buffer.raw.name)
+
+# include all files that are in template directory
+template_files = [item for item in glob.glob(os.path.join(src, "scripts", "template") + "/**/*", recursive=True)
+                  if os.path.isfile(item)]
+# include all xsd files
+xsd_files = glob.glob(src + "/**/*.xsd", recursive=True)
+
+datas = [(file, os.path.dirname(os.path.relpath(file, src))) for file in template_files + xsd_files]
+logging.debug(f"datas={datas}")
 
 block_cipher = None
 
 a = Analysis(
-    ['C:\\Users\\piotr\\Documents\\Songbook\\main.py'],
-    pathex=['C:\\Users\\piotr\\Documents\\Songbook', 'C:\\Users\\piotr\\Documents\\Songbook\\scripts',
-            'C:\\Users\\piotr\\Documents\\Songbook\\scripts\\config',
-            'C:\\Users\\piotr\\Documents\\Songbook\\scripts\\tixi',
-            'C:\\Users\\piotr\\Documents\\Songbook\\scripts\\tixi\\test',
-            'C:\\Users\\piotr\\Documents\\Songbook\\scripts\\tixi\\xtixi',
-            'C:\\Users\\piotr\\Documents\\Songbook\\scripts\\tools', 'C:\\Users\\piotr\\Documents\\Songbook\\test',
-            'C:\\Users\\piotr\\Documents\\Songbook\\test\\test_config',
-            'C:\\Users\\piotr\\Documents\\Songbook\\test\\test_tools'],
+    [os.path.join(src, 'main.py')],
+    pathex=[src,
+            os.path.join(src, 'scripts', ),
+            os.path.join(src, 'scripts', 'config', ),
+            os.path.join(src, 'scripts', 'tixi', 'xtixi'),
+            os.path.join(src, 'scripts', 'tools')
+            ],
     binaries=[],
-    datas=[
-        ('C:\\Users\\piotr\\Documents\\Songbook\\scripts\\config\\source_schema.xsd', './scripts/config'),
-        ('C:\\Users\\piotr\\Documents\\Songbook\\scripts\\config\\song_schema.xsd', './scripts/config'),
-        ('C:\\Users\\piotr\\Documents\\Songbook\\scripts\\template\\acknowledgements.xhtml', './scripts/template'),
-        ('C:\\Users\\piotr\\Documents\\Songbook\\scripts\\template\\metadata.opf', './scripts/template'),
-        ('C:\\Users\\piotr\\Documents\\Songbook\\scripts\\template\\songbook.css', './scripts/template'),
-        ('C:\\Users\\piotr\\Documents\\Songbook\\scripts\\template\\META-INF\\container.xml',
-         './scripts/template/META-INF')
-    ],
+    datas=datas,
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -42,7 +51,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='__main__',
+    name='songebook',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
