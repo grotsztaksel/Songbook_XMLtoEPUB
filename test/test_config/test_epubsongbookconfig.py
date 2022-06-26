@@ -10,8 +10,8 @@ import os
 import shutil
 import unittest
 
-from scripts.tixi import Tixi
-from scripts.config import ChordMode, EpubSongbookConfig, epubsongbookconfig
+from src.tixi import Tixi
+from src.config import ChordMode, EpubSongbookConfig, epubsongbookconfig
 
 
 class TestChordMode(unittest.TestCase):

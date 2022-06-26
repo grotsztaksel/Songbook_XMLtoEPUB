@@ -12,8 +12,8 @@ import os
 import unittest
 
 
-from scripts.config import epubsongbookconfig
-from scripts.tixi import Tixi, TixiException, ReturnCode
+from src.config import epubsongbookconfig
+from src.tixi import Tixi, TixiException, ReturnCode
 
 
 class TestSchema(unittest.TestCase):

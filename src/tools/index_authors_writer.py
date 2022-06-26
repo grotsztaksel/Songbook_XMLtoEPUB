@@ -10,8 +10,8 @@ __all__ = ['AuthorsWriter']
 
 import re
 
-from scripts.config import EpubSongbookConfig
-from scripts.tixi import Tixi
+from src.config import EpubSongbookConfig
+from src.tixi import Tixi
 from .html_writer import HtmlWriter
 
 

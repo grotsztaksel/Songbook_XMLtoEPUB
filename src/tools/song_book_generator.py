@@ -14,8 +14,8 @@ import re
 import shutil
 import logging
 
-from scripts.config import EpubSongbookConfig
-from scripts.tixi import Tixi, TixiException, ReturnCode
+from src.config import EpubSongbookConfig
+from src.tixi import Tixi, TixiException, ReturnCode
 from .index_authors_writer import AuthorsWriter
 from .index_songs_writer import SongsIndexWriter
 from .section_writer import SectionWriter

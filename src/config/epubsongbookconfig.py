@@ -17,7 +17,7 @@ from enum import Enum
 from typing import Any
 
 try:
-    from scripts.tixi import Tixi, TixiException, ReturnCode
+    from src.tixi import Tixi, TixiException, ReturnCode
 except Exception:
     pth = os.environ["PATH"].split(";")
     print(os.path.isfile(os.path.join(pth[-2], "tixi3.dll")))

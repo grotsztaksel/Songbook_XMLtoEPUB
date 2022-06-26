@@ -1,8 +1,8 @@
-/scripts/tixi/__pycache__
-/scripts/tools/__pycache__
+/src/tixi/__pycache__
+/src/tools/__pycache__
 output
-/scripts/config/__pycache__
+/src/config/__pycache__
 /*.azw3
 /*.epub
 .idea/
-scripts/__pycache__/
+src/__pycache__/

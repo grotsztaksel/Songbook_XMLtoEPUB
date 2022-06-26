@@ -9,7 +9,7 @@ __authors__ = ['Piotr Gradkowski <grotsztaksel@o2.pl>']
 __date__ = '2020-12-01'
 
 import unittest
-from scripts.split_song_xml import SourceSplitter
+from src.split_song_xml import SourceSplitter
 
 
 class MyTestCase(unittest.TestCase):

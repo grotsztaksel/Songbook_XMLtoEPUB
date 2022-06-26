@@ -9,9 +9,9 @@ __date__ = '2021-06-05'
 __authors__ = ["Piotr Gradkowski <grotsztaksel@o2.pl>"]
 
 import unittest
-from scripts.tixi import Tixi
-from scripts.tools.general import escapeQuoteMarks, getDefaultSongAttributes
-from scripts.config import epubsongbookconfig  # Only to access the XSD file
+from src.tixi import Tixi
+from src.tools.general import escapeQuoteMarks, getDefaultSongAttributes
+from src.config import epubsongbookconfig  # Only to access the XSD file
 import os
 
 

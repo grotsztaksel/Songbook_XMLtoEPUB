@@ -14,7 +14,7 @@ __authors__ = ["Piotr Gradkowski <grotsztaksel@o2.pl>"]
 
 import re
 
-from scripts.tixi import Tixi
+from src.tixi import Tixi
 
 
 def escapeQuoteMarks(tixi: Tixi):

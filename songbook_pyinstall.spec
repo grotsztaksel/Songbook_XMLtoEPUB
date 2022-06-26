@@ -12,7 +12,7 @@ args = parser.parse_args()
 src = os.path.dirname(args.input.buffer.raw.name)
 
 # include all files that are in template directory
-template_files = [item for item in glob.glob(os.path.join(src, "scripts", "template") + "/**/*", recursive=True)
+template_files = [item for item in glob.glob(os.path.join(src, "src", "template") + "/**/*", recursive=True)
                   if os.path.isfile(item)]
 # include all xsd files
 xsd_files = glob.glob(src + "/**/*.xsd", recursive=True)
@@ -25,10 +25,10 @@ block_cipher = None
 a = Analysis(
     [os.path.join(src, 'main.py')],
     pathex=[src,
-            os.path.join(src, 'scripts', ),
-            os.path.join(src, 'scripts', 'config', ),
-            os.path.join(src, 'scripts', 'tixi', 'xtixi'),
-            os.path.join(src, 'scripts', 'tools')
+            os.path.join(src, 'src', ),
+            os.path.join(src, 'src', 'config', ),
+            os.path.join(src, 'src', 'tixi', 'xtixi'),
+            os.path.join(src, 'src', 'tools')
             ],
     binaries=[],
     datas=datas,

@@ -13,8 +13,8 @@ import logging
 import os
 from collections import namedtuple
 
-from scripts.config import EpubSongbookConfig, ChordMode
-from scripts.tixi import Tixi, TixiException, ReturnCode
+from src.config import EpubSongbookConfig, ChordMode
+from src.tixi import Tixi, TixiException, ReturnCode
 from .html_writer import HtmlWriter
 from .general import escapeQuoteMarks, getDefaultSongAttributes
 

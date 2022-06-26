@@ -11,9 +11,9 @@ __date__ = '2020-11-16'
 import unittest
 import os
 
-from scripts.config import EpubSongbookConfig, ChordMode
-from scripts.tixi import Tixi, TixiException, ReturnCode
-from scripts.tools.song_writer import SongWriter, LineWithChords
+from src.config import EpubSongbookConfig, ChordMode
+from src.tixi import Tixi, TixiException, ReturnCode
+from src.tools.song_writer import SongWriter, LineWithChords
 
 
 class TestSongWriter(unittest.TestCase):

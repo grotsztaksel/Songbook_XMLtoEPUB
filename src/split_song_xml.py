@@ -9,8 +9,8 @@ import os
 import re
 import sys
 
-from scripts.tixi import Tixi, TixiException
-from scripts.tools import UtfUtils
+from src.tixi import Tixi, TixiException
+from src.tools import UtfUtils
 
 
 def main(argv):

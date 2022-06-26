@@ -9,10 +9,10 @@ __authors__ = ['Piotr Gradkowski <grotsztaksel@o2.pl>']
 __date__ = '2020-11-22'
 
 import unittest
-from scripts.tixi import Tixi
+from src.tixi import Tixi
 import os
-from scripts.tools import SectionWriter
-from scripts.tools.song_book_generator import SongBookGenerator
+from src.tools import SectionWriter
+from src.tools.song_book_generator import SongBookGenerator
 
 
 class TestSectionWriter(unittest.TestCase):

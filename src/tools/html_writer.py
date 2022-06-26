@@ -13,8 +13,8 @@ import logging
 import os
 import re
 
-from scripts.config import EpubSongbookConfig
-from scripts.tixi import Tixi
+from src.config import EpubSongbookConfig
+from src.tixi import Tixi
 
 
 class HtmlWriter(object):

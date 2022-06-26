@@ -20,7 +20,7 @@ try:
 except AttributeError:
     pass
 
-from scripts.tools.song_book_generator import SongBookGenerator
+from src.tools.song_book_generator import SongBookGenerator
 
 
 def pre(argparser: argparse.ArgumentParser):

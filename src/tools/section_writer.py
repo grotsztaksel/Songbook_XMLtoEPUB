@@ -11,8 +11,8 @@ __all__ = ['SectionWriter']
 
 import os
 
-from scripts.config.epubsongbookconfig import EpubSongbookConfig
-from scripts.tixi import Tixi
+from src.config.epubsongbookconfig import EpubSongbookConfig
+from src.tixi import Tixi
 from .html_writer import HtmlWriter
 import logging
 
