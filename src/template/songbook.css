@@ -47,7 +47,7 @@ table, tr, td {
   padding-top: 0;
   padding-bottom: 0;
 }
-.verse {
+.verse, .bridge, .intro, .outro {
   margin-left: 0;
   padding-bottom: 20px;
 }

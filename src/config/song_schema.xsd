@@ -63,10 +63,17 @@
                     <xs:attribute name="title" type="xs:string" use="optional"/>
                 </xs:complexType>
             </xs:element>
+            <xs:sequence>
+            <xs:element name="intro" type="lyrics_part" minOccurs="0" maxOccurs="1"/>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
                 <xs:element name="verse" type="lyrics_part"/>
+                <xs:element name="pre-chorus" type="lyrics_part"/>
                 <xs:element name="chorus" type="lyrics_part"/>
+                <xs:element name="bridge" type="lyrics_part"/>
+                <xs:element name="instrumental" type="lyrics_part"/>
             </xs:choice>
+            <xs:element name="outro" type="lyrics_part" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
             <xs:element name="note" minOccurs="0" maxOccurs="1" type="xs:string">
                 <xs:annotation>
                     <xs:documentation>
