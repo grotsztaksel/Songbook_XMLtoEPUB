@@ -9,6 +9,8 @@ __authors__ = ['Piotr Gradkowski <grotsztaksel@o2.pl>']
 __date__ = '2020-12-02'
 __all__ = ['SongsIndexWriter']
 
+from datetime import date
+
 from src.config import EpubSongbookConfig
 from src.tixi import Tixi
 from .html_writer import HtmlWriter
@@ -36,6 +38,7 @@ class SongsIndexWriter(HtmlWriter):
 
     def write_index(self):
         bPath = self.tixi.createElement("/html", "body")
+        self.tixi.addTextElement(bPath, 'h3', str(date.today()))
         self.tixi.addTextElement(bPath, "h2", self.settings.alphabetical_index_title)
 
         I = ""  # Initial
