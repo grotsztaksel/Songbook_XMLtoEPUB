@@ -69,6 +69,7 @@ tr.chords_above {
 }
 td.chords {
   width: 20%;
+  vertical-align: bottom;
 }
 ul > li {
   list-style-type: none;
